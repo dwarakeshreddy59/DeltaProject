@@ -387,6 +387,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                     <th onClick={() => handleSort("remittance_number")}>Remittance No. / Ref <Ico col="remittance_number" /></th>
                     <th onClick={() => handleSort("remittance_date")}>Payment / Rem. Date <Ico col="remittance_date" /></th>
                     <th onClick={() => handleSort("invoice_number")}>Linked Invoice Ref <Ico col="invoice_number" /></th>
+                    <th onClick={() => handleSort("description")}>Description / Notes <Ico col="description" /></th>
                     <th onClick={() => handleSort("gross_amount")}>Gross Amount <Ico col="gross_amount" /></th>
                     <th onClick={() => handleSort("total_gross_amount")}>Total Gross Amount <Ico col="total_gross_amount" /></th>
                     <th onClick={() => handleSort("created_at")}>Saved At <Ico col="created_at" /></th>
@@ -407,6 +408,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                       <td><span className="id-badge" style={{ background: "#f0fdf4", color: "#065f46", borderColor: "#a7f3d0" }}>{r.remittance_number || "—"}</span></td>
                       <td>{r.remittance_date || "—"}</td>
                       <td><span className="id-badge">{r.invoice_number || "—"}</span></td>
+                      <td style={{ maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.description || "—"}</td>
                       <td className="money" style={{ fontWeight: 800 }}>{fmt(r.gross_amount)}</td>
                       <td className="money">{fmt(r.total_gross_amount)}</td>
                       <td style={{ color: "#94a3b8", fontSize: ".72rem", whiteSpace: "nowrap" }}>

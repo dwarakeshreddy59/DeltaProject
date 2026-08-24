@@ -146,7 +146,7 @@ async def upload(
         # ── Extract ──────────────────────────────────────────────────────────
         po_data         = po_extractor.extract(po_path,  po_name)
         invoice_data    = invoice_extractor.extract(inv_path, inv_name)
-        remittance_data = remittance_extractor.extract(rem_path)
+        remittance_data = remittance_extractor.extract(rem_path, invoice_data.get("invoice_number", ""))
         
         print("\n=== DEBUG EXTRACTION ===")
         print("PO DATA:", po_data)
@@ -229,12 +229,12 @@ _RECORDS_SQL = """
         i.tds_rate, i.tds_amount, i.receivable,
         p.po_number, p.po_date, p.description AS po_description,
         p.delivery_date, p.total_amount,
-        r.remittance_number, r.remittance_date,
-        r.gross_amount, r.total_gross_amount,
+        r.remittance_number, r.remittance_date, r.description AS rem_description,
+        r.gross_amount, r.total_gross_amount, r.line_items AS rem_items,
         i.created_at
     FROM invoices i
-    LEFT JOIN purchase_orders p ON p.po_number      = i.po_number
-    LEFT JOIN remittances r     ON r.invoice_number  = i.invoice_number
+    LEFT JOIN purchase_orders p ON (p.po_number = i.po_number OR LTRIM(p.po_number, '0') = LTRIM(i.po_number, '0'))
+    LEFT JOIN remittances r     ON (r.invoice_number = i.invoice_number OR r.invoice_number LIKE '%' || i.invoice_number || '%')
 """
 
 
@@ -512,19 +512,25 @@ def _save_to_db(po: dict, inv: dict, rem: dict) -> None:
 
     # 5. Save Remittance
     if rem.get("remittance_number"):
+        import json
+        line_items_json = json.dumps(rem.get("items", [])) if rem.get("items") else None
+        rem_inv_num = rem.get("invoice_number") or saved_inv_number or ""
         db.execute_query(
             """INSERT INTO remittances
-                   (remittance_number, remittance_date, invoice_number,
-                    gross_amount, total_gross_amount)
-               VALUES (%s,%s,%s,%s,%s)
+                   (remittance_number, remittance_date, invoice_number, description,
+                    gross_amount, total_gross_amount, line_items)
+               VALUES (%s,%s,%s,%s,%s,%s,%s)
                ON CONFLICT (remittance_number) DO UPDATE SET
                    remittance_date    = EXCLUDED.remittance_date,
                    invoice_number     = EXCLUDED.invoice_number,
+                   description        = EXCLUDED.description,
                    gross_amount       = EXCLUDED.gross_amount,
-                   total_gross_amount = EXCLUDED.total_gross_amount""",
+                   total_gross_amount = EXCLUDED.total_gross_amount,
+                   line_items         = EXCLUDED.line_items""",
             (rem["remittance_number"], rem.get("remittance_date"),
-             rem_inv_ref,             # safe FK or None
-             rem.get("gross_amount", 0), rem.get("total_gross_amount", 0)),
+             rem_inv_num, rem.get("description", ""),
+             rem.get("gross_amount", 0), rem.get("total_gross_amount", 0),
+             line_items_json),
         )
 
 

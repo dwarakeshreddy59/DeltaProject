@@ -24,6 +24,7 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
     { section: "Remittance", label: "Remittance Number (Document No.)", value: remittance.remittance_number || "—", type: "badge", badgeColor: "#059669" },
     { section: "Remittance", label: "Remittance Date (Document Date)", value: remittance.remittance_date || "—", type: "text" },
     { section: "Remittance", label: "Invoice Number (Ref in Remittance)", value: remittance.invoice_number || "—", type: "badge", badgeColor: "#1565c0" },
+    { section: "Remittance", label: "Remittance Description / Notes", value: remittance.description || "—", type: "text" },
     { section: "Remittance", label: "Gross Amount", value: fmt(remittance.gross_amount), type: "money" },
     { section: "Remittance", label: "Total Gross Amount", value: fmt(remittance.total_gross_amount), type: "money" },
 

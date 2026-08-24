@@ -177,28 +177,31 @@ def _extract_period(text: str) -> str:
 
 
 def _extract_description(text: str, tables: list, filename: str, inv_num: str = "", po_num: str = "") -> str:
-    """Extract item/service description from PDF tables, label patterns, or cleaned filename."""
-    # 1. Search tables for Description / Particulars column
+    """Extract item/service description from PDF tables (supporting multiple rows), label patterns, or cleaned filename."""
+    # 1. Search tables for Description / Particulars column across all rows
+    table_descs = []
     for table in tables:
         if not table or len(table) < 2:
             continue
         header_row = [str(c).lower() if c else "" for c in table[0]]
         desc_col_idx = -1
         for idx, h in enumerate(header_row):
-            if any(k in h for k in ["description", "particular", "service", "item name", "details"]):
+            if any(k in h for k in ["description", "particular", "service", "item name", "details", "scope of work"]):
                 desc_col_idx = idx
                 break
         
         if desc_col_idx >= 0:
-            # Get text from first non-empty data row
             for row in table[1:]:
                 if row and len(row) > desc_col_idx and row[desc_col_idx]:
                     cell_val = str(row[desc_col_idx]).strip()
-                    # Skip total/summary rows
-                    if any(bad in cell_val.lower() for bad in ["total", "cgst", "sgst", "igst", "taxable", "hsn", "subtotal"]):
+                    if any(bad in cell_val.lower() for bad in ["total", "cgst", "sgst", "igst", "taxable", "hsn", "subtotal", "amount in words"]):
                         continue
-                    if len(cell_val) > 2 and not cell_val.isdigit():
-                        return clean_description(cell_val[:100], inv_num=inv_num, po_num=po_num)
+                    cleaned = clean_description(cell_val[:100], inv_num=inv_num, po_num=po_num)
+                    if len(cleaned) > 2 and not cleaned.isdigit() and cleaned not in table_descs:
+                        table_descs.append(cleaned)
+
+    if table_descs:
+        return ", ".join(table_descs)
 
     # 2. Search labels in text
     val = find_value_after_label(text, _DESC_LABELS)
@@ -209,6 +212,7 @@ def _extract_description(text: str, tables: list, filename: str, inv_num: str = 
 
     # 3. Fallback: clean filename
     return clean_description(filename_description(filename), inv_num=inv_num, po_num=po_num)
+
 
 
 def _extract_assessable(text: str, tables: list) -> float:

@@ -1,5 +1,6 @@
 """
 remittance_extractor.py – Extract fields from a Remittance / Payment Advice PDF.
+Supports multiple line items / gross amounts / descriptions.
 """
 
 import re
@@ -10,9 +11,9 @@ from utils.pdf_utils import (
 )
 
 _REM_NUM_LABELS = [
-    r"document\s*number",
-    r"remittance\s*(?:no\.?|number|#|ref|advice)",
-    r"payment\s*(?:ref(?:erence)?|no\.?|number|id|advice)",
+    r"document\s*(?:number|no\.?|#)",
+    r"remittance\s*(?:no\.?|number|#|ref)",
+    r"payment\s*(?:ref(?:erence)?|no\.?|number|id)",
     r"voucher\s*(?:no\.?|number)",
     r"cheque\s*(?:no\.?|number)",
     r"neft\s*(?:ref|no\.?|number|utr)",
@@ -20,6 +21,7 @@ _REM_NUM_LABELS = [
     r"transaction\s*(?:id|ref|no\.?)",
     r"doc\.?\s*no\.?",
 ]
+
 _REM_DATE_LABELS = [
     r"remittance\s*date",
     r"payment\s*date",
@@ -32,6 +34,7 @@ _REM_DATE_LABELS = [
     r"^date\b",
     r"\bdate\b",
 ]
+
 _INV_REF_LABELS = [
     r"your\s*document",
     r"your\s*ref(?:erence)?",
@@ -40,26 +43,9 @@ _INV_REF_LABELS = [
     r"bill\s*(?:no\.?|number)",
     r"inv\.?\s*(?:no\.?|#)",
 ]
-_GROSS_LABELS = [
-    r"gross\s*amount",
-    r"invoice\s*amount",
-    r"amount\s*(?:paid|remitted|payable|due)",
-    r"payment\s*amount",
-    r"net\s*amount\s*paid",
-    r"total\s*amount\s*paid",
-]
-_TOTAL_LABELS = [
-    r"total\s*(?:gross\s*)?amount",
-    r"total\s*total",
-    r"total\s*payment",
-    r"grand\s*total",
-    r"net\s*payable",
-    r"total\s*remittance",
-    r"total",
-]
 
 
-def extract(pdf_path: str) -> dict:
+def extract(pdf_path: str, target_invoice_number: str = "") -> dict:
     text   = get_pdf_text(pdf_path)
     tables = get_pdf_tables(pdf_path)
 
@@ -67,44 +53,96 @@ def extract(pdf_path: str) -> dict:
 
     doc_num  = _extract_doc_number(text, tables)
     rem_date = _extract_remittance_date(text)
-    inv_ref, row_gross = _extract_cleared_row(text, tables)
-    
-    if not inv_ref:
-        inv_ref = _extract_invoice_ref(text, tables)
+    items    = _extract_all_cleared_items(text, tables)
+    total_gross = _extract_total_amount(text, tables, items)
 
-    gross, total_gross = _extract_amounts(text, tables, row_gross)
+    # Resolve primary gross_amount, invoice_number, and description
+    inv_ref = ""
+    gross_amount = 0.0
+    desc = ""
+
+    if items:
+        # Check if any item matches the uploaded target invoice
+        matched_item = None
+        if target_invoice_number:
+            target_norm = target_invoice_number.strip().lower()
+            for it in items:
+                if it.get("invoice_number", "").strip().lower() == target_norm:
+                    matched_item = it
+                    break
+
+        if matched_item:
+            inv_ref = matched_item["invoice_number"]
+            gross_amount = matched_item["gross_amount"]
+            desc = matched_item.get("description", "")
+        else:
+            # Combine invoice numbers and descriptions if multiple
+            inv_ref = ", ".join(dict.fromkeys(it["invoice_number"] for it in items if it.get("invoice_number")))
+            gross_amount = items[0]["gross_amount"] if len(items) == 1 else total_gross
+            desc = "; ".join(dict.fromkeys(it["description"] for it in items if it.get("description")))
+    else:
+        inv_ref = _extract_single_invoice_ref(text, tables)
+        gross_amount = total_gross
+
+    if not gross_amount and total_gross > 0:
+        gross_amount = total_gross
+    if not total_gross and gross_amount > 0:
+        total_gross = gross_amount
 
     return {
         "remittance_number":  doc_num,
         "remittance_date":    rem_date,
         "invoice_number":     inv_ref,
-        "gross_amount":       gross,
+        "description":         desc,
+        "gross_amount":       gross_amount,
         "total_gross_amount": total_gross,
+        "items":              items,
     }
 
 
 def _extract_doc_number(text: str, tables: list) -> str:
     """Find doc/voucher/UTR/payment reference number (must contain digits)."""
-    m = re.search(
-        r"(?:Document\s*Number|Remittance|Payment|Voucher|UTR|NEFT|Transaction|Cheque)"
-        r"\s*(?:No\.?|Number|#|Ref|ID)?\s*[:\-]?\s*([A-Za-z0-9\-_/]{4,30})",
-        text, re.IGNORECASE,
-    )
-    if m and is_valid_id(m.group(1), min_len=4, require_digit=True):
-        return m.group(1).strip()
+    lines = [l.strip() for l in text.split("\n") if l.strip()]
 
-    val = find_value_after_label(text, _REM_NUM_LABELS)
+    # 1. Label-based search across lines
+    for i, line in enumerate(lines[:25]):
+        for pat in _REM_NUM_LABELS:
+            m = re.search(pat, line, re.IGNORECASE)
+            if m:
+                after = line[m.end():].strip(":- \t")
+                tokens = [t for t in after.split() if is_valid_id(t, min_len=4, require_digit=True)]
+                if tokens:
+                    return tokens[0]
+                for j in range(1, 4):
+                    if i + j < len(lines):
+                        cand_line = lines[i + j].strip(":- \t")
+                        tokens = [t for t in cand_line.split() if is_valid_id(t, min_len=4, require_digit=True)]
+                        if tokens:
+                            return tokens[0]
+
+    # 2. General regex finditer
+    for m in re.finditer(r"(?:Document\s*(?:Number|No\.?|#)|Voucher\s*(?:No\.?|Number)|Payment\s*(?:Ref|No)|UTR)\s*[:\-]?\s*([A-Za-z0-9\-_/]{4,30})", text, re.IGNORECASE):
+        val = m.group(1).strip()
+        if is_valid_id(val, min_len=4, require_digit=True):
+            return val
+
+    # 3. Table search
+    val = _table_value(tables, ["document number", "remittance no", "payment ref", "voucher no", "utr", "transaction id"])
     if val:
-        token = val.split()[0]
-        if is_valid_id(token, min_len=4, require_digit=True):
-            return token
+        return val
 
-    return _table_value(tables, ["document number", "remittance no", "payment ref", "voucher no", "utr", "transaction id"])
+    # 4. Fallback: 8-12 digit ID in header
+    for m in re.finditer(r"\b(\d{8,12})\b", text[:400]):
+        cand = m.group(1)
+        if cand != "0008005972" and not cand.startswith("00"):
+            return cand
+
+    return ""
 
 
 def _extract_remittance_date(text: str) -> str:
     lines = [l.strip() for l in text.split("\n") if l.strip()]
-    for i, line in enumerate(lines[:20]):
+    for i, line in enumerate(lines[:25]):
         for pat in _REM_DATE_LABELS:
             if re.search(pat, line, re.IGNORECASE):
                 d = DATE_REGEX.search(line)
@@ -123,50 +161,86 @@ def _extract_remittance_date(text: str) -> str:
     return ""
 
 
-def _extract_cleared_row(text: str, tables: list) -> tuple[str, float]:
+def _extract_all_cleared_items(text: str, tables: list) -> list:
     """
-    Search for cleared invoices table row in text:
+    Extract all cleared invoice rows, gross amounts, and descriptions.
     Pattern: <doc_num> <invoice_no> <date> <deductions> <gross_amount>
-    e.g. '6068421035 DT-2627-06-5402 18.06.2026 0,00 156.679,38'
+    e.g. 6068264211 DT-2627-05-5110 11.05.2026 0,00 1.397.655,00
+         Apr2026-Engineering
     """
+    items = []
     lines = [l.strip() for l in text.split("\n") if l.strip()]
-    for line in lines:
-        m = re.search(
-            r"\b\d{5,}\s+([A-Za-z0-9\-_/]{4,30})\s+\d{1,2}[./-]\d{1,2}[./-]\d{2,4}\s+[0-9.,]+\s+([0-9.,]+)",
+
+    # 1. Text row scanning
+    for idx, line in enumerate(lines):
+        m_row = re.search(
+            r"\b(\d{5,})\s+([A-Za-z0-9\-_/]{4,30})\s+(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})\s+([0-9.,]+)\s+([0-9.,]+)",
             line,
         )
-        if m:
-            inv = m.group(1).strip()
-            amt = clean_number(m.group(2))
-            if is_valid_id(inv, min_len=4, require_digit=True):
-                return inv, amt
+        if m_row:
+            d_no = m_row.group(1)
+            inv_no = m_row.group(2)
+            d_date = m_row.group(3)
+            ded = clean_number(m_row.group(4))
+            gross = clean_number(m_row.group(5))
 
-    # Also search tables
-    for table in tables:
-        if not table or len(table) < 2:
-            continue
-        header_row = [str(c).lower() if c else "" for c in table[0]]
-        inv_col = -1
-        amt_col = -1
-        for idx, h in enumerate(header_row):
-            if any(k in h for k in ["your document", "your ref", "invoice no", "bill no"]):
-                inv_col = idx
-            if any(k in h for k in ["gross amount", "amount", "payment", "cleared"]):
-                amt_col = idx
-        if inv_col >= 0:
-            for row in table[1:]:
-                if row and len(row) > inv_col:
-                    cand = str(row[inv_col]).strip()
-                    if is_valid_id(cand, min_len=4, require_digit=True):
-                        amt = 0.0
-                        if amt_col >= 0 and len(row) > amt_col:
-                            amt = clean_number(row[amt_col])
-                        return cand, amt
+            item_desc = ""
+            if idx + 1 < len(lines):
+                next_l = lines[idx + 1]
+                if not re.search(r"^\d{5,}|Total|AGCO|BATAVIA", next_l, re.IGNORECASE):
+                    item_desc = next_l.strip()
 
-    return "", 0.0
+            if is_valid_id(inv_no, min_len=4, require_digit=True):
+                items.append({
+                    "doc_number": d_no,
+                    "invoice_number": inv_no,
+                    "date": d_date,
+                    "deductions": ded,
+                    "gross_amount": gross,
+                    "description": item_desc,
+                })
+
+    # 2. Table scanning (if text rows not found)
+    if not items:
+        for table in tables:
+            if not table or len(table) < 2:
+                continue
+            header_row = [str(c).lower() if c else "" for c in table[0]]
+            inv_col = -1
+            amt_col = -1
+            desc_col = -1
+            for idx, h in enumerate(header_row):
+                if any(k in h for k in ["your document", "your ref", "invoice no", "bill no"]):
+                    inv_col = idx
+                if any(k in h for k in ["gross amount", "amount", "payment", "cleared"]):
+                    amt_col = idx
+                if any(k in h for k in ["description", "text", "particular"]):
+                    desc_col = idx
+
+            if inv_col >= 0:
+                for row in table[1:]:
+                    if row and len(row) > inv_col:
+                        cand = str(row[inv_col]).strip()
+                        if is_valid_id(cand, min_len=4, require_digit=True):
+                            amt = 0.0
+                            if amt_col >= 0 and len(row) > amt_col:
+                                amt = clean_number(row[amt_col])
+                            desc_txt = ""
+                            if desc_col >= 0 and len(row) > desc_col:
+                                desc_txt = str(row[desc_col]).strip()
+                            items.append({
+                                "doc_number": "",
+                                "invoice_number": cand,
+                                "date": "",
+                                "deductions": 0.0,
+                                "gross_amount": amt,
+                                "description": desc_txt,
+                            })
+
+    return items
 
 
-def _extract_invoice_ref(text: str, tables: list) -> str:
+def _extract_single_invoice_ref(text: str, tables: list) -> str:
     m = re.search(
         r"(?:Your\s*Document|Invoice|Bill|Inv)\s*(?:No\.?|Number|#|Ref)?\s*[:\-]?\s*([A-Za-z0-9\-_/]{3,30})",
         text, re.IGNORECASE,
@@ -183,73 +257,34 @@ def _extract_invoice_ref(text: str, tables: list) -> str:
     return _table_value(tables, ["your document", "invoice no", "bill no", "invoice number"])
 
 
-def _extract_amounts(text: str, tables: list, row_gross: float = 0.0) -> tuple[float, float]:
-    """
-    Extract (gross_amount, total_gross_amount).
-    """
+def _extract_total_amount(text: str, tables: list, items: list) -> float:
     lines = [l.strip() for l in text.split("\n") if l.strip()]
-    
-    total_val = 0.0
-    # Search for lines starting with Total or INR
+
+    # 1. Search for Total / INR / Grand Total
     for line in lines:
         if re.search(r"^(?:Total\s*Total|Total|INR)\b", line, re.IGNORECASE):
             amt = clean_number(line)
-            if amt > total_val:
-                total_val = amt
+            if amt > 100:
+                return amt
 
-    if row_gross > 0:
-        gross = row_gross
-    else:
-        gross = _label_amount(text, tables, _GROSS_LABELS)
+    # 2. Sum of line items
+    if items:
+        tot = sum(it.get("gross_amount", 0) for it in items)
+        if tot > 0:
+            return tot
 
-    if total_val == 0.0:
-        total_val = _label_amount(text, tables, _TOTAL_LABELS)
-
-    if gross == 0.0 and total_val > 0:
-        gross = total_val
-    elif total_val == 0.0 and gross > 0:
-        total_val = gross
-
-    # Fallback: scan all lines for largest amount
-    if gross == 0.0:
-        amounts = []
-        for line in lines:
-            if any(k in line.lower() for k in ["total", "gross", "inr", "rs", "payment"]):
-                amt = clean_number(line)
-                if amt > 100:
-                    amounts.append(amt)
-        if amounts:
-            gross = max(amounts)
-            total_val = max(amounts)
-
-    return gross, total_val
-
-
-def _label_amount(text: str, tables: list, labels: list) -> float:
-    lines = [l.strip() for l in text.split("\n") if l.strip()]
-    for i, line in enumerate(lines):
-        for pat in labels:
-            if re.search(pat, line, re.IGNORECASE):
-                after = re.sub(re.compile(pat, re.IGNORECASE), "", line)
-                n = clean_number(after)
-                if n > 100:
-                    return n
-                for j in range(1, 4):
-                    if i + j < len(lines):
-                        n = clean_number(lines[i + j])
-                        if n > 100:
-                            return n
-
+    # 3. Search tables
     for table in tables:
         for row in table:
             if not row:
                 continue
             row_text = " ".join(str(c) for c in row if c).lower()
-            if any(re.search(p, row_text, re.IGNORECASE) for p in labels):
+            if "total" in row_text:
                 for cell in reversed(row):
-                    n = clean_number(str(cell))
-                    if n > 100:
-                        return n
+                    amt = clean_number(str(cell))
+                    if amt > 100:
+                        return amt
+
     return 0.0
 
 

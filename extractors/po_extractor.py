@@ -146,15 +146,16 @@ def _extract_po_number(text: str, tables: list, filename: str) -> str:
 
 
 def _extract_description(text: str, tables: list, filename: str, po_num: str = "") -> str:
-    """Extract description from PO tables, labels, or cleaned filename."""
-    # 1. Search tables for Description / Short Text column
+    """Extract description from PO tables (supporting multiple rows), labels, or cleaned filename."""
+    # 1. Search tables for Description / Short Text column across all rows
+    table_descs = []
     for table in tables:
         if not table or len(table) < 2:
             continue
         header_row = [str(c).lower() if c else "" for c in table[0]]
         desc_col_idx = -1
         for idx, h in enumerate(header_row):
-            if any(k in h for k in ["description", "short text", "material", "item details", "service", "particular"]):
+            if any(k in h for k in ["description", "short text", "material", "item details", "service", "particular", "scope of work"]):
                 desc_col_idx = idx
                 break
         
@@ -162,10 +163,14 @@ def _extract_description(text: str, tables: list, filename: str, po_num: str = "
             for row in table[1:]:
                 if row and len(row) > desc_col_idx and row[desc_col_idx]:
                     cell_val = str(row[desc_col_idx]).strip()
-                    if any(bad in cell_val.lower() for bad in ["total", "subtotal", "tax", "gst", "amount"]):
+                    if any(bad in cell_val.lower() for bad in ["total", "subtotal", "tax", "gst", "amount", "unit price"]):
                         continue
-                    if len(cell_val) > 2 and not cell_val.isdigit():
-                        return clean_description(cell_val[:100], po_num=po_num)
+                    cleaned = clean_description(cell_val[:100], po_num=po_num)
+                    if len(cleaned) > 2 and not cleaned.isdigit() and cleaned not in table_descs:
+                        table_descs.append(cleaned)
+
+    if table_descs:
+        return ", ".join(table_descs)
 
     # 2. Search labels in text
     val = find_value_after_label(text, _DESC_LABELS)
@@ -176,6 +181,7 @@ def _extract_description(text: str, tables: list, filename: str, po_num: str = "
 
     # 3. Fallback: clean filename
     return clean_description(filename_description(filename), po_num=po_num)
+
 
 
 def _extract_total(text: str, tables: list) -> float:
