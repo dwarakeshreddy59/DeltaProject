@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Data Extraction Portal</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav class="navbar navbar-dark px-4 py-3">
+  <span class="navbar-brand fw-bold fs-5">
+    <i class="bi bi-file-earmark-pdf-fill me-2 text-danger"></i>
+    PDF Data Extraction &amp; Financial Portal
+  </span>
+  <div class="d-flex gap-2">
+    <button class="btn btn-outline-light btn-sm" onclick="loadHistory()">
+      <i class="bi bi-clock-history me-1"></i>History
+    </button>
+    <a href="/export/excel" class="btn btn-success btn-sm">
+      <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+    </a>
+  </div>
+</nav>
+
+<!-- ── Upload Section ── -->
+<div class="container-fluid main-container">
+
+  <!-- Upload Card -->
+  <div class="card upload-card mb-4">
+    <div class="card-header">
+      <i class="bi bi-cloud-upload me-2"></i>Upload Documents
+    </div>
+    <div class="card-body">
+      <form id="uploadForm" enctype="multipart/form-data">
+        <div class="row g-4">
+
+          <!-- Invoice PDF -->
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">
+              <span class="badge bg-primary me-1">1</span> Invoice PDF
+            </label>
+            <div class="drop-zone" id="dz-invoice" onclick="document.getElementById('invoice_pdf').click()">
+              <i class="bi bi-receipt fs-3 text-primary"></i>
+              <p class="mb-0 mt-2 text-muted small">Click or drag &amp; drop Invoice PDF</p>
+              <p class="file-name text-success small mt-1" id="fn-invoice"></p>
+            </div>
+            <input type="file" id="invoice_pdf" name="invoice_pdf" accept=".pdf" class="d-none"
+                   onchange="showFileName(this,'fn-invoice','dz-invoice')" />
+          </div>
+
+          <!-- PO PDF -->
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">
+              <span class="badge bg-warning text-dark me-1">2</span> Purchase Order PDF
+            </label>
+            <div class="drop-zone" id="dz-po" onclick="document.getElementById('po_pdf').click()">
+              <i class="bi bi-file-text fs-3 text-warning"></i>
+              <p class="mb-0 mt-2 text-muted small">Click or drag &amp; drop PO PDF</p>
+              <p class="file-name text-success small mt-1" id="fn-po"></p>
+            </div>
+            <input type="file" id="po_pdf" name="po_pdf" accept=".pdf" class="d-none"
+                   onchange="showFileName(this,'fn-po','dz-po')" />
+          </div>
+
+          <!-- Remittance PDF -->
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">
+              <span class="badge bg-success me-1">3</span> Remittance PDF
+            </label>
+            <div class="drop-zone" id="dz-rem" onclick="document.getElementById('remittance_pdf').click()">
+              <i class="bi bi-cash-stack fs-3 text-success"></i>
+              <p class="mb-0 mt-2 text-muted small">Click or drag &amp; drop Remittance PDF</p>
+              <p class="file-name text-success small mt-1" id="fn-rem"></p>
+            </div>
+            <input type="file" id="remittance_pdf" name="remittance_pdf" accept=".pdf" class="d-none"
+                   onchange="showFileName(this,'fn-rem','dz-rem')" />
+          </div>
+
+        </div>
+
+        <!-- TDS Rate + Submit -->
+        <div class="row mt-4 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">TDS Rate</label>
+            <select class="form-select" name="tds_rate" id="tds_rate_select">
+              <option value="0.1">0.1%</option>
+              <option value="2.0" selected>2%</option>
+              <option value="10.0">10%</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100" id="submitBtn">
+              <i class="bi bi-search me-1"></i>Extract &amp; Calculate
+            </button>
+          </div>
+          <div class="col-md-6 text-end">
+            <span class="text-muted small">GST Rate: <strong>18% (Fixed)</strong></span>
+          </div>
+        </div>
+      </form>
+
+      <!-- Spinner -->
+      <div id="spinner" class="text-center mt-3 d-none">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Extracting data from PDFs…</p>
+      </div>
+
+      <!-- Error banner -->
+      <div id="errorBanner" class="alert alert-danger mt-3 d-none"></div>
+    </div>
+  </div>
+
+  <!-- ── Results Section ── -->
+  <div id="resultsSection" class="d-none">
+
+    <!-- Cross-link badge -->
+    <div class="alert alert-info d-flex align-items-center mb-3" id="crosslinkBadge">
+      <i class="bi bi-link-45deg fs-4 me-2"></i>
+      <span id="crosslinkText"></span>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- PO Card -->
+      <div class="col-lg-4">
+        <div class="card result-card h-100">
+          <div class="card-header bg-warning text-dark">
+            <i class="bi bi-file-text me-2"></i>Purchase Order
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-sm table-bordered mb-0">
+              <tbody>
+                <tr><th>PO Number</th><td id="po_number"></td></tr>
+                <tr><th>PO Date</th><td id="po_date"></td></tr>
+                <tr><th>Description</th><td id="po_description"></td></tr>
+                <tr><th>Delivery Date / PO Validity</th><td id="delivery_date"></td></tr>
+                <tr><th>Total Amount</th><td id="po_total_amount" class="fw-bold text-end"></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Invoice Card -->
+      <div class="col-lg-4">
+        <div class="card result-card h-100">
+          <div class="card-header bg-primary text-white">
+            <i class="bi bi-receipt me-2"></i>Invoice
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-sm table-bordered mb-0">
+              <tbody>
+                <tr><th>Invoice Number</th><td id="invoice_number"></td></tr>
+                <tr><th>Invoice Date</th><td id="invoice_date"></td></tr>
+                <tr><th>PO Number (Ref)</th><td id="inv_po_number"></td></tr>
+                <tr><th>Description</th><td id="inv_description"></td></tr>
+                <tr><th>Invoice Period</th><td id="invoice_period"></td></tr>
+                <tr><th>Assessable Value</th><td id="assessable_value" class="text-end"></td></tr>
+                <tr><th>Total Tax</th><td id="total_tax" class="text-end"></td></tr>
+                <tr><th>Total Invoice Value</th><td id="total_invoice_value" class="fw-bold text-end"></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Remittance Card -->
+      <div class="col-lg-4">
+        <div class="card result-card h-100">
+          <div class="card-header bg-success text-white">
+            <i class="bi bi-cash-stack me-2"></i>Remittance
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-sm table-bordered mb-0">
+              <tbody>
+                <tr><th>Remittance Number</th><td id="remittance_number"></td></tr>
+                <tr><th>Remittance Date</th><td id="remittance_date"></td></tr>
+                <tr><th>Invoice Number (Ref)</th><td id="rem_invoice_number"></td></tr>
+                <tr><th>Gross Amount</th><td id="gross_amount" class="text-end"></td></tr>
+                <tr><th>Total Gross Amount</th><td id="total_gross_amount" class="fw-bold text-end"></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /row -->
+
+    <!-- ── Calculations Card ── -->
+    <div class="card calc-card mt-4">
+      <div class="card-header">
+        <i class="bi bi-calculator me-2"></i>Financial Calculations
+        <span class="badge bg-secondary ms-2">Live — changes with TDS dropdown</span>
+      </div>
+      <div class="card-body">
+        <div class="row g-3 align-items-center mb-3">
+          <div class="col-md-3">
+            <label class="form-label fw-semibold mb-0">TDS Rate</label>
+            <select class="form-select" id="tds_rate_calc" onchange="recalculate()">
+              <option value="0.1">0.1%</option>
+              <option value="2.0" selected>2%</option>
+              <option value="10.0">10%</option>
+            </select>
+          </div>
+          <div class="col-md-9">
+            <div class="formula-box">
+              <strong>Formulae:</strong>
+              GST = Assessable × 18% &nbsp;|&nbsp;
+              Total Invoice = Assessable + GST &nbsp;|&nbsp;
+              TDS = Assessable × TDS% &nbsp;|&nbsp;
+              Receivable = Assessable − TDS + GST
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-6 col-md-3">
+            <div class="calc-tile">
+              <div class="calc-label">Assessable Value</div>
+              <div class="calc-value text-primary" id="calc_assessable">₹ 0.00</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="calc-tile">
+              <div class="calc-label">GST (18%)</div>
+              <div class="calc-value text-info" id="calc_gst">₹ 0.00</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="calc-tile">
+              <div class="calc-label">Total Invoice Value</div>
+              <div class="calc-value text-success" id="calc_total_inv">₹ 0.00</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="calc-tile">
+              <div class="calc-label">TDS Amount</div>
+              <div class="calc-value text-danger" id="calc_tds">₹ 0.00</div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 mx-auto mt-2">
+            <div class="calc-tile calc-tile-highlight">
+              <div class="calc-label fs-6">Net Receivable</div>
+              <div class="calc-value fs-3 text-white" id="calc_receivable">₹ 0.00</div>
+              <div class="calc-sub">= Assessable − TDS + GST</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── History Table ── -->
+    <div class="card mt-4 d-none" id="historyCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-table me-2"></i>Extraction History</span>
+        <button class="btn btn-sm btn-outline-secondary" onclick="toggleHistory()">
+          <i class="bi bi-x"></i> Close
+        </button>
+      </div>
+      <div class="card-body table-responsive">
+        <table class="table table-striped table-bordered table-sm" id="historyTable">
+          <thead class="table-dark">
+            <tr>
+              <th>Invoice No.</th><th>Invoice Date</th>
+              <th>PO No.</th><th>Invoice Period</th>
+              <th>Assessable</th><th>GST</th><th>Total Inv.</th>
+              <th>TDS%</th><th>TDS Amt</th><th>Receivable</th>
+              <th>Remittance No.</th><th>Gross Amt</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /resultsSection -->
+</div><!-- /container -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
