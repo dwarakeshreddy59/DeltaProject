@@ -140,17 +140,23 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
         </div>
         <div className="search-controls">
           <div className="search-input-wrap">
-            <i className="bi bi-funnel" />
+            <i className="bi bi-funnel" style={{ color: "#64748b" }} />
             <input
               className="search-input"
               placeholder={`Filter in ${VIEW_OPTIONS.find((v) => v.id === activeView)?.label}...`}
               value={filter}
               onChange={(e) => { setFilter(e.target.value); setPage(1); }}
-              style={{ minWidth: 180 }}
+              style={{
+                minWidth: 200,
+                background: "#ffffff",
+                color: "#0f172a",
+                fontWeight: 700,
+                border: "1.5px solid #cbd5e1",
+              }}
             />
             {filter && (
-              <button onClick={() => setFilter("")} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}>
-                <i className="bi bi-x" />
+              <button onClick={() => setFilter("")} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", marginRight: ".4rem" }}>
+                <i className="bi bi-x-circle-fill" />
               </button>
             )}
           </div>

@@ -51,30 +51,30 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
       <div className="history-body">
         {/* Horizontal Master Row Table */}
         <div style={{ marginBottom: "1.5rem" }}>
-          <h6 style={{ fontSize: ".8rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: ".75rem" }}>
-            <i className="bi bi-layout-three-columns me-1" />Horizontal Consolidated Row
+          <h6 style={{ fontSize: ".85rem", fontWeight: 800, color: "#1e293b", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: ".75rem" }}>
+            <i className="bi bi-layout-three-columns me-1" style={{ color: "#2563eb" }} />Consolidated Master Record (22 Columns)
           </h6>
           <div className="history-table-wrap">
             <table className="history-table">
               <thead>
                 <tr>
-                  <th style={{ background: "#1565c0" }}>Invoice No</th>
-                  <th style={{ background: "#1565c0" }}>Invoice Date</th>
-                  <th style={{ background: "#1565c0" }}>Invoice Period</th>
-                  <th style={{ background: "#1565c0" }}>Assessable Val</th>
-                  <th style={{ background: "#1565c0" }}>Total Tax</th>
-                  <th style={{ background: "#1565c0" }}>Total Inv Val</th>
-                  <th style={{ background: "#d97706" }}>PO Number</th>
-                  <th style={{ background: "#d97706" }}>PO Date</th>
-                  <th style={{ background: "#d97706" }}>Delivery Date</th>
-                  <th style={{ background: "#d97706" }}>Total PO Amt</th>
-                  <th style={{ background: "#059669" }}>Remittance No</th>
-                  <th style={{ background: "#059669" }}>Remittance Date</th>
-                  <th style={{ background: "#059669" }}>Gross Amt</th>
-                  <th style={{ background: "#059669" }}>Total Gross Amt</th>
-                  <th style={{ background: "#4338ca" }}>GST (18%)</th>
-                  <th style={{ background: "#4338ca" }}>TDS ({calcData.tds_rate}%)</th>
-                  <th style={{ background: "#4338ca" }}>Receivable</th>
+                  <th style={{ background: "#1e40af", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice No</th>
+                  <th style={{ background: "#1e40af", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice Date</th>
+                  <th style={{ background: "#1e40af", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice Period</th>
+                  <th style={{ background: "#1e40af", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Assessable Val</th>
+                  <th style={{ background: "#1e40af", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Tax</th>
+                  <th style={{ background: "#1e40af", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Inv Val</th>
+                  <th style={{ background: "#b45309", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>PO Number</th>
+                  <th style={{ background: "#b45309", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>PO Date</th>
+                  <th style={{ background: "#b45309", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Delivery Date</th>
+                  <th style={{ background: "#b45309", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total PO Amt</th>
+                  <th style={{ background: "#047857", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Remittance No</th>
+                  <th style={{ background: "#047857", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Remittance Date</th>
+                  <th style={{ background: "#047857", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Gross Amt</th>
+                  <th style={{ background: "#047857", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Gross Amt</th>
+                  <th style={{ background: "#4338ca", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>GST (18%)</th>
+                  <th style={{ background: "#4338ca", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>TDS ({calcData.tds_rate}%)</th>
+                  <th style={{ background: "#4338ca", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Receivable</th>
                 </tr>
               </thead>
               <tbody>
@@ -103,16 +103,16 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
         </div>
 
         {/* Structured Field-by-Field Matrix Table */}
-        <h6 style={{ fontSize: ".8rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: ".75rem" }}>
-          <i className="bi bi-list-check me-1" />Detailed Field Breakdown (All Rows)
+        <h6 style={{ fontSize: ".85rem", fontWeight: 800, color: "#1e293b", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: ".75rem" }}>
+          <i className="bi bi-list-check me-1" style={{ color: "#2563eb" }} />Detailed Field Breakdown (All Rows)
         </h6>
         <div className="history-table-wrap">
           <table className="info-table" style={{ width: "100%" }}>
             <thead>
-              <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
-                <th style={{ width: "22%", padding: ".6rem 1rem" }}>Document / Category</th>
-                <th style={{ width: "48%", padding: ".6rem 1rem" }}>Field Name &amp; Description</th>
-                <th style={{ width: "30%", padding: ".6rem 1rem" }}>Extracted / Computed Value</th>
+              <tr style={{ background: "#1e293b" }}>
+                <th style={{ width: "22%", padding: ".75rem 1rem", color: "#ffffff", fontWeight: 800 }}>Document / Category</th>
+                <th style={{ width: "48%", padding: ".75rem 1rem", color: "#ffffff", fontWeight: 800 }}>Field Name &amp; Description</th>
+                <th style={{ width: "30%", padding: ".75rem 1rem", color: "#ffffff", fontWeight: 800 }}>Extracted / Computed Value</th>
               </tr>
             </thead>
             <tbody>

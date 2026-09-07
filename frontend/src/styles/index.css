@@ -421,7 +421,7 @@ body {
    ============================================================ */
 .main-container {
   max-width: 1440px;
-  margin: -2.5rem auto 4rem;
+  margin: 1.75rem auto 4rem;
   padding: 0 2rem;
   position: relative;
   z-index: 20;
@@ -448,7 +448,19 @@ body {
   font-size: 1.05rem;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+
+.search-title, .upload-title {
+  display: flex;
+  align-items: center;
   gap: 0.65rem;
+  flex-wrap: wrap;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
 }
 
 .upload-body, .search-body, .history-body {
@@ -895,16 +907,28 @@ body {
 }
 
 .history-table thead {
-  background: #f8fafc;
-  border-bottom: 2px solid #e2e8f0;
+  background: #f1f5f9;
+  border-bottom: 2px solid #cbd5e1;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .history-table th {
   padding: 0.85rem 1rem;
-  font-weight: 700;
-  color: #475569;
+  font-weight: 800;
+  color: #0f172a;
   text-align: left;
   white-space: nowrap;
+  background: #f1f5f9;
+  border-bottom: 2px solid #cbd5e1;
+  user-select: none;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+}
+
+.history-table th[style*="background"] {
+  color: #ffffff !important;
 }
 
 .history-table tbody tr {
@@ -1012,25 +1036,29 @@ body {
 }
 
 .search-input {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: #ffffff;
-  border-radius: 8px;
-  padding: 0.42rem 0.85rem 0.42rem 2.2rem;
-  font-size: 0.82rem;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #0f172a !important;
+  border-radius: 10px;
+  padding: 0.5rem 0.85rem 0.5rem 2.2rem;
+  font-size: 0.85rem;
+  font-weight: 700;
   outline: none;
   transition: all 0.2s ease;
   font-family: inherit;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .search-input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: #64748b !important;
+  font-weight: 500;
 }
 
 .search-input:focus {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: #38bdf8;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+  background: #ffffff;
+  border-color: #2563eb;
+  color: #0f172a !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
 }
 
 .btn-refresh {

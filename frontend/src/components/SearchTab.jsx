@@ -170,13 +170,16 @@ export default function SearchTab() {
               style={{
                 width: "100%",
                 padding: ".75rem 2.8rem .75rem 2.75rem",
-                fontSize: ".92rem",
+                fontSize: ".95rem",
                 borderRadius: 12,
-                border: "1.5px solid #cbd5e1",
-                background: "#f8fafc",
+                border: "2px solid #cbd5e1",
+                background: "#ffffff",
+                color: "#0f172a",
+                fontWeight: 700,
                 fontFamily: "inherit",
                 transition: "all .2s",
                 outline: "none",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
               }}
               placeholder={`Type to search in ${FIELDS.find((f2) => f2.value === field)?.label}... (e.g. invoice no, PO no, description, date)`}
               value={query}
