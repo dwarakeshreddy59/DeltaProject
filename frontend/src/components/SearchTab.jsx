@@ -1,171 +1,489 @@
 import React, { useState } from "react";
 import { fmt } from "../utils/format";
-import { searchById } from "../services/api";
+import { searchById, deleteInvoice } from "../services/api";
 import toast from "react-hot-toast";
 
 const PAGE_SIZE = 10;
 
 const FIELDS = [
-  { label: "Invoice No.",        value: "invoice_number"    },
-  { label: "PO No.",             value: "po_number"         },
-  { label: "Remittance No.",     value: "remittance_number" },
-  { label: "Invoice Date",       value: "invoice_date"      },
-  { label: "PO Date",            value: "po_date"           },
-  { label: "All Fields",         value: "all"               },
+  { label: "All Fields",         value: "all",               icon: "bi-search" },
+  { label: "Invoice No.",        value: "invoice_number",    icon: "bi-receipt" },
+  { label: "PO No.",             value: "po_number",         icon: "bi-file-earmark-text" },
+  { label: "Remittance No.",     value: "remittance_number", icon: "bi-cash-stack" },
+  { label: "Description",        value: "description",       icon: "bi-card-text" },
+  { label: "Invoice Date",       value: "invoice_date",      icon: "bi-calendar3" },
+  { label: "PO Date",            value: "po_date",           icon: "bi-calendar-event" },
 ];
 
 export default function SearchTab() {
-  const [query,   setQuery]   = useState("");
-  const [field,   setField]   = useState("invoice_number");
-  const [records, setRecords] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
-  const [page,    setPage]    = useState(1);
+  const [query,      setQuery]      = useState("");
+  const [field,      setField]      = useState("all");
+  const [records,    setRecords]    = useState([]);
+  const [loading,    setLoading]    = useState(false);
+  const [searched,   setSearched]   = useState(false);
+  const [page,       setPage]       = useState(1);
+  const [sortCol,    setSortCol]    = useState("created_at");
+  const [sortDir,    setSortDir]    = useState("desc");
+  const [deletingId, setDeletingId] = useState(null);
 
-  const handleSearch = async () => {
-    if (!query.trim()) { toast("Please enter a search term."); return; }
+  const handleSearch = async (overrideQ, overrideField) => {
+    const q = overrideQ !== undefined ? overrideQ : query;
+    const f = overrideField !== undefined ? overrideField : field;
+    if (!q.trim()) {
+      toast("Please enter a keyword or ID to search.", { icon: "💡" });
+      return;
+    }
     setLoading(true);
     try {
-      const { data } = await searchById(field, query.trim());
+      const { data } = await searchById(f, q.trim());
       if (data.success) {
         setRecords(data.records || []);
         setSearched(true);
         setPage(1);
-        if (data.total === 0) toast("No records found.", { icon: "🔍" });
-        else toast.success(`Found ${data.total} record(s)`);
+        if (data.total === 0) {
+          toast("No matching records found.", { icon: "🔍" });
+        } else {
+          toast.success(`Found ${data.total} record(s) matching "${q.trim()}"`);
+        }
       }
-    } catch { toast.error("Search failed"); }
-    finally { setLoading(false); }
+    } catch (err) {
+      const msg = err?.response?.data?.detail || err.message || "Search failed";
+      toast.error("Search failed: " + msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const totalPages = Math.max(1, Math.ceil(records.length / PAGE_SIZE));
-  const pageData   = records.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+  const handleClear = () => {
+    setQuery("");
+    setRecords([]);
+    setSearched(false);
+    setPage(1);
+  };
+
+  const handleCopy = (text, label) => {
+    if (!text || text === "—") return;
+    navigator.clipboard.writeText(text);
+    toast.success(`Copied ${label}: ${text}`);
+  };
+
+  const handleDelete = async (invNum) => {
+    if (!invNum || !window.confirm(`Are you sure you want to delete invoice #${invNum} and linked data?`)) return;
+    setDeletingId(invNum);
+    try {
+      const { data } = await deleteInvoice(invNum);
+      if (data.success) {
+        toast.success(`Invoice #${invNum} deleted.`);
+        setRecords((prev) => prev.filter((r) => r.invoice_number !== invNum));
+      }
+    } catch (e) {
+      toast.error("Delete failed: " + (e?.response?.data?.detail || e.message));
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // Sort
+  const sorted = [...records].sort((a, b) => {
+    const valA = String(a[sortCol] ?? "");
+    const valB = String(b[sortCol] ?? "");
+    const cmp = valA.localeCompare(valB, undefined, { numeric: true });
+    return sortDir === "asc" ? cmp : -cmp;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const pageData   = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const handleSort = (col) => {
+    if (sortCol === col) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else { setSortCol(col); setSortDir("asc"); }
+    setPage(1);
+  };
+
+  const SortIcon = ({ col }) => {
+    if (sortCol !== col) return <i className="bi bi-arrow-down-up ms-1" style={{ opacity: 0.3, fontSize: ".65rem" }} />;
+    return sortDir === "asc" ? (
+      <i className="bi bi-sort-up ms-1" style={{ fontSize: ".7rem", color: "#38bdf8" }} />
+    ) : (
+      <i className="bi bi-sort-down ms-1" style={{ fontSize: ".7rem", color: "#38bdf8" }} />
+    );
+  };
 
   return (
-    <div className="search-wrapper">
-      {/* Header */}
-      <div className="search-header" style={{ background: "linear-gradient(135deg,#1e1b4b,#312e81)" }}>
+    <div className="search-wrapper animate-fadein">
+      {/* ── Search Header ── */}
+      <div className="search-header" style={{ background: "linear-gradient(135deg, #070d1f 0%, #1e1b4b 50%, #312e81 100%)" }}>
         <div className="search-title">
-          <i className="bi bi-search" />Search Records by ID
+          <i className="bi bi-search-heart-fill" style={{ color: "#38bdf8" }} />
+          Smart Database Search &amp; Discovery
+        </div>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: ".65rem" }}>
+          <a href="/export/excel" className="btn-nav btn-green" style={{ textDecoration: "none", padding: ".4rem .85rem", fontSize: ".78rem" }}>
+            <i className="bi bi-file-earmark-excel-fill" /> Export All to Excel
+          </a>
         </div>
       </div>
 
-      {/* Search Panel */}
-      <div style={{ padding:"1.75rem", borderBottom:"1px solid #e2e8f0" }}>
-        <div style={{ display:"flex", gap:"1.5rem", flexWrap:"wrap", marginBottom:"1.5rem" }}>
-          {/* Quick field pills */}
-          {FIELDS.map(f => (
-            <button key={f.value} onClick={() => setField(f.value)}
-              style={{
-                background: field===f.value ? "var(--blue)" : "#fff",
-                color: field===f.value ? "#fff" : "#64748b",
-                border: `1.5px solid ${field===f.value ? "var(--blue)" : "#e2e8f0"}`,
-                borderRadius: 10, padding:".45rem 1rem",
-                fontSize:".8rem", fontWeight:600, cursor:"pointer", transition:"all .15s",
-                display:"flex", alignItems:"center", gap:".4rem",
-                boxShadow: field===f.value ? "0 4px 14px rgba(37,99,235,.3)" : "none",
-              }}>
-              <i className={`bi ${f.value==="invoice_number"?"bi-receipt":f.value==="po_number"?"bi-file-text":f.value==="remittance_number"?"bi-cash-stack":f.value==="invoice_date"||f.value==="po_date"?"bi-calendar3":"bi-search"}`} />
-              {f.label}
-            </button>
-          ))}
+      {/* ── Search Controls Panel ── */}
+      <div style={{ padding: "1.75rem", background: "#ffffff", borderBottom: "1px solid #e2e8f0" }}>
+        {/* Quick field selector pills */}
+        <div style={{ display: "flex", gap: ".6rem", flexWrap: "wrap", marginBottom: "1.25rem", alignItems: "center" }}>
+          <span style={{ fontSize: ".75rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: ".05em", marginRight: ".3rem" }}>
+            Search Target:
+          </span>
+          {FIELDS.map((f) => {
+            const isSelected = field === f.value;
+            return (
+              <button
+                key={f.value}
+                onClick={() => setField(f.value)}
+                style={{
+                  background: isSelected ? "linear-gradient(135deg,#2563eb,#1d4ed8)" : "#f8fafc",
+                  color: isSelected ? "#ffffff" : "#475569",
+                  border: `1.5px solid ${isSelected ? "#2563eb" : "#cbd5e1"}`,
+                  borderRadius: 10,
+                  padding: ".45rem .95rem",
+                  fontSize: ".82rem",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  transition: "all .2s cubic-bezier(0.16,1,0.3,1)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: ".45rem",
+                  boxShadow: isSelected ? "0 4px 14px rgba(37,99,235,.35)" : "none",
+                  transform: isSelected ? "translateY(-1px)" : "none",
+                }}
+              >
+                <i className={`bi ${f.icon}`} style={{ color: isSelected ? "#bae6fd" : "#64748b" }} />
+                {f.label}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Search Input Row */}
-        <div style={{ display:"flex", gap:"1rem", alignItems:"stretch", flexWrap:"wrap" }}>
-          <div style={{ flex:1, minWidth:240, position:"relative" }}>
-            <i className="bi bi-search" style={{ position:"absolute", left:".9rem", top:"50%", transform:"translateY(-50%)", color:"#94a3b8" }} />
+        {/* Input Row */}
+        <div style={{ display: "flex", gap: ".85rem", alignItems: "stretch", flexWrap: "wrap" }}>
+          <div style={{ flex: 1, minWidth: 260, position: "relative" }}>
+            <i className="bi bi-search" style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#64748b", fontSize: "1rem" }} />
             <input
               className="search-input"
-              style={{ width:"100%", padding:".7rem 1rem .7rem 2.4rem", fontSize:".9rem", borderRadius:12 }}
-              placeholder={`Enter ${FIELDS.find(f2=>f2.value===field)?.label ?? "search term"}...`}
+              style={{
+                width: "100%",
+                padding: ".75rem 2.8rem .75rem 2.75rem",
+                fontSize: ".92rem",
+                borderRadius: 12,
+                border: "1.5px solid #cbd5e1",
+                background: "#f8fafc",
+                fontFamily: "inherit",
+                transition: "all .2s",
+                outline: "none",
+              }}
+              placeholder={`Type to search in ${FIELDS.find((f2) => f2.value === field)?.label}... (e.g. invoice no, PO no, description, date)`}
               value={query}
-              onChange={e => setQuery(e.target.value)}
-              onKeyDown={e => e.key==="Enter" && handleSearch()}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
+            {query && (
+              <button
+                onClick={() => setQuery("")}
+                style={{
+                  position: "absolute",
+                  right: ".85rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "#e2e8f0",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: 24,
+                  height: 24,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#475569",
+                  cursor: "pointer",
+                  fontSize: ".75rem",
+                }}
+                title="Clear input"
+              >
+                <i className="bi bi-x-lg" />
+              </button>
+            )}
           </div>
-          <button className="btn-extract" onClick={handleSearch} disabled={loading}
-            style={{ borderRadius:12, padding:".7rem 2rem", fontSize:".9rem" }}>
-            {loading ? <><div className="spinner-ring" style={{ width:18, height:18, borderWidth:2 }} />Searching...</>
-              : <><i className="bi bi-search" />Search</>}
+
+          {/* Action Buttons */}
+          <button
+            className="btn-extract"
+            onClick={() => handleSearch()}
+            disabled={loading}
+            style={{
+              borderRadius: 12,
+              padding: ".75rem 2rem",
+              fontSize: ".9rem",
+              fontWeight: 700,
+              background: "linear-gradient(135deg,#2563eb,#1d4ed8)",
+              color: "#fff",
+              border: "none",
+              cursor: loading ? "not-allowed" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: ".6rem",
+              boxShadow: "0 4px 15px rgba(37,99,235,.35)",
+              transition: "all .2s",
+            }}
+          >
+            {loading ? (
+              <>
+                <div className="spinner-ring" style={{ width: 18, height: 18, borderWidth: 2.5 }} />
+                <span>Searching...</span>
+              </>
+            ) : (
+              <>
+                <i className="bi bi-search" />
+                <span>Search</span>
+              </>
+            )}
           </button>
+
           {searched && (
-            <button onClick={() => { setQuery(""); setRecords([]); setSearched(false); }}
-              style={{ background:"#f1f5f9", border:"1.5px solid #e2e8f0", borderRadius:12, padding:".7rem 1.25rem", fontSize:".85rem", fontWeight:600, color:"#64748b", cursor:"pointer" }}>
-              <i className="bi bi-x-circle me-1" />Clear
+            <button
+              onClick={handleClear}
+              style={{
+                background: "#f1f5f9",
+                border: "1.5px solid #cbd5e1",
+                borderRadius: 12,
+                padding: ".75rem 1.4rem",
+                fontSize: ".85rem",
+                fontWeight: 700,
+                color: "#475569",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: ".4rem",
+                transition: "all .2s",
+              }}
+            >
+              <i className="bi bi-arrow-counterclockwise" /> Reset
             </button>
           )}
         </div>
       </div>
 
-      {/* Results */}
+      {/* ── Search Results Body ── */}
       <div className="history-body">
+        {/* Initial Prompt State */}
         {!searched && !loading && (
-          <div style={{ textAlign:"center", padding:"3.5rem 1rem", color:"#94a3b8" }}>
-            <i className="bi bi-search" style={{ fontSize:"3rem", display:"block", marginBottom:"1rem", opacity:.25 }} />
-            <p style={{ fontWeight:600, fontSize:".95rem" }}>Select a field and type to search</p>
-            <p style={{ fontSize:".82rem", marginTop:".35rem" }}>Search by Invoice No., PO No., Remittance No., or Date</p>
-          </div>
-        )}
-        {searched && records.length === 0 && !loading && (
-          <div className="empty-state">
-            <i className="bi bi-binoculars empty-icon" />
-            <p style={{ fontWeight:600 }}>No records found for "<strong>{query}</strong>"</p>
-          </div>
-        )}
-        {records.length > 0 && (
-          <>
-            <div style={{ background:"#eff6ff", border:"1px solid #bfdbfe", borderRadius:8, padding:".6rem 1rem", marginBottom:".85rem", fontSize:".82rem", color:"#1d4ed8", display:"flex", alignItems:"center", gap:".5rem" }}>
-              <i className="bi bi-check-circle-fill" />
-              Found <strong>{records.length}</strong> record(s) for <strong>"{query}"</strong> in <strong>{FIELDS.find(f=>f.value===field)?.label}</strong>
+          <div style={{ textAlign: "center", padding: "4rem 1.5rem", color: "#64748b" }} className="animate-fadein">
+            <div
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: 24,
+                background: "linear-gradient(135deg,#eff6ff,#dbeafe)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 1.25rem",
+                fontSize: "2rem",
+                color: "#2563eb",
+                boxShadow: "0 8px 25px rgba(37,99,235,.15)",
+              }}
+            >
+              <i className="bi bi-search" />
             </div>
+            <h5 style={{ fontWeight: 800, fontSize: "1.15rem", color: "#0f172a", marginBottom: ".4rem" }}>
+              Instant Multi-Field Search
+            </h5>
+            <p style={{ fontSize: ".88rem", maxWidth: 520, margin: "0 auto 1.5rem", lineHeight: 1.5, color: "#64748b" }}>
+              Search across <strong>Invoices</strong>, <strong>Purchase Orders</strong>, <strong>Remittances</strong>, <strong>Descriptions</strong>, or <strong>Dates</strong> with partial match and zero-normalization.
+            </p>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {loading && (
+          <div style={{ padding: "2rem" }}>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="shimmer-row" style={{ animationDelay: `${i * 0.1}s` }} />
+            ))}
+          </div>
+        )}
+
+        {/* Empty Search Result */}
+        {searched && records.length === 0 && !loading && (
+          <div className="empty-state animate-fadein">
+            <i className="bi bi-binoculars empty-icon" style={{ color: "#94a3b8" }} />
+            <h5 style={{ fontWeight: 700, color: "#1e293b", marginTop: ".5rem" }}>
+              No matches found for "<strong>{query}</strong>"
+            </h5>
+            <p style={{ fontSize: ".83rem", color: "#64748b", marginTop: ".25rem" }}>
+              Target: {FIELDS.find((f) => f.value === field)?.label}. Try searching with a broader keyword or switch to "All Fields".
+            </p>
+            <button
+              onClick={() => { setField("all"); handleSearch(query, "all"); }}
+              style={{
+                marginTop: "1rem",
+                background: "#eff6ff",
+                color: "#1d4ed8",
+                border: "1.5px solid #bfdbfe",
+                borderRadius: 8,
+                padding: ".45rem 1rem",
+                fontSize: ".82rem",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              <i className="bi bi-search me-1" /> Search in All Fields
+            </button>
+          </div>
+        )}
+
+        {/* Success Results Table */}
+        {records.length > 0 && !loading && (
+          <div className="animate-fadein">
+            {/* Results Banner */}
+            <div
+              style={{
+                background: "linear-gradient(135deg,#eff6ff,#e0e7ff)",
+                border: "1px solid #bfdbfe",
+                borderRadius: 10,
+                padding: ".75rem 1.25rem",
+                marginBottom: "1rem",
+                fontSize: ".85rem",
+                color: "#1e3a8a",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: ".75rem",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: ".6rem" }}>
+                <i className="bi bi-check-circle-fill" style={{ color: "#2563eb", fontSize: "1.1rem" }} />
+                <span>
+                  Found <strong>{records.length}</strong> matching record(s) for <strong>"{query}"</strong> in <strong>{FIELDS.find((f) => f.value === field)?.label}</strong>
+                </span>
+              </div>
+              <span style={{ fontSize: ".75rem", fontWeight: 700, color: "#4338ca", background: "rgba(255,255,255,.6)", padding: ".2rem .6rem", borderRadius: 6 }}>
+                Page {page} of {totalPages}
+              </span>
+            </div>
+
+            {/* Table Wrap */}
             <div className="history-table-wrap">
               <table className="history-table">
                 <thead>
                   <tr>
-                    <th>Invoice No.</th><th>Inv. Date</th><th>Description</th>
-                    <th>Assessable</th><th>GST</th><th>Total Inv.</th>
-                    <th>TDS%</th><th>TDS Amt</th><th>Receivable</th>
-                    <th>PO No.</th><th>PO Date</th><th>PO Total</th>
-                    <th>Remittance No.</th><th>Rem. Date</th><th>Gross</th>
+                    <th style={{ width: 65, textAlign: "center" }}>Action</th>
+                    <th onClick={() => handleSort("invoice_number")}>Invoice No. <SortIcon col="invoice_number" /></th>
+                    <th onClick={() => handleSort("invoice_date")}>Inv. Date <SortIcon col="invoice_date" /></th>
+                    <th onClick={() => handleSort("inv_description")}>Description <SortIcon col="inv_description" /></th>
+                    <th onClick={() => handleSort("assessable_value")}>Assessable Val <SortIcon col="assessable_value" /></th>
+                    <th onClick={() => handleSort("gst_amount")}>GST (18%) <SortIcon col="gst_amount" /></th>
+                    <th onClick={() => handleSort("total_invoice_value")}>Total Inv. Val <SortIcon col="total_invoice_value" /></th>
+                    <th onClick={() => handleSort("tds_rate")}>TDS% <SortIcon col="tds_rate" /></th>
+                    <th onClick={() => handleSort("tds_amount")}>TDS Amt <SortIcon col="tds_amount" /></th>
+                    <th onClick={() => handleSort("receivable")}>Net Receivable <SortIcon col="receivable" /></th>
+                    <th onClick={() => handleSort("po_number")}>PO No. <SortIcon col="po_number" /></th>
+                    <th onClick={() => handleSort("po_date")}>PO Date <SortIcon col="po_date" /></th>
+                    <th onClick={() => handleSort("total_amount")}>PO Total <SortIcon col="total_amount" /></th>
+                    <th onClick={() => handleSort("remittance_number")}>Remittance No. <SortIcon col="remittance_number" /></th>
+                    <th onClick={() => handleSort("remittance_date")}>Rem. Date <SortIcon col="remittance_date" /></th>
+                    <th onClick={() => handleSort("gross_amount")}>Gross Amt <SortIcon col="gross_amount" /></th>
                   </tr>
                 </thead>
                 <tbody>
                   {pageData.map((r, i) => (
-                    <tr key={i}>
-                      <td><span className="id-badge">{r.invoice_number||"—"}</span></td>
-                      <td>{r.invoice_date||"—"}</td>
-                      <td style={{ maxWidth:140, overflow:"hidden", textOverflow:"ellipsis" }}>{r.inv_description||"—"}</td>
+                    <tr key={i} className="animate-fadein" style={{ animationDelay: `${i * 0.04}s` }}>
+                      <td style={{ textAlign: "center" }}>
+                        <button
+                          onClick={() => handleDelete(r.invoice_number)}
+                          disabled={deletingId === r.invoice_number}
+                          className="btn-del-sm"
+                          title="Delete this record"
+                        >
+                          <i className="bi bi-trash3" /> Del
+                        </button>
+                      </td>
+                      <td>
+                        <span
+                          className="id-badge"
+                          style={{ cursor: "pointer" }}
+                          title="Click to copy"
+                          onClick={() => handleCopy(r.invoice_number, "Invoice No")}
+                        >
+                          {r.invoice_number || "—"}
+                          {r.invoice_number && <i className="bi bi-copy ms-1" style={{ opacity: 0.5, fontSize: ".65rem" }} />}
+                        </span>
+                      </td>
+                      <td>{r.invoice_date || "—"}</td>
+                      <td style={{ maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={r.inv_description}>
+                        {r.inv_description || "—"}
+                      </td>
                       <td className="money">{fmt(r.assessable_value)}</td>
                       <td className="money">{fmt(r.gst_amount)}</td>
-                      <td className="money">{fmt(r.total_invoice_value)}</td>
-                      <td style={{ textAlign:"center", fontWeight:700 }}>{r.tds_rate}%</td>
+                      <td className="money" style={{ fontWeight: 800 }}>{fmt(r.total_invoice_value)}</td>
+                      <td style={{ textAlign: "center", fontWeight: 700 }}>{r.tds_rate}%</td>
                       <td className="tds-cell">{fmt(r.tds_amount)}</td>
-                      <td className="receivable-cell">{fmt(r.receivable)}</td>
-                      <td><span className="id-badge" style={{ background:"#fffbeb", color:"#92400e", borderColor:"#fde68a" }}>{r.po_number||"—"}</span></td>
-                      <td>{r.po_date||"—"}</td>
+                      <td className="receivable-cell" style={{ fontWeight: 800 }}>{fmt(r.receivable)}</td>
+                      <td>
+                        <span
+                          className="id-badge"
+                          style={{ background: "#fffbeb", color: "#92400e", borderColor: "#fde68a", cursor: "pointer" }}
+                          title="Click to copy"
+                          onClick={() => handleCopy(r.po_number, "PO No")}
+                        >
+                          {r.po_number || "—"}
+                          {r.po_number && <i className="bi bi-copy ms-1" style={{ opacity: 0.5, fontSize: ".65rem" }} />}
+                        </span>
+                      </td>
+                      <td>{r.po_date || "—"}</td>
                       <td className="money">{fmt(r.total_amount)}</td>
-                      <td><span className="id-badge" style={{ background:"#f0fdf4", color:"#065f46", borderColor:"#a7f3d0" }}>{r.remittance_number||"—"}</span></td>
-                      <td>{r.remittance_date||"—"}</td>
+                      <td>
+                        <span
+                          className="id-badge"
+                          style={{ background: "#f0fdf4", color: "#065f46", borderColor: "#a7f3d0", cursor: "pointer" }}
+                          title="Click to copy"
+                          onClick={() => handleCopy(r.remittance_number, "Remittance No")}
+                        >
+                          {r.remittance_number || "—"}
+                          {r.remittance_number && <i className="bi bi-copy ms-1" style={{ opacity: 0.5, fontSize: ".65rem" }} />}
+                        </span>
+                      </td>
+                      <td>{r.remittance_date || "—"}</td>
                       <td className="money">{fmt(r.gross_amount)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination */}
             {totalPages > 1 && (
               <div className="pagination-row">
-                <span>Showing {(page-1)*PAGE_SIZE+1}–{Math.min(page*PAGE_SIZE,records.length)} of {records.length}</span>
+                <span>
+                  Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, sorted.length)} of {sorted.length} records
+                </span>
                 <div className="page-btns">
-                  {Array.from({length:totalPages},(_,i) => (
-                    <button key={i+1} className={`page-btn ${page===i+1?"active":""}`} onClick={() => setPage(i+1)}>{i+1}</button>
+                  <button className="page-btn" disabled={page === 1} onClick={() => setPage(1)}>«</button>
+                  <button className="page-btn" disabled={page === 1} onClick={() => setPage((p) => p - 1)}>‹</button>
+                  {Array.from({ length: totalPages }, (_, idx) => (
+                    <button
+                      key={idx + 1}
+                      className={`page-btn ${page === idx + 1 ? "active" : ""}`}
+                      onClick={() => setPage(idx + 1)}
+                    >
+                      {idx + 1}
+                    </button>
                   ))}
+                  <button className="page-btn" disabled={page === totalPages} onClick={() => setPage((p) => p + 1)}>›</button>
+                  <button className="page-btn" disabled={page === totalPages} onClick={() => setPage(totalPages)}>»</button>
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>
   );
 }
+

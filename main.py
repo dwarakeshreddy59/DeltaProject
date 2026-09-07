@@ -233,8 +233,8 @@ _RECORDS_SQL = """
         r.gross_amount, r.total_gross_amount, r.line_items AS rem_items,
         i.created_at
     FROM invoices i
-    LEFT JOIN purchase_orders p ON (p.po_number = i.po_number OR LTRIM(p.po_number, '0') = LTRIM(i.po_number, '0'))
-    LEFT JOIN remittances r     ON (r.invoice_number = i.invoice_number OR r.invoice_number LIKE '%' || i.invoice_number || '%')
+    LEFT JOIN purchase_orders p ON (p.po_number = i.po_number OR LTRIM(COALESCE(p.po_number, ''), '0') = LTRIM(COALESCE(i.po_number, ''), '0'))
+    LEFT JOIN remittances r     ON (r.invoice_number = i.invoice_number OR POSITION(COALESCE(i.invoice_number, '___') IN COALESCE(r.invoice_number, '')) > 0)
 """
 
 
@@ -280,11 +280,12 @@ async def records_all():
 
 
 SEARCHABLE_FIELDS = {
-    "invoice_number":    "i.invoice_number",
-    "po_number":         "p.po_number",
-    "remittance_number": "r.remittance_number",
-    "invoice_date":      "CAST(i.invoice_date AS TEXT)",
-    "po_date":           "CAST(p.po_date AS TEXT)",
+    "invoice_number":    "(i.invoice_number ILIKE %s OR r.invoice_number ILIKE %s)",
+    "po_number":         "(p.po_number ILIKE %s OR i.po_number ILIKE %s OR LTRIM(COALESCE(p.po_number, ''), '0') ILIKE %s OR LTRIM(COALESCE(i.po_number, ''), '0') ILIKE %s)",
+    "remittance_number": "(r.remittance_number ILIKE %s)",
+    "description":       "(i.description ILIKE %s OR p.description ILIKE %s OR r.description ILIKE %s)",
+    "invoice_date":      "(CAST(i.invoice_date AS TEXT) ILIKE %s)",
+    "po_date":           "(CAST(p.po_date AS TEXT) ILIKE %s)",
     "all":               None,
 }
 
@@ -292,30 +293,52 @@ SEARCHABLE_FIELDS = {
 async def search(q: str = "", field: str = "all"):
     """
     Search DB records by a specific field or across all text fields.
-    - field: invoice_number | po_number | remittance_number | invoice_date | po_date | all
+    - field: invoice_number | po_number | remittance_number | description | invoice_date | po_date | all
     - q:     search term (case-insensitive, partial match)
     """
     if not q.strip():
         return await records_all()
 
     try:
-        q_like = f"%{q.strip()}%"
+        clean_q = q.strip()
+        q_like = f"%{clean_q}%"
+        q_ltrim = f"%{clean_q.lstrip('0')}%" if clean_q.lstrip('0') else q_like
 
         if field == "all":
             sql = _RECORDS_SQL + """
                 WHERE (
                     i.invoice_number    ILIKE %s OR
+                    r.invoice_number    ILIKE %s OR
                     p.po_number         ILIKE %s OR
+                    i.po_number         ILIKE %s OR
+                    LTRIM(COALESCE(p.po_number, ''), '0') ILIKE %s OR
                     r.remittance_number ILIKE %s OR
+                    i.description       ILIKE %s OR
+                    p.description       ILIKE %s OR
+                    r.description       ILIKE %s OR
+                    i.invoice_period    ILIKE %s OR
                     CAST(i.invoice_date AS TEXT) ILIKE %s OR
-                    i.description       ILIKE %s
+                    CAST(p.po_date AS TEXT)      ILIKE %s OR
+                    CAST(r.remittance_date AS TEXT) ILIKE %s
                 )
                 ORDER BY i.created_at DESC
             """
-            params = (q_like, q_like, q_like, q_like, q_like)
+            params = (
+                q_like, q_like, q_like, q_like, q_ltrim,
+                q_like, q_like, q_like, q_like, q_like,
+                q_like, q_like, q_like
+            )
+        elif field == "po_number":
+            sql = _RECORDS_SQL + " WHERE " + SEARCHABLE_FIELDS["po_number"] + " ORDER BY i.created_at DESC"
+            params = (q_like, q_like, q_ltrim, q_ltrim)
+        elif field == "description":
+            sql = _RECORDS_SQL + " WHERE " + SEARCHABLE_FIELDS["description"] + " ORDER BY i.created_at DESC"
+            params = (q_like, q_like, q_like)
+        elif field == "invoice_number":
+            sql = _RECORDS_SQL + " WHERE " + SEARCHABLE_FIELDS["invoice_number"] + " ORDER BY i.created_at DESC"
+            params = (q_like, q_like)
         elif field in SEARCHABLE_FIELDS and SEARCHABLE_FIELDS[field]:
-            col = SEARCHABLE_FIELDS[field]
-            sql = _RECORDS_SQL + f" WHERE {col} ILIKE %s ORDER BY i.created_at DESC"
+            sql = _RECORDS_SQL + f" WHERE {SEARCHABLE_FIELDS[field]} ORDER BY i.created_at DESC"
             params = (q_like,)
         else:
             raise HTTPException(status_code=400, detail=f"Unknown search field: {field}")
@@ -324,7 +347,7 @@ async def search(q: str = "", field: str = "all"):
         records = [dict(r) for r in (rows or [])]
         return {
             "success": True,
-            "query":   q,
+            "query":   clean_q,
             "field":   field,
             "total":   len(records),
             "records": records,
