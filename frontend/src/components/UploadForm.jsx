@@ -7,24 +7,24 @@ const SLOTS = [
     label: "Invoice PDF",
     hint: "Document No. & Invoice Date",
     icon: "bi-receipt",
-    color: "#0abab5",
-    bg: "linear-gradient(135deg,#0abab5,#089793)",
+    color: "#A855F7",
+    bg: "linear-gradient(135deg, #7C3AED, #A855F7)",
   },
   {
     key: "po",
     label: "Purchase Order PDF",
     hint: "PO No. & Delivery Date",
     icon: "bi-file-text",
-    color: "#0284c7",
-    bg: "linear-gradient(135deg,#0284c7,#0369a1)",
+    color: "#C084FC",
+    bg: "linear-gradient(135deg, #9333EA, #C084FC)",
   },
   {
     key: "remittance",
     label: "Remittance PDF",
     hint: "Payment Ref. & Gross Amount",
     icon: "bi-cash-stack",
-    color: "#059669",
-    bg: "linear-gradient(135deg,#10b981,#059669)",
+    color: "#22C55E",
+    bg: "linear-gradient(135deg, #16A34A, #22C55E)",
   },
 ];
 
@@ -75,12 +75,13 @@ export default function UploadForm({ onSubmit, loading }) {
       </div>
 
       {/* Progress bar */}
-      <div style={{ height: 4, background: "#cbf3ef" }}>
+      <div style={{ height: 4, background: "rgba(168, 85, 247, 0.15)" }}>
         <div
           style={{
             height: "100%",
             width: `${(filled / 3) * 100}%`,
-            background: filled === 3 ? "linear-gradient(90deg,#0abab5,#0284c7)" : "linear-gradient(90deg,#81d8d0,#0abab5)",
+            background: filled === 3 ? "linear-gradient(90deg, #7C3AED, #22C55E)" : "linear-gradient(90deg, #7C3AED, #A855F7)",
+            boxShadow: "0 0 12px rgba(168, 85, 247, 0.6)",
             transition: "width .4s cubic-bezier(.34,1.56,.64,1)",
           }}
         />
@@ -118,11 +119,11 @@ export default function UploadForm({ onSubmit, loading }) {
               flexWrap: "wrap",
               gap: "1rem",
               paddingTop: "1rem",
-              borderTop: "1px solid #f0fbf9",
+              borderTop: "1px solid rgba(168, 85, 247, 0.15)",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: ".6rem", color: "#3e6563", fontSize: ".82rem" }}>
-              <i className="bi bi-shield-check" style={{ color: "#0abab5", fontSize: "1.1rem" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: ".6rem", color: "#A1A1AA", fontSize: ".82rem" }}>
+              <i className="bi bi-shield-check" style={{ color: "#A855F7", fontSize: "1.1rem" }} />
               <span>PDFs will be parsed &amp; auto-saved to PostgreSQL</span>
             </div>
 
@@ -132,14 +133,15 @@ export default function UploadForm({ onSubmit, loading }) {
                   type="button"
                   onClick={handleReset}
                   style={{
-                    background: "#f0fbf9",
-                    border: "1.5px solid #cbf3ef",
+                    background: "rgba(168, 85, 247, 0.12)",
+                    border: "1.5px solid rgba(168, 85, 247, 0.3)",
                     borderRadius: 10,
                     padding: ".55rem 1rem",
-                    color: "#075955",
+                    color: "#C084FC",
                     cursor: "pointer",
                     fontSize: ".83rem",
                     fontWeight: 600,
+                    transition: "all .2s",
                   }}
                 >
                   <i className="bi bi-arrow-counterclockwise me-1" />Reset
@@ -152,11 +154,11 @@ export default function UploadForm({ onSubmit, loading }) {
                 disabled={loading || !allSelected}
                 style={{
                   background: allSelected
-                    ? "linear-gradient(135deg,#0abab5,#077c77)"
-                    : "#cbd5e1",
-                  color: "#ffffff",
-                  border: allSelected ? "1.5px solid #ffffff" : "none",
-                  boxShadow: allSelected ? "0 6px 20px rgba(10,186,181,.45)" : "none",
+                    ? "linear-gradient(135deg, #7C3AED, #A855F7)"
+                    : "rgba(255, 255, 255, 0.08)",
+                  color: allSelected ? "#ffffff" : "#71717A",
+                  border: allSelected ? "1.5px solid #C084FC" : "1px solid rgba(255, 255, 255, 0.1)",
+                  boxShadow: allSelected ? "0 0 25px rgba(168, 85, 247, 0.5), 0 6px 20px rgba(0,0,0,0.4)" : "none",
                   cursor: allSelected ? "pointer" : "not-allowed",
                   borderRadius: 10,
                   padding: ".6rem 1.6rem",

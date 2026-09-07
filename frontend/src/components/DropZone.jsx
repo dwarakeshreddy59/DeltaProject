@@ -1,9 +1,9 @@
 import React, { useRef } from "react";
 
 const SLOT_CONFIG = {
-  invoice:    { icon: "bi-receipt",    color: "#0abab5", bg: "linear-gradient(135deg,#0abab5,#089793)" },
-  po:         { icon: "bi-file-text",  color: "#0284c7", bg: "linear-gradient(135deg,#0284c7,#0369a1)" },
-  remittance: { icon: "bi-cash-stack", color: "#059669", bg: "linear-gradient(135deg,#10b981,#059669)" },
+  invoice:    { icon: "bi-receipt",    color: "#A855F7", bg: "linear-gradient(135deg, #7C3AED, #A855F7)" },
+  po:         { icon: "bi-file-text",  color: "#C084FC", bg: "linear-gradient(135deg, #9333EA, #C084FC)" },
+  remittance: { icon: "bi-cash-stack", color: "#22C55E", bg: "linear-gradient(135deg, #16A34A, #22C55E)" },
 };
 
 export default function DropZone({ slot, label, hint, file, onFile, hasError }) {
@@ -55,7 +55,7 @@ export default function DropZone({ slot, label, hint, file, onFile, hasError }) 
       </div>
 
       {/* Label */}
-      <div className="drop-label" style={{ color: file ? "#065f46" : undefined }}>
+      <div className="drop-label" style={{ color: file ? "#22C55E" : undefined }}>
         {file ? `${label} ✓` : label}
       </div>
 
@@ -69,23 +69,24 @@ export default function DropZone({ slot, label, hint, file, onFile, hasError }) 
               type="button"
               onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
               style={{
-                background: "#fff", border: `1.5px solid ${cfg.color}`, color: cfg.color,
+                background: "rgba(124, 58, 237, 0.2)", border: `1.5px solid ${cfg.color}`, color: "#ffffff",
                 borderRadius: 8, padding: ".3rem .75rem", fontSize: ".73rem",
-                fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: ".3rem"
+                fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: ".3rem",
+                boxShadow: `0 0 10px ${cfg.color}40`
               }}
             >
-              <i className="bi bi-arrow-repeat" />Change
+              <i className="bi bi-arrow-repeat" /> Change
             </button>
             <button
               type="button"
               onClick={handleClear}
               style={{
-                background: "#fff", border: "1.5px solid #ef4444", color: "#ef4444",
+                background: "rgba(239, 68, 68, 0.15)", border: "1.5px solid rgba(239, 68, 68, 0.4)", color: "#f87171",
                 borderRadius: 8, padding: ".3rem .75rem", fontSize: ".73rem",
                 fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: ".3rem"
               }}
             >
-              <i className="bi bi-x" />Remove
+              <i className="bi bi-x" /> Remove
             </button>
           </div>
         </>

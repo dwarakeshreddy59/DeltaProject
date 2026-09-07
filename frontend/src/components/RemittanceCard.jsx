@@ -15,7 +15,7 @@ const Row = ({ label, value, type = "text" }) => {
     displayVal = value;
     tdClass += " val-highlight";
   } else if (type === "badge") {
-    displayVal = <span className="badge-val" style={{ background: "#f0fdf4", color: "#065f46", borderColor: "#a7f3d0" }}>{value}</span>;
+    displayVal = <span className="badge-val" style={{ background: "rgba(34, 197, 94, 0.15)", color: "#22C55E", borderColor: "rgba(34, 197, 94, 0.3)" }}>{value}</span>;
   } else {
     displayVal = value;
   }
@@ -53,14 +53,14 @@ export default function RemittanceCard({ remittance = {} }) {
 
         {/* Multiple Line Items / Invoices Breakdown */}
         {items.length > 1 && (
-          <div style={{ marginTop: "1rem", paddingTop: ".75rem", borderTop: "1px dashed #cbd5e1" }}>
-            <div style={{ fontSize: ".75rem", fontWeight: 700, color: "#047857", textTransform: "uppercase", marginBottom: ".5rem", display: "flex", alignItems: "center", gap: "5px" }}>
+          <div style={{ marginTop: "1rem", paddingTop: ".75rem", borderTop: "1px dashed rgba(168, 85, 247, 0.3)" }}>
+            <div style={{ fontSize: ".75rem", fontWeight: 700, color: "#22C55E", textTransform: "uppercase", marginBottom: ".5rem", display: "flex", alignItems: "center", gap: "5px" }}>
               <i className="bi bi-list-nested" /> Cleared Invoices Breakdown ({items.length} items)
             </div>
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", fontSize: ".78rem", borderCollapse: "collapse" }}>
                 <thead>
-                  <tr style={{ background: "#f0fdf4", color: "#065f46" }}>
+                  <tr style={{ background: "rgba(34, 197, 94, 0.15)", color: "#22C55E" }}>
                     <th style={{ padding: "4px 8px", textAlign: "left" }}>Doc / Ref</th>
                     <th style={{ padding: "4px 8px", textAlign: "left" }}>Invoice No</th>
                     <th style={{ padding: "4px 8px", textAlign: "left" }}>Description</th>
@@ -69,11 +69,11 @@ export default function RemittanceCard({ remittance = {} }) {
                 </thead>
                 <tbody>
                   {items.map((it, idx) => (
-                    <tr key={idx} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                      <td style={{ padding: "4px 8px", color: "#64748b" }}>{it.doc_number || "—"}</td>
-                      <td style={{ padding: "4px 8px", fontWeight: 600, color: "#1d4ed8" }}>{it.invoice_number || "—"}</td>
-                      <td style={{ padding: "4px 8px", color: "#334155" }}>{it.description || "—"}</td>
-                      <td style={{ padding: "4px 8px", textAlign: "right", fontWeight: 700, color: "#047857" }}>{inr(it.gross_amount)}</td>
+                    <tr key={idx} style={{ borderBottom: "1px solid rgba(168, 85, 247, 0.12)" }}>
+                      <td style={{ padding: "4px 8px", color: "#A1A1AA" }}>{it.doc_number || "—"}</td>
+                      <td style={{ padding: "4px 8px", fontWeight: 600, color: "#A855F7" }}>{it.invoice_number || "—"}</td>
+                      <td style={{ padding: "4px 8px", color: "#FFFFFF" }}>{it.description || "—"}</td>
+                      <td style={{ padding: "4px 8px", textAlign: "right", fontWeight: 700, color: "#22C55E" }}>{inr(it.gross_amount)}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -203,9 +203,9 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
               key={opt.id}
               onClick={() => { setActiveView(opt.id); setPage(1); setFilter(""); }}
               style={{
-                background: isActive ? "linear-gradient(135deg, #0abab5, #089793)" : "var(--bg-card)",
+                background: isActive ? "linear-gradient(135deg, #7C3AED, #A855F7)" : "var(--bg-card)",
                 color: isActive ? "#ffffff" : "var(--text-main)",
-                border: `1.5px solid ${isActive ? "#0abab5" : "var(--border-subtle)"}`,
+                border: `1.5px solid ${isActive ? "#A855F7" : "var(--border-subtle)"}`,
                 borderRadius: 10,
                 padding: ".45rem .95rem",
                 fontSize: ".82rem",
@@ -215,11 +215,11 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                 alignItems: "center",
                 gap: ".5rem",
                 transition: "all .2s",
-                boxShadow: isActive ? "0 4px 14px rgba(10,186,181,.3)" : "0 1px 3px rgba(0,0,0,.04)",
+                boxShadow: isActive ? "0 4px 18px rgba(168,85,247,.45)" : "0 1px 3px rgba(0,0,0,.04)",
                 transform: isActive ? "translateY(-1px)" : "none",
               }}
             >
-              <i className={`bi ${opt.icon}`} style={{ color: isActive ? "#ffffff" : "#0abab5" }} />
+              <i className={`bi ${opt.icon}`} style={{ color: isActive ? "#ffffff" : "#A855F7" }} />
               {opt.label}
               <span
                 style={{
@@ -241,7 +241,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
 
       {/* ── Sub-Tab Info Bar ── */}
       <div className="db-verify-bar" style={{ background: "var(--bg-card)", borderBottom: "1px solid var(--border-subtle)" }}>
-        <i className="bi bi-info-circle-fill" style={{ color: "#0abab5" }} />
+        <i className="bi bi-info-circle-fill" style={{ color: "#A855F7" }} />
         <span style={{ color: "var(--text-muted)" }}>
           Viewing <strong>{VIEW_OPTIONS.find((v) => v.id === activeView)?.desc}</strong> ({filtered.length} of {currentList.length} records). Delete anytime using the red Action buttons.
         </span>
@@ -316,7 +316,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                       </td>
                       <td><span className="id-badge">{r.invoice_number || "—"}</span></td>
                       <td>{r.invoice_date || "—"}</td>
-                      <td><span className="id-badge" style={{ background: "#f0f9ff", color: "#0369a1", borderColor: "#bae6fd" }}>{r.po_number || "—"}</span></td>
+                      <td><span className="id-badge" style={{ background: "rgba(192, 132, 252, 0.15)", color: "#C084FC", borderColor: "rgba(192, 132, 252, 0.3)" }}>{r.po_number || "—"}</span></td>
                       <td style={{ minWidth: 180, maxWidth: 320, wordBreak: "break-word", whiteSpace: "normal", lineHeight: 1.4 }}>{r.description || "—"}</td>
                       <td>{r.invoice_period || "—"}</td>
                       <td className="money">{fmt(r.assessable_value)}</td>
@@ -366,7 +366,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                           <i className="bi bi-trash3" /> Delete
                         </button>
                       </td>
-                      <td><span className="id-badge" style={{ background: "#f0f9ff", color: "#0369a1", borderColor: "#bae6fd" }}>{r.po_number || "—"}</span></td>
+                      <td><span className="id-badge" style={{ background: "rgba(192, 132, 252, 0.15)", color: "#C084FC", borderColor: "rgba(192, 132, 252, 0.3)" }}>{r.po_number || "—"}</span></td>
                       <td>{r.po_date || "—"}</td>
                       <td style={{ minWidth: 200, maxWidth: 350, wordBreak: "break-word", whiteSpace: "normal", lineHeight: 1.4 }}>{r.description || "—"}</td>
                       <td>{r.delivery_date || "—"}</td>
@@ -412,7 +412,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                           <i className="bi bi-trash3" /> Delete
                         </button>
                       </td>
-                      <td><span className="id-badge" style={{ background: "#f0fdf4", color: "#065f46", borderColor: "#a7f3d0" }}>{r.remittance_number || "—"}</span></td>
+                      <td><span className="id-badge" style={{ background: "rgba(34, 197, 94, 0.15)", color: "#22C55E", borderColor: "rgba(34, 197, 94, 0.3)" }}>{r.remittance_number || "—"}</span></td>
                       <td>{r.remittance_date || "—"}</td>
                       <td><span className="id-badge">{r.invoice_number || "—"}</span></td>
                       <td style={{ minWidth: 200, maxWidth: 350, wordBreak: "break-word", whiteSpace: "normal", lineHeight: 1.4 }}>{r.description || "—"}</td>
@@ -480,12 +480,12 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                       <td className="money">{fmt(r.total_invoice_value)}</td>
                       <td style={{ textAlign: "center", fontWeight: 700 }}>{r.tds_rate}%</td>
                       <td className="tds-cell">{fmt(r.tds_amount)}</td>
-                      <td className="receivable-cell">{fmt(r.receivable)}</td>
-                      <td><span className="id-badge" style={{ background: "#f0f9ff", color: "#0369a1", borderColor: "#bae6fd" }}>{r.po_number || "—"}</span></td>
+                      <td className="receivable-cell" style={{ color: "#22C55E", fontWeight: 800 }}>{fmt(r.receivable)}</td>
+                      <td><span className="id-badge" style={{ background: "rgba(192, 132, 252, 0.15)", color: "#C084FC", borderColor: "rgba(192, 132, 252, 0.3)" }}>{r.po_number || "—"}</span></td>
                       <td>{r.po_date || "—"}</td>
                       <td>{r.delivery_date || "—"}</td>
                       <td className="money">{fmt(r.total_amount)}</td>
-                      <td><span className="id-badge" style={{ background: "#f0fdf4", color: "#065f46", borderColor: "#a7f3d0" }}>{r.remittance_number || "—"}</span></td>
+                      <td><span className="id-badge" style={{ background: "rgba(34, 197, 94, 0.15)", color: "#22C55E", borderColor: "rgba(34, 197, 94, 0.3)" }}>{r.remittance_number || "—"}</span></td>
                       <td>{r.remittance_date || "—"}</td>
                       <td className="money">{fmt(r.gross_amount)}</td>
                       <td className="money">{fmt(r.total_gross_amount)}</td>

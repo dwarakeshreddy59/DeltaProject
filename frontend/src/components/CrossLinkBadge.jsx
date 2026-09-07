@@ -12,11 +12,11 @@ export default function CrossLinkBadge({ po, invoice, remittance }) {
         <i className="bi bi-diagram-3 me-1" />Document Chain
       </div>
       <div className="crosslink-chain">
-        <ChainItem label="Purchase Order" value={poNum} color="#0284c7" />
+        <ChainItem label="Purchase Order" value={poNum} color="#C084FC" />
         <span className="chain-arrow"><i className="bi bi-arrow-right" /></span>
-        <ChainItem label="Invoice" value={invNum} color="#0abab5" />
+        <ChainItem label="Invoice" value={invNum} color="#A855F7" />
         <span className="chain-arrow"><i className="bi bi-arrow-right" /></span>
-        <ChainItem label="Remittance" value={remNum} color="#059669" />
+        <ChainItem label="Remittance" value={remNum} color="#22C55E" />
       </div>
     </div>
   );
@@ -28,9 +28,9 @@ function ChainItem({ label, value, color }) {
     <div className="chain-item">
       <div className="chain-label">{label}</div>
       <div className="chain-value" style={{
-        borderColor: missing ? "#fca5a5" : undefined,
+        borderColor: missing ? "rgba(239, 68, 68, 0.4)" : undefined,
         color: missing ? "#ef4444" : color,
-        background: missing ? "#fff1f2" : undefined,
+        background: missing ? "rgba(239, 68, 68, 0.12)" : undefined,
       }}>
         {missing
           ? <><i className="bi bi-exclamation-circle me-1" />Not found</>

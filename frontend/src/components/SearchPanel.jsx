@@ -153,8 +153,8 @@ export default function SearchPanel({ visible = true, refreshTrigger = 0 }) {
       </div>
 
       {/* ── Quick ID Search Pills ── */}
-      <div style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0", padding: ".65rem 1.25rem", display: "flex", gap: ".5rem", alignItems: "center", flexWrap: "wrap" }}>
-        <span style={{ fontSize: ".72rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: ".05em" }}>
+      <div style={{ background: "var(--bg-card-subtle)", borderBottom: "1px solid var(--border-subtle)", padding: ".65rem 1.25rem", display: "flex", gap: ".5rem", alignItems: "center", flexWrap: "wrap" }}>
+        <span style={{ fontSize: ".72rem", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: ".05em" }}>
           Quick Search:
         </span>
         {["invoice_number", "po_number", "remittance_number"].map(f => (
@@ -162,15 +162,16 @@ export default function SearchPanel({ visible = true, refreshTrigger = 0 }) {
             key={f}
             onClick={() => setSearchType(f)}
             style={{
-              background: searchType === f ? "#eff6ff" : "#fff",
-              border: `1.5px solid ${searchType === f ? "#93c5fd" : "#e2e8f0"}`,
-              color: searchType === f ? "#1d4ed8" : "#64748b",
+              background: searchType === f ? "linear-gradient(135deg, #7C3AED, #A855F7)" : "var(--bg-card)",
+              border: `1.5px solid ${searchType === f ? "#A855F7" : "var(--border-subtle)"}`,
+              color: searchType === f ? "#ffffff" : "var(--text-muted)",
               borderRadius: 7,
               padding: ".25rem .65rem",
               fontSize: ".73rem",
               fontWeight: 600,
               cursor: "pointer",
               transition: "all .15s",
+              boxShadow: searchType === f ? "0 2px 10px rgba(168,85,247,.4)" : "none",
             }}
           >
             <i className={`bi ${f === "invoice_number" ? "bi-receipt" : f === "po_number" ? "bi-file-text" : "bi-cash-stack"} me-1`} />
@@ -184,7 +185,7 @@ export default function SearchPanel({ visible = true, refreshTrigger = 0 }) {
         {loading ? (
           <div className="loading-overlay">
             <div className="spinner-ring" />
-            <p style={{ color: "#64748b", fontSize: ".85rem" }}>Loading from PostgreSQL...</p>
+            <p style={{ color: "var(--text-muted)", fontSize: ".85rem" }}>Loading from PostgreSQL...</p>
           </div>
         ) : pageData.length === 0 ? (
           <div className="empty-state">
@@ -193,7 +194,7 @@ export default function SearchPanel({ visible = true, refreshTrigger = 0 }) {
               {query ? `No records match "${query}"` : "No records in DB yet. Upload your first PDFs!"}
             </p>
             {query && (
-              <button onClick={handleClear} style={{ marginTop: ".75rem", background: "var(--blue)", color: "#fff", border: "none", borderRadius: 8, padding: ".45rem 1rem", cursor: "pointer", fontSize: ".82rem" }}>
+              <button onClick={handleClear} style={{ marginTop: ".75rem", background: "linear-gradient(135deg, #7C3AED, #A855F7)", color: "#fff", border: "none", borderRadius: 8, padding: ".45rem 1rem", cursor: "pointer", fontSize: ".82rem", fontWeight: 700, boxShadow: "0 0 15px rgba(168,85,247,.4)" }}>
                 Clear Search & Show All
               </button>
             )}
@@ -202,10 +203,10 @@ export default function SearchPanel({ visible = true, refreshTrigger = 0 }) {
           <>
             {/* Result Info */}
             {query && (
-              <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 8, padding: ".55rem 1rem", marginBottom: ".85rem", fontSize: ".8rem", color: "#1d4ed8", display: "flex", alignItems: "center", gap: ".5rem" }}>
+              <div style={{ background: "rgba(124, 58, 237, 0.15)", border: "1px solid rgba(168, 85, 247, 0.35)", borderRadius: 8, padding: ".55rem 1rem", marginBottom: ".85rem", fontSize: ".8rem", color: "#C084FC", display: "flex", alignItems: "center", gap: ".5rem" }}>
                 <i className="bi bi-search" />
                 Showing <strong>{records.length}</strong> result(s) for <strong>"{query}"</strong> in <strong>{SEARCH_FIELDS.find(f => f.value === searchType)?.label}</strong>
-                <button onClick={handleClear} style={{ marginLeft: "auto", background: "none", border: "none", color: "#1d4ed8", cursor: "pointer", fontWeight: 600, fontSize: ".78rem" }}>
+                <button onClick={handleClear} style={{ marginLeft: "auto", background: "none", border: "none", color: "#C084FC", cursor: "pointer", fontWeight: 600, fontSize: ".78rem" }}>
                   Clear &times;
                 </button>
               </div>
@@ -247,12 +248,12 @@ export default function SearchPanel({ visible = true, refreshTrigger = 0 }) {
                       <td className="money">{fmt(r.total_invoice_value)}</td>
                       <td style={{ textAlign: "center", fontWeight: 700 }}>{r.tds_rate}%</td>
                       <td className="tds-cell">{fmt(r.tds_amount)}</td>
-                      <td className="receivable-cell">{fmt(r.receivable)}</td>
-                      <td><span className="id-badge" style={{ background: "#f0f9ff", color: "#0369a1", borderColor: "#bae6fd" }}>{r.po_number || "—"}</span></td>
+                      <td className="receivable-cell" style={{ color: "#22C55E", fontWeight: 800 }}>{fmt(r.receivable)}</td>
+                      <td><span className="id-badge" style={{ background: "rgba(192, 132, 252, 0.15)", color: "#C084FC", borderColor: "rgba(192, 132, 252, 0.3)" }}>{r.po_number || "—"}</span></td>
                       <td>{r.po_date || "—"}</td>
                       <td>{r.delivery_date || "—"}</td>
                       <td className="money">{fmt(r.total_amount)}</td>
-                      <td><span className="id-badge" style={{ background: "#f0fdf4", color: "#065f46", borderColor: "#a7f3d0" }}>{r.remittance_number || "—"}</span></td>
+                      <td><span className="id-badge" style={{ background: "rgba(34, 197, 94, 0.15)", color: "#22C55E", borderColor: "rgba(34, 197, 94, 0.3)" }}>{r.remittance_number || "—"}</span></td>
                       <td>{r.remittance_date || "—"}</td>
                       <td className="money">{fmt(r.gross_amount)}</td>
                       <td className="money">{fmt(r.total_gross_amount)}</td>

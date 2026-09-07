@@ -17,9 +17,9 @@ export default function App() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [uploadCount,    setUploadCount]    = useState(0);
 
-  // ── Theme State: 'bright' (Tiffany Blue & White & Gold) or 'dark' (Midnight Obsidian & Gold) ──
+  // ── Theme State: 'dark' (Premium Dark Purple Luxury) or 'bright' (Light Lavender) ──
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("app_theme") || "bright";
+    return localStorage.getItem("app_theme") || "dark";
   });
 
   useEffect(() => {
@@ -54,14 +54,14 @@ export default function App() {
           </p>
 
           <div className="hero-stats">
-            <HeroStat icon="bi-file-earmark-text" bg="linear-gradient(135deg,#0abab5,#077c77)"
+            <HeroStat icon="bi-file-earmark-text" bg="linear-gradient(135deg, #7C3AED, #5B21B6)"
               value={uploadCount} label="Extractions" trend="This session" />
-            <HeroStat icon="bi-currency-rupee" bg="linear-gradient(135deg,#0284c7,#0369a1)"
+            <HeroStat icon="bi-currency-rupee" bg="linear-gradient(135deg, #22C55E, #15803D)"
               value={results ? `₹${Number(calcData?.receivable||0).toLocaleString("en-IN",{minimumFractionDigits:2})}` : "₹0"}
               label="Net Receivable" trend="Last extraction" isStr />
-            <HeroStat icon="bi-percent" bg="linear-gradient(135deg,#0d9488,#0f766e)"
+            <HeroStat icon="bi-percent" bg="linear-gradient(135deg, #A855F7, #7C3AED)"
               value={results ? `${calcData?.tds_rate??2}%` : "—"} label="TDS Rate" trend="Selected" isStr />
-            <HeroStat icon="bi-database-check" bg="linear-gradient(135deg,#0abab5,#089793)"
+            <HeroStat icon="bi-database-check" bg="linear-gradient(135deg, #C084FC, #9333EA)"
               value="Live" label="PostgreSQL" trend="Auto-saving" isStr />
           </div>
         </div>
