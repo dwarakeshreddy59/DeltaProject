@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import UploadTab from "./components/UploadTab";
 import RecordsTab from "./components/RecordsTab";
@@ -17,6 +17,20 @@ export default function App() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [uploadCount,    setUploadCount]    = useState(0);
 
+  // ── Theme State: 'bright' (Tiffany Blue & White & Gold) or 'dark' (Midnight Obsidian & Gold) ──
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("app_theme") || "bright";
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("app_theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "bright" : "dark"));
+  };
+
   const handleExtract = async (formData) => {
     await extract(formData);
     setRefreshTrigger((n) => n + 1);
@@ -26,7 +40,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Navbar />
+      <Navbar theme={theme} onToggleTheme={toggleTheme} />
 
       {/* ── Hero ── */}
       <div className="hero-banner">

@@ -6,7 +6,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 /* ── CSS Variables ── */
-:root {
+:root, [data-theme="bright"] {
   /* Tiffany Blue Palette */
   --tiffany-50:      #f0fbf9;
   --tiffany-100:     #e0f7f5;
@@ -49,6 +49,7 @@
   
   --bg-main:         #f2faf9;
   --bg-card:         #ffffff;
+  --bg-card-subtle:  #f8fdfc;
   --border-subtle:   #cbf3ef;
   --border-medium:   #81d8d0;
   --border-gold:     #d4af37;
@@ -68,6 +69,26 @@
   --shadow-glow-blue: 0 0 30px -5px rgba(10, 186, 181, 0.45);
   --shadow-glow-emerald: 0 0 30px -5px rgba(10, 186, 181, 0.45);
   --shadow-glow-gold: 0 0 25px -3px rgba(212, 175, 55, 0.45);
+}
+
+[data-theme="dark"] {
+  --bg-main:         #021817;
+  --bg-card:         #052322;
+  --bg-card-subtle:  #072d2b;
+  --border-subtle:   rgba(10, 186, 181, 0.25);
+  --border-medium:   #0abab5;
+  --border-gold:     #d4af37;
+  
+  --text-main:       #f0fbf9;
+  --text-muted:      #9de6df;
+  --text-light:      #81d8d0;
+  
+  --shadow-sm:       0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-md:       0 10px 25px rgba(0, 0, 0, 0.45);
+  --shadow-lg:       0 20px 35px rgba(0, 0, 0, 0.55);
+  --shadow-glow-blue: 0 0 30px -5px rgba(10, 186, 181, 0.6);
+  --shadow-glow-emerald: 0 0 30px -5px rgba(10, 186, 181, 0.6);
+  --shadow-glow-gold: 0 0 25px -3px rgba(212, 175, 55, 0.6);
 }
 
 /* ── Keyframe Animations ── */
@@ -216,6 +237,49 @@ body {
   display: flex;
   align-items: center;
   gap: 0.65rem;
+}
+
+.btn-theme-toggle {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid #d4af37;
+  color: #ffffff;
+  padding: 0.45rem 1.05rem;
+  border-radius: 25px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  user-select: none;
+}
+.btn-theme-toggle:hover {
+  background: rgba(212, 175, 55, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+}
+.btn-theme-toggle:active {
+  transform: translateY(0);
+}
+
+.theme-icon-sun {
+  color: #fbe296;
+  font-size: 0.95rem;
+  filter: drop-shadow(0 0 6px rgba(251, 226, 150, 0.6));
+}
+
+.theme-icon-moon {
+  color: #81d8d0;
+  font-size: 0.95rem;
+  filter: drop-shadow(0 0 6px rgba(10, 186, 181, 0.6));
+}
+
+.theme-toggle-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
 }
 
 .btn-nav {
@@ -1516,4 +1580,299 @@ body {
     margin-bottom: 1rem;
   }
 }
+
+/* ============================================================
+   DARK MODE THEME OVERRIDES ([data-theme="dark"])
+   ============================================================ */
+[data-theme="dark"] body {
+  background: 
+    radial-gradient(circle at 10% 8%, rgba(10, 186, 181, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 90% 85%, rgba(212, 175, 55, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 50% 40%, rgba(10, 186, 181, 0.05) 0%, transparent 60%),
+    linear-gradient(135deg, #011211 0%, #031c1b 35%, #052625 65%, #021716 100%);
+  background-attachment: fixed;
+  color: #f0fbf9;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track { background: #021817; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #075955; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #0abab5; }
+
+/* Dark mode navbar */
+[data-theme="dark"] .portal-navbar {
+  background: linear-gradient(135deg, rgba(1, 18, 17, 0.98) 0%, rgba(3, 28, 27, 0.98) 50%, rgba(5, 38, 37, 0.98) 100%);
+  border-bottom: 2.5px solid #d4af37;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* Dark mode hero banner */
+[data-theme="dark"] .hero-banner {
+  background: 
+    radial-gradient(circle at 80% 20%, rgba(10, 186, 181, 0.25) 0%, transparent 45%),
+    radial-gradient(circle at 15% 80%, rgba(212, 175, 55, 0.2) 0%, transparent 40%),
+    linear-gradient(135deg, #010e0d 0%, #021a19 45%, #042624 100%);
+  border-bottom: 2.5px solid #d4af37;
+}
+
+[data-theme="dark"] .hero-subtitle {
+  color: rgba(224, 247, 245, 0.85);
+}
+
+[data-theme="dark"] .stat-card {
+  background: rgba(4, 38, 36, 0.6);
+  border-color: rgba(212, 175, 55, 0.35);
+}
+[data-theme="dark"] .stat-card:hover {
+  background: rgba(7, 48, 46, 0.8);
+  border-color: #d4af37;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+/* Dark mode sticky tab bar */
+[data-theme="dark"] .tab-bar-wrap {
+  background: linear-gradient(135deg, rgba(1, 18, 17, 0.98) 0%, rgba(3, 28, 27, 0.98) 100%);
+  border-bottom: 2px solid rgba(212, 175, 55, 0.45);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+[data-theme="dark"] .tab-btn {
+  color: rgba(224, 247, 245, 0.7);
+}
+[data-theme="dark"] .tab-btn:hover {
+  color: #ffffff;
+  background: rgba(10, 186, 181, 0.2);
+}
+[data-theme="dark"] .tab-btn.active {
+  color: #ffffff;
+  border-bottom-color: #d4af37;
+  background: rgba(10, 186, 181, 0.25);
+}
+
+/* Dark mode wrappers */
+[data-theme="dark"] .upload-wrapper,
+[data-theme="dark"] .search-wrapper,
+[data-theme="dark"] .history-wrapper,
+[data-theme="dark"] .calc-wrapper,
+[data-theme="dark"] .result-card {
+  background: #052322;
+  border-color: rgba(10, 186, 181, 0.3);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55), 0 0 20px rgba(10, 186, 181, 0.08);
+}
+
+[data-theme="dark"] .upload-wrapper:hover,
+[data-theme="dark"] .search-wrapper:hover,
+[data-theme="dark"] .history-wrapper:hover,
+[data-theme="dark"] .calc-wrapper:hover,
+[data-theme="dark"] .result-card:hover {
+  border-color: #0abab5;
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.65), 0 0 25px rgba(10, 186, 181, 0.2);
+}
+
+/* Dark mode drop zones */
+[data-theme="dark"] .drop-zone {
+  background: #031a19;
+  border-color: rgba(10, 186, 181, 0.45);
+}
+[data-theme="dark"] .drop-zone:hover {
+  background: #062b29;
+  border-color: #0abab5;
+  box-shadow: 0 0 30px rgba(10, 186, 181, 0.35);
+}
+[data-theme="dark"] .drop-zone.has-file {
+  background: #052a28;
+  border-color: #0abab5;
+  box-shadow: 0 0 25px rgba(10, 186, 181, 0.3);
+}
+[data-theme="dark"] .drop-label {
+  color: #f0fbf9;
+}
+[data-theme="dark"] .drop-hint {
+  color: #81d8d0;
+}
+[data-theme="dark"] .drop-filename {
+  background: #043835;
+  color: #9de6df;
+  border: 1px solid #0abab5;
+}
+
+/* Dark mode inputs */
+[data-theme="dark"] .search-input {
+  background: #031a19 !important;
+  color: #ffffff !important;
+  border-color: rgba(10, 186, 181, 0.45) !important;
+}
+[data-theme="dark"] .search-input::placeholder {
+  color: #678d8a !important;
+}
+[data-theme="dark"] .search-input:focus {
+  background: #042422 !important;
+  border-color: #0abab5 !important;
+  box-shadow: 0 0 0 3px rgba(10, 186, 181, 0.35) !important;
+}
+
+/* Dark mode tables */
+[data-theme="dark"] .history-table-wrap {
+  background: #052322;
+  border-color: rgba(10, 186, 181, 0.25);
+}
+[data-theme="dark"] .history-table {
+  background: #052322;
+}
+[data-theme="dark"] .history-table thead {
+  background: #021716;
+  border-bottom-color: #0abab5;
+}
+[data-theme="dark"] .history-table th {
+  background: #021716;
+  color: #f0fbf9;
+  border-bottom-color: #0abab5;
+}
+[data-theme="dark"] .history-table tbody tr {
+  border-bottom-color: rgba(10, 186, 181, 0.12);
+}
+[data-theme="dark"] .history-table tbody tr:hover {
+  background: #083230;
+}
+[data-theme="dark"] .history-table td {
+  color: #f0fbf9;
+}
+[data-theme="dark"] .history-table td.money {
+  color: #fbe296;
+}
+
+/* Dark mode info cards */
+[data-theme="dark"] .info-table tr {
+  border-bottom-color: rgba(10, 186, 181, 0.12);
+}
+[data-theme="dark"] .result-th {
+  color: #9de6df;
+}
+[data-theme="dark"] .result-td {
+  color: #ffffff;
+}
+[data-theme="dark"] .val-money {
+  color: #fbe296;
+}
+[data-theme="dark"] .val-highlight {
+  color: #0abab5;
+}
+
+/* Dark mode badges */
+[data-theme="dark"] .id-badge {
+  background: #043836;
+  border-color: #0abab5;
+  color: #9de6df;
+}
+[data-theme="dark"] .badge-val {
+  background: #043836;
+  border-color: #0abab5;
+  color: #9de6df;
+}
+
+/* Dark mode calculation panel */
+[data-theme="dark"] .formula-banner {
+  background: #031a19;
+  border-color: rgba(10, 186, 181, 0.25);
+  color: #9de6df;
+}
+[data-theme="dark"] .calc-tile {
+  background: #031a19;
+  border-color: rgba(10, 186, 181, 0.22);
+}
+[data-theme="dark"] .calc-tile:hover {
+  border-color: #0abab5;
+  box-shadow: 0 0 20px rgba(10, 186, 181, 0.2);
+}
+[data-theme="dark"] .tile-label {
+  color: #81d8d0;
+}
+[data-theme="dark"] .tile-value.v-blue {
+  color: #9de6df;
+}
+[data-theme="dark"] .tile-value.v-teal {
+  color: #0abab5;
+}
+[data-theme="dark"] .tile-value.v-green {
+  color: #fbe296;
+}
+
+[data-theme="dark"] .calc-breakdown {
+  background: #031a19;
+  border-color: rgba(10, 186, 181, 0.22);
+}
+[data-theme="dark"] .br-label {
+  color: #81d8d0;
+}
+[data-theme="dark"] .br-val {
+  color: #ffffff;
+}
+
+/* Dark mode toggle bars & controls */
+[data-theme="dark"] .view-toggle-bar {
+  background: #052322;
+  border-color: rgba(10, 186, 181, 0.25);
+}
+[data-theme="dark"] .view-toggle-label {
+  color: #f0fbf9;
+}
+[data-theme="dark"] .toggle-group {
+  background: #031a19;
+}
+[data-theme="dark"] .toggle-btn {
+  color: #81d8d0;
+}
+[data-theme="dark"] .toggle-btn:hover {
+  color: #ffffff;
+}
+[data-theme="dark"] .toggle-btn.active {
+  background: #073b38;
+  color: #0abab5;
+  border-color: #d4af37;
+}
+
+[data-theme="dark"] .view-btn {
+  background: #031a19;
+  border-color: rgba(10, 186, 181, 0.3);
+  color: #9de6df;
+}
+[data-theme="dark"] .view-btn:hover {
+  background: #052625;
+  color: #ffffff;
+  border-color: #0abab5;
+}
+
+[data-theme="dark"] .page-btn {
+  background: #031a19;
+  border-color: rgba(10, 186, 181, 0.25);
+  color: #9de6df;
+}
+[data-theme="dark"] .page-btn:hover:not(:disabled) {
+  background: #052625;
+  color: #ffffff;
+  border-color: #0abab5;
+}
+
+[data-theme="dark"] .crosslink-bar {
+  background: #052322;
+  border-color: rgba(10, 186, 181, 0.25);
+}
+[data-theme="dark"] .chain-label {
+  color: #81d8d0;
+}
+[data-theme="dark"] .chain-value {
+  background: #031a19;
+  border-color: rgba(10, 186, 181, 0.3);
+  color: #f0fbf9;
+}
+
+[data-theme="dark"] .pagination-row {
+  border-top-color: rgba(10, 186, 181, 0.15);
+  color: #81d8d0;
+}
+[data-theme="dark"] .empty-state {
+  color: #81d8d0;
+}
+[data-theme="dark"] .empty-icon {
+  color: rgba(10, 186, 181, 0.4);
+}
+
 

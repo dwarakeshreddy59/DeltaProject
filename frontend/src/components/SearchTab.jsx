@@ -125,10 +125,10 @@ export default function SearchTab() {
       </div>
 
       {/* ── Search Controls Panel ── */}
-      <div style={{ padding: "1.75rem", background: "#ffffff", borderBottom: "1px solid #cbf3ef" }}>
+      <div style={{ padding: "1.75rem", background: "var(--bg-card)", borderBottom: "1px solid var(--border-subtle)" }}>
         {/* Quick field selector pills */}
         <div style={{ display: "flex", gap: ".6rem", flexWrap: "wrap", marginBottom: "1.25rem", alignItems: "center" }}>
-          <span style={{ fontSize: ".75rem", fontWeight: 700, color: "#075955", textTransform: "uppercase", letterSpacing: ".05em", marginRight: ".3rem" }}>
+          <span style={{ fontSize: ".75rem", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: ".05em", marginRight: ".3rem" }}>
             Search Target:
           </span>
           {FIELDS.map((f) => {
@@ -138,9 +138,9 @@ export default function SearchTab() {
                 key={f.value}
                 onClick={() => setField(f.value)}
                 style={{
-                  background: isSelected ? "linear-gradient(135deg,#075955,#0abab5)" : "#ffffff",
-                  color: isSelected ? "#ffffff" : "#075955",
-                  border: `1.5px solid ${isSelected ? "#d4af37" : "#cbf3ef"}`,
+                  background: isSelected ? "linear-gradient(135deg,#075955,#0abab5)" : "var(--bg-card-subtle)",
+                  color: isSelected ? "#ffffff" : "var(--text-main)",
+                  border: `1.5px solid ${isSelected ? "#d4af37" : "var(--border-subtle)"}`,
                   borderRadius: 10,
                   padding: ".45rem .95rem",
                   fontSize: ".82rem",
@@ -164,7 +164,7 @@ export default function SearchTab() {
         {/* Input Row */}
         <div style={{ display: "flex", gap: ".85rem", alignItems: "stretch", flexWrap: "wrap" }}>
           <div style={{ flex: 1, minWidth: 260, position: "relative" }}>
-            <i className="bi bi-search" style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#64748b", fontSize: "1rem" }} />
+            <i className="bi bi-search" style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", fontSize: "1rem" }} />
             <input
               className="search-input"
               style={{
@@ -172,9 +172,9 @@ export default function SearchTab() {
                 padding: ".75rem 2.8rem .75rem 2.75rem",
                 fontSize: ".95rem",
                 borderRadius: 12,
-                border: "2px solid #cbd5e1",
-                background: "#ffffff",
-                color: "#0f172a",
+                border: "2px solid var(--border-medium)",
+                background: "var(--bg-card)",
+                color: "var(--text-main)",
                 fontWeight: 700,
                 fontFamily: "inherit",
                 transition: "all .2s",
@@ -347,13 +347,13 @@ export default function SearchTab() {
             {/* Results Banner */}
             <div
               style={{
-                background: "linear-gradient(135deg,#e8faf8,#fef9e7)",
-                border: "1.5px solid #d4af37",
+                background: "var(--bg-card-subtle)",
+                border: "1.5px solid var(--border-gold)",
                 borderRadius: 10,
                 padding: ".75rem 1.25rem",
                 marginBottom: "1rem",
                 fontSize: ".85rem",
-                color: "#043e3b",
+                color: "var(--text-main)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
@@ -367,7 +367,7 @@ export default function SearchTab() {
                   Found <strong>{records.length}</strong> matching record(s) for <strong>"{query}"</strong> in <strong>{FIELDS.find((f) => f.value === field)?.label}</strong>
                 </span>
               </div>
-              <span style={{ fontSize: ".75rem", fontWeight: 800, color: "#043e3b", background: "#fbe296", border: "1px solid #d4af37", padding: ".2rem .6rem", borderRadius: 6 }}>
+              <span style={{ fontSize: ".75rem", fontWeight: 800, color: "#022624", background: "linear-gradient(135deg,#d4af37,#b8860b)", border: "1px solid #d4af37", padding: ".2rem .6rem", borderRadius: 6 }}>
                 Page {page} of {totalPages}
               </span>
             </div>

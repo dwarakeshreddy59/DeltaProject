@@ -148,10 +148,10 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
               onChange={(e) => { setFilter(e.target.value); setPage(1); }}
               style={{
                 minWidth: 200,
-                background: "#ffffff",
-                color: "#0f172a",
+                background: "var(--bg-card)",
+                color: "var(--text-main)",
                 fontWeight: 700,
-                border: "1.5px solid #cbd5e1",
+                border: "1.5px solid var(--border-medium)",
               }}
             />
             {filter && (
@@ -191,8 +191,8 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
       </div>
 
       {/* ── 4 Option Sub-Tabs ── */}
-      <div style={{ background: "#f4faf9", borderBottom: "1px solid #cbf3ef", padding: ".75rem 1.25rem", display: "flex", gap: ".65rem", flexWrap: "wrap", alignItems: "center" }}>
-        <span style={{ fontSize: ".74rem", fontWeight: 700, color: "#075955", textTransform: "uppercase", letterSpacing: ".05em", marginRight: ".25rem" }}>
+      <div style={{ background: "var(--bg-card-subtle)", borderBottom: "1px solid var(--border-subtle)", padding: ".75rem 1.25rem", display: "flex", gap: ".65rem", flexWrap: "wrap", alignItems: "center" }}>
+        <span style={{ fontSize: ".74rem", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: ".05em", marginRight: ".25rem" }}>
           Select View:
         </span>
         {VIEW_OPTIONS.map((opt) => {
@@ -203,9 +203,9 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
               key={opt.id}
               onClick={() => { setActiveView(opt.id); setPage(1); setFilter(""); }}
               style={{
-                background: isActive ? "linear-gradient(135deg,#075955,#0abab5)" : "#ffffff",
-                color: isActive ? "#ffffff" : "#075955",
-                border: `1.5px solid ${isActive ? "#d4af37" : "#cbf3ef"}`,
+                background: isActive ? "linear-gradient(135deg,#075955,#0abab5)" : "var(--bg-card)",
+                color: isActive ? "#ffffff" : "var(--text-main)",
+                border: `1.5px solid ${isActive ? "#d4af37" : "var(--border-subtle)"}`,
                 borderRadius: 10,
                 padding: ".45rem .95rem",
                 fontSize: ".82rem",
@@ -223,9 +223,9 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
               {opt.label}
               <span
                 style={{
-                  background: isActive ? "#d4af37" : "#e8faf8",
-                  color: isActive ? "#022624" : "#075955",
-                  border: isActive ? "1px solid #fef3c7" : "1px solid #cbf3ef",
+                  background: isActive ? "#d4af37" : "var(--bg-card-subtle)",
+                  color: isActive ? "#022624" : "var(--text-muted)",
+                  border: isActive ? "1px solid #fef3c7" : "1px solid var(--border-subtle)",
                   borderRadius: 12,
                   padding: ".05rem .45rem",
                   fontSize: ".7rem",
@@ -240,9 +240,9 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
       </div>
 
       {/* ── Sub-Tab Info Bar ── */}
-      <div className="db-verify-bar" style={{ background: "#ffffff", borderBottom: "1px solid #f1f5f9" }}>
-        <i className="bi bi-info-circle-fill" style={{ color: "#3b82f6" }} />
-        <span>
+      <div className="db-verify-bar" style={{ background: "var(--bg-card)", borderBottom: "1px solid var(--border-subtle)" }}>
+        <i className="bi bi-info-circle-fill" style={{ color: "#0abab5" }} />
+        <span style={{ color: "var(--text-muted)" }}>
           Viewing <strong>{VIEW_OPTIONS.find((v) => v.id === activeView)?.desc}</strong> ({filtered.length} of {currentList.length} records). Delete anytime using the red Action buttons.
         </span>
       </div>

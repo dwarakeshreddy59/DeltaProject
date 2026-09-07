@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Navbar() {
+export default function Navbar({ theme = "bright", onToggleTheme }) {
   return (
     <nav className="portal-navbar">
       <a href="/" className="brand">
@@ -14,6 +14,29 @@ export default function Navbar() {
       </a>
 
       <div className="nav-actions">
+        {/* Theme Mode Toggle (Bright / Dark) */}
+        <button
+          type="button"
+          className="btn-theme-toggle"
+          onClick={onToggleTheme}
+          title={theme === "dark" ? "Switch to Bright Mode (Tiffany & White)" : "Switch to Dark Mode (Midnight & Gold)"}
+          aria-label="Toggle Bright/Dark Mode"
+        >
+          {theme === "dark" ? (
+            <>
+              <i className="bi bi-sun-fill theme-icon-sun" />
+              <span className="theme-toggle-label">Bright Mode</span>
+            </>
+          ) : (
+            <>
+              <i className="bi bi-moon-stars-fill theme-icon-moon" />
+              <span className="theme-toggle-label">Dark Mode</span>
+            </>
+          )}
+        </button>
+
+        <div className="nav-divider" />
+
         <a className="btn-nav" href="http://localhost:8000/docs" target="_blank" rel="noreferrer">
           <i className="bi bi-code-slash" />API Docs
         </a>
