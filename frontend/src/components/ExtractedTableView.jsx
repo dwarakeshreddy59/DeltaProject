@@ -85,17 +85,17 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
                   <td className="money">{fmt(invoice.assessable_value)}</td>
                   <td className="money">{fmt(invoice.total_tax)}</td>
                   <td className="money">{fmt(invoice.total_invoice_value)}</td>
-                  <td><span className="id-badge" style={{ background: "rgba(192, 132, 252, 0.15)", color: "#C084FC", borderColor: "rgba(192, 132, 252, 0.3)" }}>{po.po_number || "—"}</span></td>
+                  <td><span className="id-badge badge-po">{po.po_number || "—"}</span></td>
                   <td>{po.po_date || "—"}</td>
                   <td>{po.delivery_date || "—"}</td>
                   <td className="money">{fmt(po.total_amount)}</td>
-                  <td><span className="id-badge" style={{ background: "rgba(34, 197, 94, 0.15)", color: "#22C55E", borderColor: "rgba(34, 197, 94, 0.3)" }}>{remittance.remittance_number || "—"}</span></td>
+                  <td><span className="id-badge badge-remit">{remittance.remittance_number || "—"}</span></td>
                   <td>{remittance.remittance_date || "—"}</td>
                   <td className="money">{fmt(remittance.gross_amount)}</td>
                   <td className="money">{fmt(remittance.total_gross_amount)}</td>
                   <td className="money">{fmt(calcData.gst_amount)}</td>
                   <td className="tds-cell">{fmt(calcData.tds_amount)}</td>
-                  <td className="receivable-cell" style={{ fontSize: ".9rem", fontWeight: 800, color: "#22C55E" }}>{fmt(calcData.receivable)}</td>
+                  <td className="receivable-cell" style={{ fontSize: ".9rem", fontWeight: 800 }}>{fmt(calcData.receivable)}</td>
                 </tr>
               </tbody>
             </table>
@@ -136,10 +136,10 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
                     {f.label}
                   </td>
                   <td style={{ padding: ".55rem 1rem" }}>
-                    {f.type === "money" && <span className="val-money" style={{ fontWeight: 700, color: "#C084FC", fontFamily: "Courier New, monospace" }}>{f.value}</span>}
-                    {f.type === "tds" && <span style={{ fontWeight: 700, color: "#ef4444", fontFamily: "Courier New, monospace" }}>{f.value}</span>}
-                    {f.type === "receivable" && <span style={{ fontWeight: 800, color: "#22C55E", fontFamily: "Courier New, monospace", fontSize: ".95rem" }}>{f.value}</span>}
-                    {f.type === "badge" && <span className="id-badge" style={{ color: f.badgeColor }}>{f.value}</span>}
+                    {f.type === "money" && <span className="val-money" style={{ fontWeight: 700, fontFamily: "Courier New, monospace" }}>{f.value}</span>}
+                    {f.type === "tds" && <span style={{ fontWeight: 700, color: "var(--danger-red)", fontFamily: "Courier New, monospace" }}>{f.value}</span>}
+                    {f.type === "receivable" && <span style={{ fontWeight: 800, color: "var(--success-green)", fontFamily: "Courier New, monospace", fontSize: ".95rem" }}>{f.value}</span>}
+                    {f.type === "badge" && <span className={`id-badge ${f.section === "Purchase Order" ? "badge-po" : f.section === "Remittance" ? "badge-remit" : ""}`}>{f.value}</span>}
                     {f.type === "text" && <span style={{ fontWeight: 600, color: "var(--text-main)" }}>{f.value}</span>}
                   </td>
                 </tr>

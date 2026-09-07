@@ -103,19 +103,19 @@ export default function CalculationPanel({ calcData, onTdsChange }) {
         <div className="calc-breakdown mt-3">
           <div className="breakdown-row">
             <span className="br-label">Assessable Value</span>
-            <span className="br-val" style={{ color: "#C084FC" }}>+ {fmt(assessable_value)}</span>
+            <span className="br-val br-assessable">+ {fmt(assessable_value)}</span>
           </div>
           <div className="breakdown-row">
             <span className="br-label">GST ({gst_rate}%)</span>
-            <span className="br-val" style={{ color: "#A855F7" }}>+ {fmt(gst_amount)}</span>
+            <span className="br-val br-gst">+ {fmt(gst_amount)}</span>
           </div>
           <div className="breakdown-row">
             <span className="br-label">TDS ({tds_rate}%)</span>
-            <span className="br-val" style={{ color: "#ef4444" }}>− {fmt(tds_amount)}</span>
+            <span className="br-val tds-cell">− {fmt(tds_amount)}</span>
           </div>
           <div className="breakdown-row" style={{ paddingTop: ".5rem", borderTop: "2px solid rgba(168, 85, 247, 0.3)", marginTop: ".25rem" }}>
             <span className="br-label" style={{ fontWeight: 700, color: "var(--text-main)" }}>Net Receivable</span>
-            <span className="br-val" style={{ color: "#22C55E", fontSize: "1.05rem", fontWeight: 800 }}>{fmt(receivable)}</span>
+            <span className="br-val receivable-cell" style={{ fontSize: "1.05rem", fontWeight: 800 }}>{fmt(receivable)}</span>
           </div>
         </div>
       </div>

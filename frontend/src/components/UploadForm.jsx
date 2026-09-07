@@ -122,8 +122,8 @@ export default function UploadForm({ onSubmit, loading }) {
               borderTop: "1px solid rgba(168, 85, 247, 0.15)",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: ".6rem", color: "#A1A1AA", fontSize: ".82rem" }}>
-              <i className="bi bi-shield-check" style={{ color: "#A855F7", fontSize: "1.1rem" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: ".6rem", color: "var(--text-muted)", fontSize: ".82rem" }}>
+              <i className="bi bi-shield-check" style={{ color: "var(--purple-neon)", fontSize: "1.1rem" }} />
               <span>PDFs will be parsed &amp; auto-saved to PostgreSQL</span>
             </div>
 
@@ -137,7 +137,7 @@ export default function UploadForm({ onSubmit, loading }) {
                     border: "1.5px solid rgba(168, 85, 247, 0.3)",
                     borderRadius: 10,
                     padding: ".55rem 1rem",
-                    color: "#C084FC",
+                    color: "var(--purple-violet)",
                     cursor: "pointer",
                     fontSize: ".83rem",
                     fontWeight: 600,

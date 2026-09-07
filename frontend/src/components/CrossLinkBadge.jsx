@@ -12,24 +12,24 @@ export default function CrossLinkBadge({ po, invoice, remittance }) {
         <i className="bi bi-diagram-3 me-1" />Document Chain
       </div>
       <div className="crosslink-chain">
-        <ChainItem label="Purchase Order" value={poNum} color="#C084FC" />
+        <ChainItem label="Purchase Order" value={poNum} badgeClass="badge-po" />
         <span className="chain-arrow"><i className="bi bi-arrow-right" /></span>
-        <ChainItem label="Invoice" value={invNum} color="#A855F7" />
+        <ChainItem label="Invoice" value={invNum} badgeClass="badge-inv" />
         <span className="chain-arrow"><i className="bi bi-arrow-right" /></span>
-        <ChainItem label="Remittance" value={remNum} color="#22C55E" />
+        <ChainItem label="Remittance" value={remNum} badgeClass="badge-remit" />
       </div>
     </div>
   );
 }
 
-function ChainItem({ label, value, color }) {
+function ChainItem({ label, value, badgeClass = "" }) {
   const missing = value === "Not found";
   return (
     <div className="chain-item">
       <div className="chain-label">{label}</div>
-      <div className="chain-value" style={{
+      <div className={`chain-value ${badgeClass}`} style={{
         borderColor: missing ? "rgba(239, 68, 68, 0.4)" : undefined,
-        color: missing ? "#ef4444" : color,
+        color: missing ? "#ef4444" : undefined,
         background: missing ? "rgba(239, 68, 68, 0.12)" : undefined,
       }}>
         {missing

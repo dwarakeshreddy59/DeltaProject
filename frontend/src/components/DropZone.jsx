@@ -69,10 +69,10 @@ export default function DropZone({ slot, label, hint, file, onFile, hasError }) 
               type="button"
               onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
               style={{
-                background: "rgba(124, 58, 237, 0.2)", border: `1.5px solid ${cfg.color}`, color: "#ffffff",
+                background: "linear-gradient(135deg, #7C3AED, #9333EA)", border: "1.5px solid #C084FC", color: "#ffffff",
                 borderRadius: 8, padding: ".3rem .75rem", fontSize: ".73rem",
                 fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: ".3rem",
-                boxShadow: `0 0 10px ${cfg.color}40`
+                boxShadow: "0 2px 10px rgba(124, 58, 237, 0.3)"
               }}
             >
               <i className="bi bi-arrow-repeat" /> Change
@@ -81,7 +81,7 @@ export default function DropZone({ slot, label, hint, file, onFile, hasError }) 
               type="button"
               onClick={handleClear}
               style={{
-                background: "rgba(239, 68, 68, 0.15)", border: "1.5px solid rgba(239, 68, 68, 0.4)", color: "#f87171",
+                background: "rgba(239, 68, 68, 0.15)", border: "1.5px solid rgba(239, 68, 68, 0.4)", color: "var(--danger-red)",
                 borderRadius: 8, padding: ".3rem .75rem", fontSize: ".73rem",
                 fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: ".3rem"
               }}

@@ -15,7 +15,7 @@ const Row = ({ label, value, type = "text" }) => {
     displayVal = value;
     tdClass += " val-highlight";
   } else if (type === "badge") {
-    displayVal = <span className="badge-val" style={{ background: "rgba(34, 197, 94, 0.15)", color: "#22C55E", borderColor: "rgba(34, 197, 94, 0.3)" }}>{value}</span>;
+    displayVal = <span className="badge-val badge-remit">{value}</span>;
   } else {
     displayVal = value;
   }
@@ -69,11 +69,11 @@ export default function RemittanceCard({ remittance = {} }) {
                 </thead>
                 <tbody>
                   {items.map((it, idx) => (
-                    <tr key={idx} style={{ borderBottom: "1px solid rgba(168, 85, 247, 0.12)" }}>
-                      <td style={{ padding: "4px 8px", color: "#A1A1AA" }}>{it.doc_number || "—"}</td>
-                      <td style={{ padding: "4px 8px", fontWeight: 600, color: "#A855F7" }}>{it.invoice_number || "—"}</td>
-                      <td style={{ padding: "4px 8px", color: "#FFFFFF" }}>{it.description || "—"}</td>
-                      <td style={{ padding: "4px 8px", textAlign: "right", fontWeight: 700, color: "#22C55E" }}>{inr(it.gross_amount)}</td>
+                    <tr key={idx} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                      <td style={{ padding: "4px 8px", color: "var(--text-muted)" }}>{it.doc_number || "—"}</td>
+                      <td style={{ padding: "4px 8px", fontWeight: 600, color: "var(--purple-primary)" }}>{it.invoice_number || "—"}</td>
+                      <td style={{ padding: "4px 8px", color: "var(--text-main)" }}>{it.description || "—"}</td>
+                      <td style={{ padding: "4px 8px", textAlign: "right", fontWeight: 700, color: "var(--success-green)" }}>{inr(it.gross_amount)}</td>
                     </tr>
                   ))}
                 </tbody>

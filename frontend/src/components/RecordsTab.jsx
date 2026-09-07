@@ -316,7 +316,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                       </td>
                       <td><span className="id-badge">{r.invoice_number || "—"}</span></td>
                       <td>{r.invoice_date || "—"}</td>
-                      <td><span className="id-badge" style={{ background: "rgba(192, 132, 252, 0.15)", color: "#C084FC", borderColor: "rgba(192, 132, 252, 0.3)" }}>{r.po_number || "—"}</span></td>
+                      <td><span className="id-badge badge-po">{r.po_number || "—"}</span></td>
                       <td style={{ minWidth: 180, maxWidth: 320, wordBreak: "break-word", whiteSpace: "normal", lineHeight: 1.4 }}>{r.description || "—"}</td>
                       <td>{r.invoice_period || "—"}</td>
                       <td className="money">{fmt(r.assessable_value)}</td>
@@ -326,7 +326,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                       <td style={{ textAlign: "center", fontWeight: 700 }}>{r.tds_rate}%</td>
                       <td className="tds-cell">{fmt(r.tds_amount)}</td>
                       <td className="receivable-cell">{fmt(r.receivable)}</td>
-                      <td style={{ color: "#94a3b8", fontSize: ".72rem", whiteSpace: "nowrap" }}>
+                      <td style={{ color: "var(--text-muted)", fontSize: ".72rem", whiteSpace: "nowrap" }}>
                         {r.created_at ? new Date(r.created_at).toLocaleString("en-IN") : "—"}
                       </td>
                     </tr>
@@ -366,12 +366,12 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                           <i className="bi bi-trash3" /> Delete
                         </button>
                       </td>
-                      <td><span className="id-badge" style={{ background: "rgba(192, 132, 252, 0.15)", color: "#C084FC", borderColor: "rgba(192, 132, 252, 0.3)" }}>{r.po_number || "—"}</span></td>
+                      <td><span className="id-badge badge-po">{r.po_number || "—"}</span></td>
                       <td>{r.po_date || "—"}</td>
                       <td style={{ minWidth: 200, maxWidth: 350, wordBreak: "break-word", whiteSpace: "normal", lineHeight: 1.4 }}>{r.description || "—"}</td>
                       <td>{r.delivery_date || "—"}</td>
                       <td className="money" style={{ fontWeight: 800, fontSize: ".9rem" }}>{fmt(r.total_amount)}</td>
-                      <td style={{ color: "#94a3b8", fontSize: ".72rem", whiteSpace: "nowrap" }}>
+                      <td style={{ color: "var(--text-muted)", fontSize: ".72rem", whiteSpace: "nowrap" }}>
                         {r.created_at ? new Date(r.created_at).toLocaleString("en-IN") : "—"}
                       </td>
                     </tr>
@@ -412,13 +412,13 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                           <i className="bi bi-trash3" /> Delete
                         </button>
                       </td>
-                      <td><span className="id-badge" style={{ background: "rgba(34, 197, 94, 0.15)", color: "#22C55E", borderColor: "rgba(34, 197, 94, 0.3)" }}>{r.remittance_number || "—"}</span></td>
+                      <td><span className="id-badge badge-remit">{r.remittance_number || "—"}</span></td>
                       <td>{r.remittance_date || "—"}</td>
                       <td><span className="id-badge">{r.invoice_number || "—"}</span></td>
                       <td style={{ minWidth: 200, maxWidth: 350, wordBreak: "break-word", whiteSpace: "normal", lineHeight: 1.4 }}>{r.description || "—"}</td>
                       <td className="money" style={{ fontWeight: 800 }}>{fmt(r.gross_amount)}</td>
                       <td className="money">{fmt(r.total_gross_amount)}</td>
-                      <td style={{ color: "#94a3b8", fontSize: ".72rem", whiteSpace: "nowrap" }}>
+                      <td style={{ color: "var(--text-muted)", fontSize: ".72rem", whiteSpace: "nowrap" }}>
                         {r.created_at ? new Date(r.created_at).toLocaleString("en-IN") : "—"}
                       </td>
                     </tr>
@@ -480,16 +480,16 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                       <td className="money">{fmt(r.total_invoice_value)}</td>
                       <td style={{ textAlign: "center", fontWeight: 700 }}>{r.tds_rate}%</td>
                       <td className="tds-cell">{fmt(r.tds_amount)}</td>
-                      <td className="receivable-cell" style={{ color: "#22C55E", fontWeight: 800 }}>{fmt(r.receivable)}</td>
-                      <td><span className="id-badge" style={{ background: "rgba(192, 132, 252, 0.15)", color: "#C084FC", borderColor: "rgba(192, 132, 252, 0.3)" }}>{r.po_number || "—"}</span></td>
+                      <td className="receivable-cell" style={{ fontWeight: 800 }}>{fmt(r.receivable)}</td>
+                      <td><span className="id-badge badge-po">{r.po_number || "—"}</span></td>
                       <td>{r.po_date || "—"}</td>
                       <td>{r.delivery_date || "—"}</td>
                       <td className="money">{fmt(r.total_amount)}</td>
-                      <td><span className="id-badge" style={{ background: "rgba(34, 197, 94, 0.15)", color: "#22C55E", borderColor: "rgba(34, 197, 94, 0.3)" }}>{r.remittance_number || "—"}</span></td>
+                      <td><span className="id-badge badge-remit">{r.remittance_number || "—"}</span></td>
                       <td>{r.remittance_date || "—"}</td>
                       <td className="money">{fmt(r.gross_amount)}</td>
                       <td className="money">{fmt(r.total_gross_amount)}</td>
-                      <td style={{ color: "#94a3b8", fontSize: ".72rem", whiteSpace: "nowrap" }}>
+                      <td style={{ color: "var(--text-muted)", fontSize: ".72rem", whiteSpace: "nowrap" }}>
                         {r.created_at ? new Date(r.created_at).toLocaleString("en-IN") : "—"}
                       </td>
                     </tr>

@@ -297,7 +297,7 @@ export default function SearchTab() {
             <h5 style={{ fontWeight: 800, fontSize: "1.15rem", color: "var(--text-main)", marginBottom: ".4rem" }}>
               Instant Multi-Field Search
             </h5>
-            <p style={{ fontSize: ".88rem", maxWidth: 520, margin: "0 auto 1.5rem", lineHeight: 1.5, color: "#A1A1AA" }}>
+            <p style={{ fontSize: ".88rem", maxWidth: 520, margin: "0 auto 1.5rem", lineHeight: 1.5, color: "var(--text-muted)" }}>
               Search across <strong>Invoices</strong>, <strong>Purchase Orders</strong>, <strong>Remittances</strong>, <strong>Descriptions</strong>, or <strong>Dates</strong> with partial match and zero-normalization.
             </p>
           </div>
@@ -315,11 +315,11 @@ export default function SearchTab() {
         {/* Empty Search Result */}
         {searched && records.length === 0 && !loading && (
           <div className="empty-state animate-fadein">
-            <i className="bi bi-binoculars empty-icon" style={{ color: "#A855F7" }} />
+            <i className="bi bi-binoculars empty-icon" style={{ color: "var(--purple-neon)" }} />
             <h5 style={{ fontWeight: 700, color: "var(--text-main)", marginTop: ".5rem" }}>
               No matches found for "<strong>{query}</strong>"
             </h5>
-            <p style={{ fontSize: ".83rem", color: "#A1A1AA", marginTop: ".25rem" }}>
+            <p style={{ fontSize: ".83rem", color: "var(--text-muted)", marginTop: ".25rem" }}>
               Target: {FIELDS.find((f) => f.value === field)?.label}. Try searching with a broader keyword or switch to "All Fields".
             </p>
             <button
@@ -327,7 +327,7 @@ export default function SearchTab() {
               style={{
                 marginTop: "1rem",
                 background: "rgba(124, 58, 237, 0.15)",
-                color: "#C084FC",
+                color: "var(--purple-primary)",
                 border: "1.5px solid #7C3AED",
                 borderRadius: 8,
                 padding: ".45rem 1rem",
@@ -411,7 +411,7 @@ export default function SearchTab() {
                       <td>
                         <span
                           className="id-badge"
-                          style={{ cursor: "pointer", color: "#A855F7" }}
+                          style={{ cursor: "pointer" }}
                           title="Click to copy"
                           onClick={() => handleCopy(r.invoice_number, "Invoice No")}
                         >
@@ -428,11 +428,11 @@ export default function SearchTab() {
                       <td className="money" style={{ fontWeight: 800 }}>{fmt(r.total_invoice_value)}</td>
                       <td style={{ textAlign: "center", fontWeight: 700 }}>{r.tds_rate}%</td>
                       <td className="tds-cell">{fmt(r.tds_amount)}</td>
-                      <td className="receivable-cell" style={{ fontWeight: 800, color: "#22C55E" }}>{fmt(r.receivable)}</td>
+                      <td className="receivable-cell" style={{ fontWeight: 800 }}>{fmt(r.receivable)}</td>
                       <td>
                         <span
-                          className="id-badge"
-                          style={{ background: "rgba(192, 132, 252, 0.15)", color: "#C084FC", borderColor: "rgba(192, 132, 252, 0.3)", cursor: "pointer" }}
+                          className="id-badge badge-po"
+                          style={{ cursor: "pointer" }}
                           title="Click to copy"
                           onClick={() => handleCopy(r.po_number, "PO No")}
                         >
@@ -444,8 +444,8 @@ export default function SearchTab() {
                       <td className="money">{fmt(r.total_amount)}</td>
                       <td>
                         <span
-                          className="id-badge"
-                          style={{ background: "rgba(34, 197, 94, 0.15)", color: "#22C55E", borderColor: "rgba(34, 197, 94, 0.3)", cursor: "pointer" }}
+                          className="id-badge badge-remit"
+                          style={{ cursor: "pointer" }}
                           title="Click to copy"
                           onClick={() => handleCopy(r.remittance_number, "Remittance No")}
                         >
