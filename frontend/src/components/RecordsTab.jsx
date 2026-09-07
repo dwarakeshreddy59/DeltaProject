@@ -316,7 +316,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                       <td><span className="id-badge">{r.invoice_number || "—"}</span></td>
                       <td>{r.invoice_date || "—"}</td>
                       <td><span className="id-badge" style={{ background: "#fffbeb", color: "#92400e", borderColor: "#fde68a" }}>{r.po_number || "—"}</span></td>
-                      <td style={{ maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.description || "—"}</td>
+                      <td style={{ minWidth: 180, maxWidth: 320, wordBreak: "break-word", whiteSpace: "normal", lineHeight: 1.4 }}>{r.description || "—"}</td>
                       <td>{r.invoice_period || "—"}</td>
                       <td className="money">{fmt(r.assessable_value)}</td>
                       <td className="money">{fmt(r.total_tax)}</td>
@@ -367,7 +367,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                       </td>
                       <td><span className="id-badge" style={{ background: "#fffbeb", color: "#92400e", borderColor: "#fde68a" }}>{r.po_number || "—"}</span></td>
                       <td>{r.po_date || "—"}</td>
-                      <td style={{ maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.description || "—"}</td>
+                      <td style={{ minWidth: 200, maxWidth: 350, wordBreak: "break-word", whiteSpace: "normal", lineHeight: 1.4 }}>{r.description || "—"}</td>
                       <td>{r.delivery_date || "—"}</td>
                       <td className="money" style={{ fontWeight: 800, fontSize: ".9rem" }}>{fmt(r.total_amount)}</td>
                       <td style={{ color: "#94a3b8", fontSize: ".72rem", whiteSpace: "nowrap" }}>
@@ -414,7 +414,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                       <td><span className="id-badge" style={{ background: "#f0fdf4", color: "#065f46", borderColor: "#a7f3d0" }}>{r.remittance_number || "—"}</span></td>
                       <td>{r.remittance_date || "—"}</td>
                       <td><span className="id-badge">{r.invoice_number || "—"}</span></td>
-                      <td style={{ maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.description || "—"}</td>
+                      <td style={{ minWidth: 200, maxWidth: 350, wordBreak: "break-word", whiteSpace: "normal", lineHeight: 1.4 }}>{r.description || "—"}</td>
                       <td className="money" style={{ fontWeight: 800 }}>{fmt(r.gross_amount)}</td>
                       <td className="money">{fmt(r.total_gross_amount)}</td>
                       <td style={{ color: "#94a3b8", fontSize: ".72rem", whiteSpace: "nowrap" }}>
@@ -472,7 +472,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                       </td>
                       <td><span className="id-badge">{r.invoice_number || "—"}</span></td>
                       <td>{r.invoice_date || "—"}</td>
-                      <td style={{ maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.inv_description || "—"}</td>
+                      <td style={{ minWidth: 180, maxWidth: 350, wordBreak: "break-word", whiteSpace: "normal", lineHeight: 1.4 }}>{r.inv_description || r.po_description || r.rem_description || "—"}</td>
                       <td>{r.invoice_period || "—"}</td>
                       <td className="money">{fmt(r.assessable_value)}</td>
                       <td className="money">{fmt(r.gst_amount)}</td>

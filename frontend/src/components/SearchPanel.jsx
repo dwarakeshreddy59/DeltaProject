@@ -240,7 +240,7 @@ export default function SearchPanel({ visible = true, refreshTrigger = 0 }) {
                     <tr key={i}>
                       <td><span className="id-badge">{r.invoice_number || "—"}</span></td>
                       <td>{r.invoice_date || "—"}</td>
-                      <td style={{ maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis" }}>{r.inv_description || "—"}</td>
+                      <td style={{ minWidth: 180, maxWidth: 350, wordBreak: "break-word", whiteSpace: "normal", lineHeight: 1.4 }}>{r.inv_description || "—"}</td>
                       <td>{r.invoice_period || "—"}</td>
                       <td className="money">{fmt(r.assessable_value)}</td>
                       <td className="money">{fmt(r.gst_amount)}</td>

@@ -419,8 +419,8 @@ export default function SearchTab() {
                         </span>
                       </td>
                       <td>{r.invoice_date || "—"}</td>
-                      <td style={{ maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={r.inv_description}>
-                        {r.inv_description || "—"}
+                      <td style={{ minWidth: 180, maxWidth: 350, wordBreak: "break-word", whiteSpace: "normal", lineHeight: 1.4 }}>
+                        {r.inv_description || r.po_description || r.rem_description || "—"}
                       </td>
                       <td className="money">{fmt(r.assessable_value)}</td>
                       <td className="money">{fmt(r.gst_amount)}</td>
