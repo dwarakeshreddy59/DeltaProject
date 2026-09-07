@@ -146,8 +146,8 @@ def _extract_po_number(text: str, tables: list, filename: str) -> str:
 
 
 def _extract_description(text: str, tables: list, filename: str, po_num: str = "") -> str:
-    """Extract description from PO tables (supporting multiple rows), labels, or cleaned filename."""
-    # 1. Search tables for Description / Short Text column across all rows
+    """Extract description from PO tables (supporting multiple rows/lines), labels, or cleaned filename."""
+    # 1. Search tables for Description / Short Text column across all rows and lines
     table_descs = []
     for table in tables:
         if not table or len(table) < 2:
@@ -165,19 +165,35 @@ def _extract_description(text: str, tables: list, filename: str, po_num: str = "
                     cell_val = str(row[desc_col_idx]).strip()
                     if any(bad in cell_val.lower() for bad in ["total", "subtotal", "tax", "gst", "amount", "unit price"]):
                         continue
-                    cleaned = clean_description(cell_val[:100], po_num=po_num)
-                    if len(cleaned) > 2 and not cleaned.isdigit() and cleaned not in table_descs:
-                        table_descs.append(cleaned)
+                    for line_part in cell_val.split("\n"):
+                        cleaned = clean_description(line_part[:100], po_num=po_num)
+                        if len(cleaned) > 2 and not cleaned.isdigit() and cleaned not in table_descs:
+                            table_descs.append(cleaned)
 
     if table_descs:
         return ", ".join(table_descs)
 
-    # 2. Search labels in text
-    val = find_value_after_label(text, _DESC_LABELS)
-    if val:
-        cleaned_val = clean_description(val[:100], po_num=po_num)
-        if len(cleaned_val) > 3 and not any(bad in cleaned_val.lower() for bad in ["total", "taxable", "hsn", "amount"]):
-            return cleaned_val
+    # 2. Search labels in text (collect multiple lines)
+    lines = [l.strip() for l in text.split("\n") if l.strip()]
+    text_descs = []
+    for i, line in enumerate(lines):
+        for pat in _DESC_LABELS:
+            if re.search(pat, line, re.IGNORECASE):
+                after = re.sub(pat, "", line, flags=re.IGNORECASE).strip(":- \t")
+                if after:
+                    c = clean_description(after[:100], po_num=po_num)
+                    if len(c) > 2 and not c.isdigit() and c not in text_descs:
+                        text_descs.append(c)
+                for j in range(1, 7):
+                    if i + j < len(lines):
+                        nxt = lines[i + j]
+                        if re.search(r"^(?:Total|Taxable|GST|Amount|Delivery|Vendor|Bill to|Ship to|Unloading|Terms|Payment)\b", nxt, re.IGNORECASE):
+                            break
+                        c = clean_description(nxt[:100], po_num=po_num)
+                        if len(c) > 2 and not c.isdigit() and c not in text_descs:
+                            text_descs.append(c)
+                if text_descs:
+                    return ", ".join(text_descs)
 
     # 3. Fallback: clean filename
     return clean_description(filename_description(filename), po_num=po_num)

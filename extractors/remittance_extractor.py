@@ -1,6 +1,6 @@
 """
 remittance_extractor.py – Extract fields from a Remittance / Payment Advice PDF.
-Supports multiple line items / gross amounts / descriptions.
+Supports multi-item, multi-line descriptions and multiple gross amounts.
 """
 
 import re
@@ -56,10 +56,13 @@ def extract(pdf_path: str, target_invoice_number: str = "") -> dict:
     items    = _extract_all_cleared_items(text, tables)
     total_gross = _extract_total_amount(text, tables, items)
 
-    # Resolve primary gross_amount, invoice_number, and description
+    # Collect all unique non-empty descriptions from items
+    all_item_descs = [it["description"] for it in items if it.get("description")]
+    combined_all_descs = " | ".join(dict.fromkeys(all_item_descs))
+
     inv_ref = ""
     gross_amount = 0.0
-    desc = ""
+    desc = combined_all_descs
 
     if items:
         # Check if any item matches the uploaded target invoice
@@ -74,12 +77,13 @@ def extract(pdf_path: str, target_invoice_number: str = "") -> dict:
         if matched_item:
             inv_ref = matched_item["invoice_number"]
             gross_amount = matched_item["gross_amount"]
-            desc = matched_item.get("description", "")
+            # If the single matched item has a description, use it; otherwise fallback to combined
+            desc = matched_item.get("description") or combined_all_descs
         else:
-            # Combine invoice numbers and descriptions if multiple
+            # Combine all invoice numbers and descriptions
             inv_ref = ", ".join(dict.fromkeys(it["invoice_number"] for it in items if it.get("invoice_number")))
             gross_amount = items[0]["gross_amount"] if len(items) == 1 else total_gross
-            desc = "; ".join(dict.fromkeys(it["description"] for it in items if it.get("description")))
+            desc = combined_all_descs
     else:
         inv_ref = _extract_single_invoice_ref(text, tables)
         gross_amount = total_gross
@@ -163,10 +167,11 @@ def _extract_remittance_date(text: str) -> str:
 
 def _extract_all_cleared_items(text: str, tables: list) -> list:
     """
-    Extract all cleared invoice rows, gross amounts, and descriptions.
+    Extract all cleared invoice rows, gross amounts, and multi-line descriptions.
     Pattern: <doc_num> <invoice_no> <date> <deductions> <gross_amount>
     e.g. 6068264211 DT-2627-05-5110 11.05.2026 0,00 1.397.655,00
-         Apr2026-Engineering
+         Apr2026-Engineering Services
+         Onsite Deployment
     """
     items = []
     lines = [l.strip() for l in text.split("\n") if l.strip()]
@@ -184,11 +189,16 @@ def _extract_all_cleared_items(text: str, tables: list) -> list:
             ded = clean_number(m_row.group(4))
             gross = clean_number(m_row.group(5))
 
-            item_desc = ""
-            if idx + 1 < len(lines):
-                next_l = lines[idx + 1]
-                if not re.search(r"^\d{5,}|Total|AGCO|BATAVIA", next_l, re.IGNORECASE):
-                    item_desc = next_l.strip()
+            # Collect ALL description lines between this row and the next row / footer
+            item_descs = []
+            for k in range(idx + 1, len(lines)):
+                next_l = lines[k]
+                if re.search(r"^\d{5,}\s+[A-Za-z0-9\-_/]{4,}|^(?:Total|AGCO|BATAVIA|With kind|Document Number)\b", next_l, re.IGNORECASE):
+                    break
+                if len(next_l.strip()) > 1:
+                    item_descs.append(next_l.strip())
+
+            item_desc_str = " - ".join(item_descs) if item_descs else ""
 
             if is_valid_id(inv_no, min_len=4, require_digit=True):
                 items.append({
@@ -197,7 +207,7 @@ def _extract_all_cleared_items(text: str, tables: list) -> list:
                     "date": d_date,
                     "deductions": ded,
                     "gross_amount": gross,
-                    "description": item_desc,
+                    "description": item_desc_str,
                 })
 
     # 2. Table scanning (if text rows not found)
