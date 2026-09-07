@@ -71,7 +71,7 @@ def extract(pdf_path: str, filename: str) -> dict:
     po_num        = _extract_po_number(text, tables, filename)
     po_date       = _find_date(text, _PO_DATE_LABELS)
     delivery_date = _find_date(text, _DELIVERY_DATE_LABELS)
-    description   = _extract_description(text, tables, filename, po_num)
+    description   = filename_description(filename, po_num)
     total_amount  = _extract_total(text, tables)
 
     # Normalize PO Number (strip leading zeros: 0080029552 -> 80029552)

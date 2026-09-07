@@ -95,7 +95,7 @@ def extract(pdf_path: str, filename: str) -> dict:
     inv_date    = find_date_after_label(text, _INVOICE_DATE_LABELS)
     po_num      = _extract_po_number(text, tables)
     inv_period  = _extract_period(text)
-    description = _extract_description(text, tables, filename, inv_num, po_num)
+    description = filename_description(filename, inv_num)
     assessable  = _extract_assessable(text, tables)
     total_tax   = _extract_total_tax(text, tables)
     total_val   = _extract_total_invoice(text, tables)

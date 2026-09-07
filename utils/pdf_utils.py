@@ -141,11 +141,33 @@ def is_valid_id(token: str, min_len: int = 3, require_digit: bool = True) -> boo
     return True
 
 
-def filename_description(filename: str) -> str:
-    """Strip extension and trailing numbers from filename."""
-    name = os.path.splitext(filename)[0]
-    name = re.sub(r"[_\-\s]+\d+$", "", name)
-    return name.strip("_- ")
+def filename_description(filename: str, doc_num: str = "") -> str:
+    """
+    Strip invoice/PO numbers and trailing numbers from filename to get clean description.
+    e.g. 'DT-2526-11-5101_Product Engineering_Aug-25_AGCO.pdf' -> 'Product Engineering_Aug-25_AGCO'
+         '81003200_Engineering Resources deployed_FY-2025.pdf' -> 'Engineering Resources deployed_FY-2025'
+         'DT-2627-06-5402_AGCO 3D Scanning.pdf' -> 'AGCO 3D Scanning'
+         '80029552_Scanning.PDF' -> 'Scanning'
+    """
+    if not filename:
+        return ""
+    base = os.path.splitext(os.path.basename(filename))[0]
+
+    # Strip specific document number if passed
+    if doc_num:
+        base = re.sub(r"^" + re.escape(doc_num) + r"[\s_\-–]+", "", base, flags=re.IGNORECASE)
+        norm = doc_num.lstrip("0")
+        if norm and norm != doc_num:
+            base = re.sub(r"^" + re.escape(norm) + r"[\s_\-–]+", "", base, flags=re.IGNORECASE)
+
+    # Strip leading invoice patterns (e.g. DT-2627-06-5402_ or INV-2024-001_)
+    base = re.sub(r"^[A-Za-z]{2,5}[-_]\d{2,4}[-_]\d{2}[-_]\d{2,5}[\s_\-–]+", "", base)
+    # Strip leading PO/Doc digit numbers (e.g. 81003200_ or 0080029552_)
+    base = re.sub(r"^\d{5,12}[\s_\-–]+", "", base)
+
+    # Clean leading and trailing punctuation
+    base = re.sub(r"^[\s_\-–.:]+|[\s_\-–.:]+$", "", base)
+    return base.strip()
 
 
 def clean_description(desc: str, inv_num: str = "", po_num: str = "") -> str:
