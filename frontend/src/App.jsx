@@ -88,22 +88,24 @@ export default function App() {
 
       {/* ── Tab Content ── */}
       <div className="main-container">
-        {activeTab === "upload" && (
-          <UploadTab
-            loading={loading}
-            results={results}
-            calcData={calcData}
-            onExtract={handleExtract}
-            onRecalc={recalc}
-            onViewRecords={() => setActiveTab("records")}
-          />
-        )}
-        {activeTab === "records" && (
-          <RecordsTab refreshTrigger={refreshTrigger} />
-        )}
-        {activeTab === "search" && (
-          <SearchTab />
-        )}
+        <div key={activeTab} className="animate-fadein">
+          {activeTab === "upload" && (
+            <UploadTab
+              loading={loading}
+              results={results}
+              calcData={calcData}
+              onExtract={handleExtract}
+              onRecalc={recalc}
+              onViewRecords={() => setActiveTab("records")}
+            />
+          )}
+          {activeTab === "records" && (
+            <RecordsTab refreshTrigger={refreshTrigger} />
+          )}
+          {activeTab === "search" && (
+            <SearchTab />
+          )}
+        </div>
       </div>
     </div>
   );

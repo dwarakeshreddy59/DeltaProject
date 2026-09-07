@@ -26,7 +26,7 @@ export default function CalculationPanel({ calcData, onTdsChange }) {
   } = calcData;
 
   return (
-    <div className="calc-wrapper">
+    <div className="calc-wrapper animate-slideup">
       <div className="calc-header">
         <div className="calc-title">
           <i className="bi bi-calculator-fill" />
@@ -91,7 +91,7 @@ export default function CalculationPanel({ calcData, onTdsChange }) {
         {/* Receivable */}
         <div className="row justify-content-center">
           <div className="col-md-6">
-            <div className="receivable-tile">
+            <div className="receivable-tile btn-shine">
               <div className="rec-label">Net Receivable</div>
               <div className="rec-value">{inr(receivable)}</div>
               <div className="rec-formula">= Assessable − TDS + GST</div>

@@ -18,7 +18,7 @@ export default function UploadTab({ loading, results, calcData, onExtract, onRec
 
       {/* Results */}
       {results && (
-        <>
+        <div className="animate-slideup">
           <WrongFileAlert warnings={results.errors} />
 
           <CrossLinkBadge po={results.po} invoice={results.invoice} remittance={results.remittance} />
@@ -63,12 +63,12 @@ export default function UploadTab({ loading, results, calcData, onExtract, onRec
 
           {/* Calculations */}
           <CalculationPanel calcData={calcData} onTdsChange={onRecalc} />
-        </>
+        </div>
       )}
 
       {!results && !loading && (
-        <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#94a3b8" }}>
-          <i className="bi bi-arrow-up-circle" style={{ fontSize: "3rem", display: "block", marginBottom: "1rem" }} />
+        <div className="animate-fadein" style={{ textAlign: "center", padding: "3rem 1rem", color: "#A1A1AA" }}>
+          <i className="bi bi-arrow-up-circle empty-icon" style={{ fontSize: "3rem", display: "block", marginBottom: "1rem" }} />
           <p style={{ fontSize: ".95rem", fontWeight: 600 }}>Upload your 3 PDFs above to get started</p>
           <p style={{ fontSize: ".82rem", marginTop: ".4rem" }}>Invoice · Purchase Order · Remittance</p>
         </div>

@@ -150,7 +150,7 @@ export default function UploadForm({ onSubmit, loading }) {
 
               <button
                 type="submit"
-                className="btn-extract animate-popin"
+                className={`btn-extract animate-popin ${allSelected ? "btn-shine animate-neonpulse" : ""}`}
                 disabled={loading || !allSelected}
                 style={{
                   background: allSelected
