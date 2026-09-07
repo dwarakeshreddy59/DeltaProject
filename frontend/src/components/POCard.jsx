@@ -15,7 +15,7 @@ const Row = ({ label, value, type = "text" }) => {
     displayVal = value;
     tdClass += " val-highlight";
   } else if (type === "badge") {
-    displayVal = <span className="badge-val" style={{ background: "#fffbeb", color: "#92400e", borderColor: "#fde68a" }}>{value}</span>;
+    displayVal = <span className="badge-val" style={{ background: "#f0f9ff", color: "#0369a1", borderColor: "#bae6fd" }}>{value}</span>;
   } else {
     displayVal = value;
   }

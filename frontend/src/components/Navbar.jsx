@@ -19,7 +19,7 @@ export default function Navbar({ theme = "bright", onToggleTheme }) {
           type="button"
           className="btn-theme-toggle"
           onClick={onToggleTheme}
-          title={theme === "dark" ? "Switch to Bright Mode (Tiffany & White)" : "Switch to Dark Mode (Midnight & Gold)"}
+          title={theme === "dark" ? "Switch to Bright Mode (Tiffany & White)" : "Switch to Dark Mode (Tiffany Night)"}
           aria-label="Toggle Bright/Dark Mode"
         >
           {theme === "dark" ? (

@@ -66,10 +66,10 @@ export default function CalculationPanel({ calcData, onTdsChange }) {
                 fontWeight: 700,
                 fontSize: ".82rem",
                 transition: "all .2s",
-                background: tds_rate === o.value ? "linear-gradient(135deg,#075955,#0abab5)" : "#fff",
-                borderColor: tds_rate === o.value ? "#d4af37" : "#cbf3ef",
-                color: tds_rate === o.value ? "#fff" : "#022624",
-                boxShadow: tds_rate === o.value ? "0 4px 12px rgba(10,186,181,.35)" : "none",
+                background: tds_rate === o.value ? "linear-gradient(135deg,#0abab5,#089793)" : "var(--bg-card)",
+                borderColor: tds_rate === o.value ? "#0abab5" : "var(--border-subtle)",
+                color: tds_rate === o.value ? "#fff" : "var(--text-main)",
+                boxShadow: tds_rate === o.value ? "0 4px 12px rgba(10,186,181,.4)" : "none",
               }}
             >
               {o.label}

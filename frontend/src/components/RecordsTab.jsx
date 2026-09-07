@@ -203,9 +203,9 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
               key={opt.id}
               onClick={() => { setActiveView(opt.id); setPage(1); setFilter(""); }}
               style={{
-                background: isActive ? "linear-gradient(135deg,#075955,#0abab5)" : "var(--bg-card)",
+                background: isActive ? "linear-gradient(135deg, #0abab5, #089793)" : "var(--bg-card)",
                 color: isActive ? "#ffffff" : "var(--text-main)",
-                border: `1.5px solid ${isActive ? "#d4af37" : "var(--border-subtle)"}`,
+                border: `1.5px solid ${isActive ? "#0abab5" : "var(--border-subtle)"}`,
                 borderRadius: 10,
                 padding: ".45rem .95rem",
                 fontSize: ".82rem",
@@ -219,13 +219,13 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                 transform: isActive ? "translateY(-1px)" : "none",
               }}
             >
-              <i className={`bi ${opt.icon}`} style={{ color: isActive ? "#fbe296" : "#0abab5" }} />
+              <i className={`bi ${opt.icon}`} style={{ color: isActive ? "#ffffff" : "#0abab5" }} />
               {opt.label}
               <span
                 style={{
-                  background: isActive ? "#d4af37" : "var(--bg-card-subtle)",
-                  color: isActive ? "#022624" : "var(--text-muted)",
-                  border: isActive ? "1px solid #fef3c7" : "1px solid var(--border-subtle)",
+                  background: isActive ? "rgba(255,255,255,0.25)" : "var(--bg-card-subtle)",
+                  color: isActive ? "#ffffff" : "var(--text-muted)",
+                  border: isActive ? "1px solid rgba(255,255,255,0.4)" : "1px solid var(--border-subtle)",
                   borderRadius: 12,
                   padding: ".05rem .45rem",
                   fontSize: ".7rem",
@@ -316,7 +316,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                       </td>
                       <td><span className="id-badge">{r.invoice_number || "—"}</span></td>
                       <td>{r.invoice_date || "—"}</td>
-                      <td><span className="id-badge" style={{ background: "#fffbeb", color: "#92400e", borderColor: "#fde68a" }}>{r.po_number || "—"}</span></td>
+                      <td><span className="id-badge" style={{ background: "#f0f9ff", color: "#0369a1", borderColor: "#bae6fd" }}>{r.po_number || "—"}</span></td>
                       <td style={{ minWidth: 180, maxWidth: 320, wordBreak: "break-word", whiteSpace: "normal", lineHeight: 1.4 }}>{r.description || "—"}</td>
                       <td>{r.invoice_period || "—"}</td>
                       <td className="money">{fmt(r.assessable_value)}</td>
@@ -366,7 +366,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                           <i className="bi bi-trash3" /> Delete
                         </button>
                       </td>
-                      <td><span className="id-badge" style={{ background: "#fffbeb", color: "#92400e", borderColor: "#fde68a" }}>{r.po_number || "—"}</span></td>
+                      <td><span className="id-badge" style={{ background: "#f0f9ff", color: "#0369a1", borderColor: "#bae6fd" }}>{r.po_number || "—"}</span></td>
                       <td>{r.po_date || "—"}</td>
                       <td style={{ minWidth: 200, maxWidth: 350, wordBreak: "break-word", whiteSpace: "normal", lineHeight: 1.4 }}>{r.description || "—"}</td>
                       <td>{r.delivery_date || "—"}</td>
@@ -481,7 +481,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                       <td style={{ textAlign: "center", fontWeight: 700 }}>{r.tds_rate}%</td>
                       <td className="tds-cell">{fmt(r.tds_amount)}</td>
                       <td className="receivable-cell">{fmt(r.receivable)}</td>
-                      <td><span className="id-badge" style={{ background: "#fffbeb", color: "#92400e", borderColor: "#fde68a" }}>{r.po_number || "—"}</span></td>
+                      <td><span className="id-badge" style={{ background: "#f0f9ff", color: "#0369a1", borderColor: "#bae6fd" }}>{r.po_number || "—"}</span></td>
                       <td>{r.po_date || "—"}</td>
                       <td>{r.delivery_date || "—"}</td>
                       <td className="money">{fmt(r.total_amount)}</td>

@@ -1,9 +1,9 @@
 import React, { useRef } from "react";
 
 const SLOT_CONFIG = {
-  invoice:    { icon: "bi-receipt",    color: "#075955", bg: "linear-gradient(135deg,#075955,#0abab5)" },
-  po:         { icon: "bi-file-text",  color: "#92400e", bg: "linear-gradient(135deg,#b8860b,#d4af37)" },
-  remittance: { icon: "bi-cash-stack", color: "#054340", bg: "linear-gradient(135deg,#054340,#0abab5)" },
+  invoice:    { icon: "bi-receipt",    color: "#0abab5", bg: "linear-gradient(135deg,#0abab5,#089793)" },
+  po:         { icon: "bi-file-text",  color: "#0284c7", bg: "linear-gradient(135deg,#0284c7,#0369a1)" },
+  remittance: { icon: "bi-cash-stack", color: "#059669", bg: "linear-gradient(135deg,#10b981,#059669)" },
 };
 
 export default function DropZone({ slot, label, hint, file, onFile, hasError }) {

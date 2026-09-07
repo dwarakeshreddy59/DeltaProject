@@ -112,9 +112,9 @@ export default function SearchTab() {
   return (
     <div className="search-wrapper animate-fadein">
       {/* ── Search Header ── */}
-      <div className="search-header" style={{ background: "linear-gradient(135deg, #075955 0%, #0abab5 100%)", borderBottom: "2px solid #d4af37" }}>
-        <div className="search-title">
-          <i className="bi bi-search-heart-fill" style={{ color: "#fbe296" }} />
+      <div className="search-header" style={{ background: "linear-gradient(135deg, #0abab5 0%, #089793 50%, #067470 100%)", borderBottom: "2px solid rgba(255, 255, 255, 0.35)" }}>
+        <div className="search-title" style={{ color: "#ffffff" }}>
+          <i className="bi bi-search-heart-fill" style={{ color: "#ffffff" }} />
           Smart Database Search &amp; Discovery
         </div>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: ".65rem" }}>
@@ -138,9 +138,9 @@ export default function SearchTab() {
                 key={f.value}
                 onClick={() => setField(f.value)}
                 style={{
-                  background: isSelected ? "linear-gradient(135deg,#075955,#0abab5)" : "var(--bg-card-subtle)",
+                  background: isSelected ? "linear-gradient(135deg, #0abab5, #089793)" : "var(--bg-card-subtle)",
                   color: isSelected ? "#ffffff" : "var(--text-main)",
-                  border: `1.5px solid ${isSelected ? "#d4af37" : "var(--border-subtle)"}`,
+                  border: `1.5px solid ${isSelected ? "#0abab5" : "var(--border-subtle)"}`,
                   borderRadius: 10,
                   padding: ".45rem .95rem",
                   fontSize: ".82rem",
@@ -154,7 +154,7 @@ export default function SearchTab() {
                   transform: isSelected ? "translateY(-1px)" : "none",
                 }}
               >
-                <i className={`bi ${f.icon}`} style={{ color: isSelected ? "#fbe296" : "#0abab5" }} />
+                <i className={`bi ${f.icon}`} style={{ color: isSelected ? "#ffffff" : "#0abab5" }} />
                 {f.label}
               </button>
             );
@@ -223,9 +223,9 @@ export default function SearchTab() {
               padding: ".75rem 2rem",
               fontSize: ".9rem",
               fontWeight: 700,
-              background: "linear-gradient(135deg,#0abab5,#075955)",
+              background: "linear-gradient(135deg, #0abab5, #089793)",
               color: "#fff",
-              border: "1.5px solid #d4af37",
+              border: "1.5px solid rgba(255, 255, 255, 0.4)",
               cursor: loading ? "not-allowed" : "pointer",
               display: "flex",
               alignItems: "center",
@@ -287,8 +287,8 @@ export default function SearchTab() {
                 justifyContent: "center",
                 margin: "0 auto 1.25rem",
                 fontSize: "2rem",
-                color: "#075955",
-                border: "1.5px solid #d4af37",
+                color: "#089793",
+                border: "1.5px solid #0abab5",
                 boxShadow: "0 8px 25px rgba(10,186,181,.2)",
               }}
             >
@@ -348,7 +348,7 @@ export default function SearchTab() {
             <div
               style={{
                 background: "var(--bg-card-subtle)",
-                border: "1.5px solid var(--border-gold)",
+                border: "1.5px solid var(--border-medium)",
                 borderRadius: 10,
                 padding: ".75rem 1.25rem",
                 marginBottom: "1rem",
@@ -367,7 +367,7 @@ export default function SearchTab() {
                   Found <strong>{records.length}</strong> matching record(s) for <strong>"{query}"</strong> in <strong>{FIELDS.find((f) => f.value === field)?.label}</strong>
                 </span>
               </div>
-              <span style={{ fontSize: ".75rem", fontWeight: 800, color: "#022624", background: "linear-gradient(135deg,#d4af37,#b8860b)", border: "1px solid #d4af37", padding: ".2rem .6rem", borderRadius: 6 }}>
+              <span style={{ fontSize: ".75rem", fontWeight: 800, color: "#ffffff", background: "linear-gradient(135deg, #0abab5, #089793)", border: "1px solid rgba(255,255,255,0.4)", padding: ".2rem .6rem", borderRadius: 6 }}>
                 Page {page} of {totalPages}
               </span>
             </div>
@@ -432,7 +432,7 @@ export default function SearchTab() {
                       <td>
                         <span
                           className="id-badge"
-                          style={{ background: "#fffbeb", color: "#92400e", borderColor: "#fde68a", cursor: "pointer" }}
+                          style={{ background: "#f0f9ff", color: "#0369a1", borderColor: "#bae6fd", cursor: "pointer" }}
                           title="Click to copy"
                           onClick={() => handleCopy(r.po_number, "PO No")}
                         >

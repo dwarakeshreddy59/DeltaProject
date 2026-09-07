@@ -7,24 +7,24 @@ const SLOTS = [
     label: "Invoice PDF",
     hint: "Document No. & Invoice Date",
     icon: "bi-receipt",
-    color: "#075955",
-    bg: "linear-gradient(135deg,#075955,#0abab5)",
+    color: "#0abab5",
+    bg: "linear-gradient(135deg,#0abab5,#089793)",
   },
   {
     key: "po",
     label: "Purchase Order PDF",
     hint: "PO No. & Delivery Date",
     icon: "bi-file-text",
-    color: "#92400e",
-    bg: "linear-gradient(135deg,#b8860b,#d4af37)",
+    color: "#0284c7",
+    bg: "linear-gradient(135deg,#0284c7,#0369a1)",
   },
   {
     key: "remittance",
     label: "Remittance PDF",
     hint: "Payment Ref. & Gross Amount",
     icon: "bi-cash-stack",
-    color: "#054340",
-    bg: "linear-gradient(135deg,#054340,#0abab5)",
+    color: "#059669",
+    bg: "linear-gradient(135deg,#10b981,#059669)",
   },
 ];
 
@@ -80,7 +80,7 @@ export default function UploadForm({ onSubmit, loading }) {
           style={{
             height: "100%",
             width: `${(filled / 3) * 100}%`,
-            background: filled === 3 ? "linear-gradient(90deg,#0abab5,#d4af37)" : "linear-gradient(90deg,#81d8d0,#0abab5)",
+            background: filled === 3 ? "linear-gradient(90deg,#0abab5,#0284c7)" : "linear-gradient(90deg,#81d8d0,#0abab5)",
             transition: "width .4s cubic-bezier(.34,1.56,.64,1)",
           }}
         />
@@ -152,11 +152,11 @@ export default function UploadForm({ onSubmit, loading }) {
                 disabled={loading || !allSelected}
                 style={{
                   background: allSelected
-                    ? "linear-gradient(135deg,#075955,#0abab5)"
+                    ? "linear-gradient(135deg,#0abab5,#077c77)"
                     : "#cbd5e1",
                   color: "#ffffff",
-                  border: allSelected ? "1.5px solid #d4af37" : "none",
-                  boxShadow: allSelected ? "0 6px 20px rgba(10,186,181,.4), 0 0 10px rgba(212,175,55,.25)" : "none",
+                  border: allSelected ? "1.5px solid #ffffff" : "none",
+                  boxShadow: allSelected ? "0 6px 20px rgba(10,186,181,.45)" : "none",
                   cursor: allSelected ? "pointer" : "not-allowed",
                   borderRadius: 10,
                   padding: ".6rem 1.6rem",

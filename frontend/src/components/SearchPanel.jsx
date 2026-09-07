@@ -248,7 +248,7 @@ export default function SearchPanel({ visible = true, refreshTrigger = 0 }) {
                       <td style={{ textAlign: "center", fontWeight: 700 }}>{r.tds_rate}%</td>
                       <td className="tds-cell">{fmt(r.tds_amount)}</td>
                       <td className="receivable-cell">{fmt(r.receivable)}</td>
-                      <td><span className="id-badge" style={{ background: "#fffbeb", color: "#92400e", borderColor: "#fde68a" }}>{r.po_number || "—"}</span></td>
+                      <td><span className="id-badge" style={{ background: "#f0f9ff", color: "#0369a1", borderColor: "#bae6fd" }}>{r.po_number || "—"}</span></td>
                       <td>{r.po_date || "—"}</td>
                       <td>{r.delivery_date || "—"}</td>
                       <td className="money">{fmt(r.total_amount)}</td>

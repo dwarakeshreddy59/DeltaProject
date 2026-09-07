@@ -12,9 +12,9 @@ export default function CrossLinkBadge({ po, invoice, remittance }) {
         <i className="bi bi-diagram-3 me-1" />Document Chain
       </div>
       <div className="crosslink-chain">
-        <ChainItem label="Purchase Order" value={poNum} color="#d97706" />
+        <ChainItem label="Purchase Order" value={poNum} color="#0284c7" />
         <span className="chain-arrow"><i className="bi bi-arrow-right" /></span>
-        <ChainItem label="Invoice" value={invNum} color="#1565c0" />
+        <ChainItem label="Invoice" value={invNum} color="#0abab5" />
         <span className="chain-arrow"><i className="bi bi-arrow-right" /></span>
         <ChainItem label="Remittance" value={remNum} color="#059669" />
       </div>
