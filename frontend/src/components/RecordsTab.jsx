@@ -191,8 +191,8 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
       </div>
 
       {/* ── 4 Option Sub-Tabs ── */}
-      <div style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0", padding: ".75rem 1.25rem", display: "flex", gap: ".65rem", flexWrap: "wrap", alignItems: "center" }}>
-        <span style={{ fontSize: ".74rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: ".05em", marginRight: ".25rem" }}>
+      <div style={{ background: "#f4faf9", borderBottom: "1px solid #cbf3ef", padding: ".75rem 1.25rem", display: "flex", gap: ".65rem", flexWrap: "wrap", alignItems: "center" }}>
+        <span style={{ fontSize: ".74rem", fontWeight: 700, color: "#075955", textTransform: "uppercase", letterSpacing: ".05em", marginRight: ".25rem" }}>
           Select View:
         </span>
         {VIEW_OPTIONS.map((opt) => {
@@ -203,9 +203,9 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
               key={opt.id}
               onClick={() => { setActiveView(opt.id); setPage(1); setFilter(""); }}
               style={{
-                background: isActive ? "linear-gradient(135deg,#1e293b,#0f172a)" : "#ffffff",
-                color: isActive ? "#ffffff" : "#334155",
-                border: `1.5px solid ${isActive ? "#0f172a" : "#cbd5e1"}`,
+                background: isActive ? "linear-gradient(135deg,#075955,#0abab5)" : "#ffffff",
+                color: isActive ? "#ffffff" : "#075955",
+                border: `1.5px solid ${isActive ? "#d4af37" : "#cbf3ef"}`,
                 borderRadius: 10,
                 padding: ".45rem .95rem",
                 fontSize: ".82rem",
@@ -215,16 +215,17 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                 alignItems: "center",
                 gap: ".5rem",
                 transition: "all .2s",
-                boxShadow: isActive ? "0 4px 14px rgba(15,23,42,.25)" : "0 1px 3px rgba(0,0,0,.04)",
+                boxShadow: isActive ? "0 4px 14px rgba(10,186,181,.3)" : "0 1px 3px rgba(0,0,0,.04)",
                 transform: isActive ? "translateY(-1px)" : "none",
               }}
             >
-              <i className={`bi ${opt.icon}`} style={{ color: isActive ? "#60a5fa" : "#64748b" }} />
+              <i className={`bi ${opt.icon}`} style={{ color: isActive ? "#fbe296" : "#0abab5" }} />
               {opt.label}
               <span
                 style={{
-                  background: isActive ? "#3b82f6" : "#e2e8f0",
-                  color: isActive ? "#ffffff" : "#475569",
+                  background: isActive ? "#d4af37" : "#e8faf8",
+                  color: isActive ? "#022624" : "#075955",
+                  border: isActive ? "1px solid #fef3c7" : "1px solid #cbf3ef",
                   borderRadius: 12,
                   padding: ".05rem .45rem",
                   fontSize: ".7rem",

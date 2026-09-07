@@ -7,24 +7,24 @@ const SLOTS = [
     label: "Invoice PDF",
     hint: "Document No. & Invoice Date",
     icon: "bi-receipt",
-    color: "#1565c0",
-    bg: "linear-gradient(135deg,#3b82f6,#1d4ed8)",
+    color: "#075955",
+    bg: "linear-gradient(135deg,#075955,#0abab5)",
   },
   {
     key: "po",
     label: "Purchase Order PDF",
     hint: "PO No. & Delivery Date",
     icon: "bi-file-text",
-    color: "#b45309",
-    bg: "linear-gradient(135deg,#f59e0b,#d97706)",
+    color: "#92400e",
+    bg: "linear-gradient(135deg,#b8860b,#d4af37)",
   },
   {
     key: "remittance",
     label: "Remittance PDF",
     hint: "Payment Ref. & Gross Amount",
     icon: "bi-cash-stack",
-    color: "#065f46",
-    bg: "linear-gradient(135deg,#10b981,#059669)",
+    color: "#054340",
+    bg: "linear-gradient(135deg,#054340,#0abab5)",
   },
 ];
 
@@ -75,12 +75,12 @@ export default function UploadForm({ onSubmit, loading }) {
       </div>
 
       {/* Progress bar */}
-      <div style={{ height: 4, background: "#e2e8f0" }}>
+      <div style={{ height: 4, background: "#cbf3ef" }}>
         <div
           style={{
             height: "100%",
             width: `${(filled / 3) * 100}%`,
-            background: filled === 3 ? "linear-gradient(90deg,#10b981,#3b82f6)" : "linear-gradient(90deg,#3b82f6,#8b5cf6)",
+            background: filled === 3 ? "linear-gradient(90deg,#0abab5,#d4af37)" : "linear-gradient(90deg,#81d8d0,#0abab5)",
             transition: "width .4s cubic-bezier(.34,1.56,.64,1)",
           }}
         />
@@ -118,11 +118,11 @@ export default function UploadForm({ onSubmit, loading }) {
               flexWrap: "wrap",
               gap: "1rem",
               paddingTop: "1rem",
-              borderTop: "1px solid #f1f5f9",
+              borderTop: "1px solid #f0fbf9",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: ".6rem", color: "#64748b", fontSize: ".82rem" }}>
-              <i className="bi bi-shield-check" style={{ color: "#10b981", fontSize: "1.1rem" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: ".6rem", color: "#3e6563", fontSize: ".82rem" }}>
+              <i className="bi bi-shield-check" style={{ color: "#0abab5", fontSize: "1.1rem" }} />
               <span>PDFs will be parsed &amp; auto-saved to PostgreSQL</span>
             </div>
 
@@ -132,11 +132,11 @@ export default function UploadForm({ onSubmit, loading }) {
                   type="button"
                   onClick={handleReset}
                   style={{
-                    background: "#f8fafc",
-                    border: "1.5px solid #e2e8f0",
+                    background: "#f0fbf9",
+                    border: "1.5px solid #cbf3ef",
                     borderRadius: 10,
                     padding: ".55rem 1rem",
-                    color: "#64748b",
+                    color: "#075955",
                     cursor: "pointer",
                     fontSize: ".83rem",
                     fontWeight: 600,
@@ -152,10 +152,11 @@ export default function UploadForm({ onSubmit, loading }) {
                 disabled={loading || !allSelected}
                 style={{
                   background: allSelected
-                    ? "linear-gradient(135deg,#2563eb,#1d4ed8)"
+                    ? "linear-gradient(135deg,#075955,#0abab5)"
                     : "#cbd5e1",
                   color: "#ffffff",
-                  boxShadow: allSelected ? "0 6px 20px rgba(37,99,235,.35)" : "none",
+                  border: allSelected ? "1.5px solid #d4af37" : "none",
+                  boxShadow: allSelected ? "0 6px 20px rgba(10,186,181,.4), 0 0 10px rgba(212,175,55,.25)" : "none",
                   cursor: allSelected ? "pointer" : "not-allowed",
                   borderRadius: 10,
                   padding: ".6rem 1.6rem",
@@ -164,7 +165,6 @@ export default function UploadForm({ onSubmit, loading }) {
                   display: "flex",
                   alignItems: "center",
                   gap: ".5rem",
-                  border: "none",
                   transition: "all .2s",
                 }}
               >

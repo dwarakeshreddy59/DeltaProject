@@ -40,14 +40,14 @@ export default function App() {
           </p>
 
           <div className="hero-stats">
-            <HeroStat icon="bi-file-earmark-text" bg="linear-gradient(135deg,#3b82f6,#1d4ed8)"
+            <HeroStat icon="bi-file-earmark-text" bg="linear-gradient(135deg,#0abab5,#075955)"
               value={uploadCount} label="Extractions" trend="This session" />
-            <HeroStat icon="bi-currency-rupee" bg="linear-gradient(135deg,#10b981,#059669)"
+            <HeroStat icon="bi-currency-rupee" bg="linear-gradient(135deg,#d4af37,#b8860b)"
               value={results ? `₹${Number(calcData?.receivable||0).toLocaleString("en-IN",{minimumFractionDigits:2})}` : "₹0"}
               label="Net Receivable" trend="Last extraction" isStr />
-            <HeroStat icon="bi-percent" bg="linear-gradient(135deg,#f59e0b,#d97706)"
+            <HeroStat icon="bi-percent" bg="linear-gradient(135deg,#e5b839,#d97706)"
               value={results ? `${calcData?.tds_rate??2}%` : "—"} label="TDS Rate" trend="Selected" isStr />
-            <HeroStat icon="bi-database-check" bg="linear-gradient(135deg,#8b5cf6,#6d28d9)"
+            <HeroStat icon="bi-database-check" bg="linear-gradient(135deg,#81d8d0,#088c88)"
               value="Live" label="PostgreSQL" trend="Auto-saving" isStr />
           </div>
         </div>

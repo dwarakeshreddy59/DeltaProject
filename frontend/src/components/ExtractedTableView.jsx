@@ -38,11 +38,11 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
 
   return (
     <div className="search-wrapper mb-4" style={{ marginTop: "1.5rem" }}>
-      <div className="search-header" style={{ background: "linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%)" }}>
+      <div className="search-header" style={{ background: "linear-gradient(135deg, #075955 0%, #0abab5 100%)", borderBottom: "2px solid #d4af37" }}>
         <div className="search-title">
           <i className="bi bi-grid-3x3-gap-fill" />
           All Extracted Data (Master Table View)
-          <span style={{ background: "rgba(255,255,255,.15)", borderRadius: 20, padding: ".15rem .6rem", fontSize: ".72rem" }}>
+          <span style={{ background: "rgba(212,175,55,.25)", border: "1px solid #d4af37", color: "#fff", borderRadius: 20, padding: ".15rem .6rem", fontSize: ".72rem" }}>
             22 Columns / Fields
           </span>
         </div>
@@ -51,30 +51,30 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
       <div className="history-body">
         {/* Horizontal Master Row Table */}
         <div style={{ marginBottom: "1.5rem" }}>
-          <h6 style={{ fontSize: ".85rem", fontWeight: 800, color: "#1e293b", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: ".75rem" }}>
-            <i className="bi bi-layout-three-columns me-1" style={{ color: "#2563eb" }} />Consolidated Master Record (22 Columns)
+          <h6 style={{ fontSize: ".85rem", fontWeight: 800, color: "#022624", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: ".75rem" }}>
+            <i className="bi bi-layout-three-columns me-1" style={{ color: "#0abab5" }} />Consolidated Master Record (22 Columns)
           </h6>
           <div className="history-table-wrap">
             <table className="history-table">
               <thead>
                 <tr>
-                  <th style={{ background: "#1e40af", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice No</th>
-                  <th style={{ background: "#1e40af", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice Date</th>
-                  <th style={{ background: "#1e40af", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice Period</th>
-                  <th style={{ background: "#1e40af", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Assessable Val</th>
-                  <th style={{ background: "#1e40af", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Tax</th>
-                  <th style={{ background: "#1e40af", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Inv Val</th>
-                  <th style={{ background: "#b45309", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>PO Number</th>
-                  <th style={{ background: "#b45309", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>PO Date</th>
-                  <th style={{ background: "#b45309", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Delivery Date</th>
-                  <th style={{ background: "#b45309", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total PO Amt</th>
-                  <th style={{ background: "#047857", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Remittance No</th>
-                  <th style={{ background: "#047857", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Remittance Date</th>
-                  <th style={{ background: "#047857", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Gross Amt</th>
-                  <th style={{ background: "#047857", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Gross Amt</th>
-                  <th style={{ background: "#4338ca", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>GST (18%)</th>
-                  <th style={{ background: "#4338ca", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>TDS ({calcData.tds_rate}%)</th>
-                  <th style={{ background: "#4338ca", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Receivable</th>
+                  <th style={{ background: "#075955", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice No</th>
+                  <th style={{ background: "#075955", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice Date</th>
+                  <th style={{ background: "#075955", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice Period</th>
+                  <th style={{ background: "#075955", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Assessable Val</th>
+                  <th style={{ background: "#075955", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Tax</th>
+                  <th style={{ background: "#075955", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Inv Val</th>
+                  <th style={{ background: "#b8860b", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>PO Number</th>
+                  <th style={{ background: "#b8860b", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>PO Date</th>
+                  <th style={{ background: "#b8860b", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Delivery Date</th>
+                  <th style={{ background: "#b8860b", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total PO Amt</th>
+                  <th style={{ background: "#0abab5", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Remittance No</th>
+                  <th style={{ background: "#0abab5", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Remittance Date</th>
+                  <th style={{ background: "#0abab5", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Gross Amt</th>
+                  <th style={{ background: "#0abab5", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Gross Amt</th>
+                  <th style={{ background: "#d4af37", color: "#022624", fontWeight: 800, padding: ".75rem 1rem" }}>GST (18%)</th>
+                  <th style={{ background: "#d4af37", color: "#022624", fontWeight: 800, padding: ".75rem 1rem" }}>TDS ({calcData.tds_rate}%)</th>
+                  <th style={{ background: "#d4af37", color: "#022624", fontWeight: 800, padding: ".75rem 1rem" }}>Receivable</th>
                 </tr>
               </thead>
               <tbody>
@@ -89,7 +89,7 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
                   <td>{po.po_date || "—"}</td>
                   <td>{po.delivery_date || "—"}</td>
                   <td className="money">{fmt(po.total_amount)}</td>
-                  <td><span className="id-badge" style={{ background: "#f0fdf4", color: "#065f46", borderColor: "#a7f3d0" }}>{remittance.remittance_number || "—"}</span></td>
+                  <td><span className="id-badge" style={{ background: "#e8faf8", color: "#075955", borderColor: "#9de6df" }}>{remittance.remittance_number || "—"}</span></td>
                   <td>{remittance.remittance_date || "—"}</td>
                   <td className="money">{fmt(remittance.gross_amount)}</td>
                   <td className="money">{fmt(remittance.total_gross_amount)}</td>
@@ -103,13 +103,13 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
         </div>
 
         {/* Structured Field-by-Field Matrix Table */}
-        <h6 style={{ fontSize: ".85rem", fontWeight: 800, color: "#1e293b", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: ".75rem" }}>
-          <i className="bi bi-list-check me-1" style={{ color: "#2563eb" }} />Detailed Field Breakdown (All Rows)
+        <h6 style={{ fontSize: ".85rem", fontWeight: 800, color: "#022624", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: ".75rem" }}>
+          <i className="bi bi-list-check me-1" style={{ color: "#0abab5" }} />Detailed Field Breakdown (All Rows)
         </h6>
         <div className="history-table-wrap">
           <table className="info-table" style={{ width: "100%" }}>
             <thead>
-              <tr style={{ background: "#1e293b" }}>
+              <tr style={{ background: "linear-gradient(135deg, #022624 0%, #075955 100%)", borderBottom: "2px solid #d4af37" }}>
                 <th style={{ width: "22%", padding: ".75rem 1rem", color: "#ffffff", fontWeight: 800 }}>Document / Category</th>
                 <th style={{ width: "48%", padding: ".75rem 1rem", color: "#ffffff", fontWeight: 800 }}>Field Name &amp; Description</th>
                 <th style={{ width: "30%", padding: ".75rem 1rem", color: "#ffffff", fontWeight: 800 }}>Extracted / Computed Value</th>
@@ -117,16 +117,17 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
             </thead>
             <tbody>
               {fields.map((f, i) => (
-                <tr key={i} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                  <td style={{ padding: ".55rem 1rem", fontWeight: 600, color: "#475569", fontSize: ".8rem" }}>
+                <tr key={i} style={{ borderBottom: "1px solid #f0fbf9" }}>
+                  <td style={{ padding: ".55rem 1rem", fontWeight: 600, color: "#3e6563", fontSize: ".8rem" }}>
                     <span style={{
                       display: "inline-block",
                       padding: ".15rem .5rem",
                       borderRadius: 4,
                       fontSize: ".72rem",
                       fontWeight: 700,
-                      background: f.section === "Invoice" ? "#eff6ff" : f.section === "Purchase Order" ? "#fffbeb" : f.section === "Remittance" ? "#f0fdf4" : "#f5f3ff",
-                      color: f.section === "Invoice" ? "#1d4ed8" : f.section === "Purchase Order" ? "#b45309" : f.section === "Remittance" ? "#047857" : "#6d28d9"
+                      background: f.section === "Invoice" ? "#e8faf8" : f.section === "Purchase Order" ? "#fef9e7" : f.section === "Remittance" ? "#e0f7f5" : "#fdf8ea",
+                      color: f.section === "Invoice" ? "#075955" : f.section === "Purchase Order" ? "#92400e" : f.section === "Remittance" ? "#054340" : "#784e13",
+                      border: f.section === "Invoice" ? "1px solid #9de6df" : f.section === "Purchase Order" ? "1px solid #fde68a" : f.section === "Remittance" ? "1px solid #81d8d0" : "1px solid #f7e283"
                     }}>
                       {f.section}
                     </span>

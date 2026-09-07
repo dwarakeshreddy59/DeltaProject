@@ -112,9 +112,9 @@ export default function SearchTab() {
   return (
     <div className="search-wrapper animate-fadein">
       {/* ── Search Header ── */}
-      <div className="search-header" style={{ background: "linear-gradient(135deg, #070d1f 0%, #1e1b4b 50%, #312e81 100%)" }}>
+      <div className="search-header" style={{ background: "linear-gradient(135deg, #075955 0%, #0abab5 100%)", borderBottom: "2px solid #d4af37" }}>
         <div className="search-title">
-          <i className="bi bi-search-heart-fill" style={{ color: "#38bdf8" }} />
+          <i className="bi bi-search-heart-fill" style={{ color: "#fbe296" }} />
           Smart Database Search &amp; Discovery
         </div>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: ".65rem" }}>
@@ -125,10 +125,10 @@ export default function SearchTab() {
       </div>
 
       {/* ── Search Controls Panel ── */}
-      <div style={{ padding: "1.75rem", background: "#ffffff", borderBottom: "1px solid #e2e8f0" }}>
+      <div style={{ padding: "1.75rem", background: "#ffffff", borderBottom: "1px solid #cbf3ef" }}>
         {/* Quick field selector pills */}
         <div style={{ display: "flex", gap: ".6rem", flexWrap: "wrap", marginBottom: "1.25rem", alignItems: "center" }}>
-          <span style={{ fontSize: ".75rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: ".05em", marginRight: ".3rem" }}>
+          <span style={{ fontSize: ".75rem", fontWeight: 700, color: "#075955", textTransform: "uppercase", letterSpacing: ".05em", marginRight: ".3rem" }}>
             Search Target:
           </span>
           {FIELDS.map((f) => {
@@ -138,9 +138,9 @@ export default function SearchTab() {
                 key={f.value}
                 onClick={() => setField(f.value)}
                 style={{
-                  background: isSelected ? "linear-gradient(135deg,#2563eb,#1d4ed8)" : "#f8fafc",
-                  color: isSelected ? "#ffffff" : "#475569",
-                  border: `1.5px solid ${isSelected ? "#2563eb" : "#cbd5e1"}`,
+                  background: isSelected ? "linear-gradient(135deg,#075955,#0abab5)" : "#ffffff",
+                  color: isSelected ? "#ffffff" : "#075955",
+                  border: `1.5px solid ${isSelected ? "#d4af37" : "#cbf3ef"}`,
                   borderRadius: 10,
                   padding: ".45rem .95rem",
                   fontSize: ".82rem",
@@ -150,11 +150,11 @@ export default function SearchTab() {
                   display: "flex",
                   alignItems: "center",
                   gap: ".45rem",
-                  boxShadow: isSelected ? "0 4px 14px rgba(37,99,235,.35)" : "none",
+                  boxShadow: isSelected ? "0 4px 14px rgba(10,186,181,.35)" : "none",
                   transform: isSelected ? "translateY(-1px)" : "none",
                 }}
               >
-                <i className={`bi ${f.icon}`} style={{ color: isSelected ? "#bae6fd" : "#64748b" }} />
+                <i className={`bi ${f.icon}`} style={{ color: isSelected ? "#fbe296" : "#0abab5" }} />
                 {f.label}
               </button>
             );
@@ -223,14 +223,14 @@ export default function SearchTab() {
               padding: ".75rem 2rem",
               fontSize: ".9rem",
               fontWeight: 700,
-              background: "linear-gradient(135deg,#2563eb,#1d4ed8)",
+              background: "linear-gradient(135deg,#0abab5,#075955)",
               color: "#fff",
-              border: "none",
+              border: "1.5px solid #d4af37",
               cursor: loading ? "not-allowed" : "pointer",
               display: "flex",
               alignItems: "center",
               gap: ".6rem",
-              boxShadow: "0 4px 15px rgba(37,99,235,.35)",
+              boxShadow: "0 4px 15px rgba(10,186,181,.35)",
               transition: "all .2s",
             }}
           >
@@ -281,22 +281,23 @@ export default function SearchTab() {
                 width: 72,
                 height: 72,
                 borderRadius: 24,
-                background: "linear-gradient(135deg,#eff6ff,#dbeafe)",
+                background: "linear-gradient(135deg,#e8faf8,#cbf3ef)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 margin: "0 auto 1.25rem",
                 fontSize: "2rem",
-                color: "#2563eb",
-                boxShadow: "0 8px 25px rgba(37,99,235,.15)",
+                color: "#075955",
+                border: "1.5px solid #d4af37",
+                boxShadow: "0 8px 25px rgba(10,186,181,.2)",
               }}
             >
               <i className="bi bi-search" />
             </div>
-            <h5 style={{ fontWeight: 800, fontSize: "1.15rem", color: "#0f172a", marginBottom: ".4rem" }}>
+            <h5 style={{ fontWeight: 800, fontSize: "1.15rem", color: "#043e3b", marginBottom: ".4rem" }}>
               Instant Multi-Field Search
             </h5>
-            <p style={{ fontSize: ".88rem", maxWidth: 520, margin: "0 auto 1.5rem", lineHeight: 1.5, color: "#64748b" }}>
+            <p style={{ fontSize: ".88rem", maxWidth: 520, margin: "0 auto 1.5rem", lineHeight: 1.5, color: "#4b7270" }}>
               Search across <strong>Invoices</strong>, <strong>Purchase Orders</strong>, <strong>Remittances</strong>, <strong>Descriptions</strong>, or <strong>Dates</strong> with partial match and zero-normalization.
             </p>
           </div>
@@ -325,9 +326,9 @@ export default function SearchTab() {
               onClick={() => { setField("all"); handleSearch(query, "all"); }}
               style={{
                 marginTop: "1rem",
-                background: "#eff6ff",
-                color: "#1d4ed8",
-                border: "1.5px solid #bfdbfe",
+                background: "#e8faf8",
+                color: "#075955",
+                border: "1.5px solid #0abab5",
                 borderRadius: 8,
                 padding: ".45rem 1rem",
                 fontSize: ".82rem",
@@ -346,13 +347,13 @@ export default function SearchTab() {
             {/* Results Banner */}
             <div
               style={{
-                background: "linear-gradient(135deg,#eff6ff,#e0e7ff)",
-                border: "1px solid #bfdbfe",
+                background: "linear-gradient(135deg,#e8faf8,#fef9e7)",
+                border: "1.5px solid #d4af37",
                 borderRadius: 10,
                 padding: ".75rem 1.25rem",
                 marginBottom: "1rem",
                 fontSize: ".85rem",
-                color: "#1e3a8a",
+                color: "#043e3b",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
@@ -361,12 +362,12 @@ export default function SearchTab() {
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: ".6rem" }}>
-                <i className="bi bi-check-circle-fill" style={{ color: "#2563eb", fontSize: "1.1rem" }} />
+                <i className="bi bi-check-circle-fill" style={{ color: "#0abab5", fontSize: "1.1rem" }} />
                 <span>
                   Found <strong>{records.length}</strong> matching record(s) for <strong>"{query}"</strong> in <strong>{FIELDS.find((f) => f.value === field)?.label}</strong>
                 </span>
               </div>
-              <span style={{ fontSize: ".75rem", fontWeight: 700, color: "#4338ca", background: "rgba(255,255,255,.6)", padding: ".2rem .6rem", borderRadius: 6 }}>
+              <span style={{ fontSize: ".75rem", fontWeight: 800, color: "#043e3b", background: "#fbe296", border: "1px solid #d4af37", padding: ".2rem .6rem", borderRadius: 6 }}>
                 Page {page} of {totalPages}
               </span>
             </div>
