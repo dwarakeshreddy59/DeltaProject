@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import DropZone from "./DropZone";
+import WrongFileModal from "./WrongFileModal";
 
 const SLOTS = [
   {
     key: "invoice",
     label: "Invoice PDF",
-    hint: "Document No. & Invoice Date",
+    hint: "Tax Invoice / e-Invoice & Details",
     icon: "bi-receipt",
     color: "#A855F7",
     bg: "linear-gradient(135deg, #7C3AED, #A855F7)",
@@ -21,20 +22,21 @@ const SLOTS = [
   {
     key: "remittance",
     label: "Remittance PDF",
-    hint: "Payment Ref. & Gross Amount",
+    hint: "Remittance Advice & Cleared Items",
     icon: "bi-cash-stack",
     color: "#22C55E",
     bg: "linear-gradient(135deg, #16A34A, #22C55E)",
   },
 ];
 
-export default function UploadForm({ onSubmit, loading }) {
+export default function UploadForm({ onSubmit, loading, mismatchError, onClearMismatch }) {
   const [files, setFiles] = useState({ invoice: null, po: null, remittance: null });
   const [errors, setErrors] = useState({});
 
   const setFile = (key) => (f) => {
     setFiles((prev) => ({ ...prev, [key]: f }));
     setErrors((prev) => ({ ...prev, [key]: false }));
+    if (onClearMismatch) onClearMismatch();
   };
 
   const allSelected = files.invoice && files.po && files.remittance;
@@ -59,29 +61,63 @@ export default function UploadForm({ onSubmit, loading }) {
   const handleReset = () => {
     setFiles({ invoice: null, po: null, remittance: null });
     setErrors({});
+    if (onClearMismatch) onClearMismatch();
+  };
+
+  const handleAutoSwap = (slotA, slotB) => {
+    const fileA = files[slotA];
+    const fileB = files[slotB];
+    const swapped = { ...files, [slotA]: fileB, [slotB]: fileA };
+    setFiles(swapped);
+    if (onClearMismatch) onClearMismatch();
+
+    // Auto resubmit swapped files immediately
+    if (swapped.invoice && swapped.po && swapped.remittance) {
+      const fd = new FormData();
+      fd.append("invoice_pdf", swapped.invoice);
+      fd.append("po_pdf", swapped.po);
+      fd.append("remittance_pdf", swapped.remittance);
+      fd.append("tds_rate", 2.0);
+      onSubmit(fd);
+    }
   };
 
   // Count how many slots are filled
   const filled = Object.values(files).filter(Boolean).length;
+  const mismatches = mismatchError?.mismatches || [];
 
   return (
     <div className="upload-wrapper animate-fadein">
+      {/* Centered High-Visibility Error Modal */}
+      <WrongFileModal
+        errorData={mismatchError}
+        onClose={onClearMismatch}
+        onAutoSwap={handleAutoSwap}
+      />
+
       <div className="upload-header">
-        <i className="bi bi-cloud-arrow-up-fill" />
-        Upload &amp; Extract Documents
-        <span style={{ marginLeft: "auto", fontSize: ".78rem", opacity: 0.8, fontWeight: 600 }}>
-          {filled}/3 PDFs Ready
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: ".6rem" }}>
+          <span className="header-icon-glow">
+            <i className="bi bi-cloud-arrow-up-fill" />
+          </span>
+          <span style={{ fontWeight: 800, letterSpacing: "-0.01em" }}>Upload &amp; Extract Documents</span>
+        </div>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: ".5rem" }}>
+          <span className="upload-counter-pill">
+            <i className="bi bi-layers-fill me-1" />
+            {filled}/3 PDFs Loaded
+          </span>
+        </div>
       </div>
 
       {/* Progress bar */}
-      <div style={{ height: 4, background: "rgba(168, 85, 247, 0.15)" }}>
+      <div style={{ height: 4, background: "rgba(168, 85, 247, 0.15)", overflow: "hidden" }}>
         <div
           style={{
             height: "100%",
             width: `${(filled / 3) * 100}%`,
             background: filled === 3 ? "linear-gradient(90deg, #7C3AED, #22C55E)" : "linear-gradient(90deg, #7C3AED, #A855F7)",
-            boxShadow: "0 0 12px rgba(168, 85, 247, 0.6)",
+            boxShadow: "0 0 14px rgba(168, 85, 247, 0.7)",
             transition: "width .4s cubic-bezier(.34,1.56,.64,1)",
           }}
         />
@@ -91,23 +127,27 @@ export default function UploadForm({ onSubmit, loading }) {
         <form onSubmit={handleSubmit}>
           {/* Drop zones for all 3 PDFs */}
           <div className="row g-3" style={{ marginBottom: "1.25rem" }}>
-            {SLOTS.map(({ key, label, hint }) => (
-              <div key={key} className="col-md-4">
-                {errors[key] && (
-                  <p style={{ color: "#ef4444", fontSize: ".75rem", marginBottom: ".35rem", fontWeight: 600 }}>
-                    <i className="bi bi-exclamation-circle me-1" />{label} is required
-                  </p>
-                )}
-                <DropZone
-                  slot={key}
-                  label={label}
-                  hint={hint}
-                  file={files[key]}
-                  onFile={setFile(key)}
-                  hasError={errors[key]}
-                />
-              </div>
-            ))}
+            {SLOTS.map(({ key, label, hint }) => {
+              const slotMismatch = mismatches.find((m) => m.slot === key);
+              return (
+                <div key={key} className="col-md-4">
+                  {errors[key] && (
+                    <p style={{ color: "#ef4444", fontSize: ".75rem", marginBottom: ".35rem", fontWeight: 600 }}>
+                      <i className="bi bi-exclamation-circle me-1" />{label} is required
+                    </p>
+                  )}
+                  <DropZone
+                    slot={key}
+                    label={label}
+                    hint={hint}
+                    file={files[key]}
+                    onFile={setFile(key)}
+                    hasError={errors[key]}
+                    mismatch={slotMismatch}
+                  />
+                </div>
+              );
+            })}
           </div>
 
           {/* Action Row - Dedicated Upload & Extract button */}

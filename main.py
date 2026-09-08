@@ -125,29 +125,75 @@ async def upload(
     warnings = []
 
     try:
-        # ── Smart Wrong-File Detection ────────────────────────────────────────
-        from utils.pdf_utils import get_pdf_text
-        text_inv = get_pdf_text(inv_path).lower()
-        text_po  = get_pdf_text(po_path).lower()
-        text_rem = get_pdf_text(rem_path).lower()
-        
-        if "remittance" in text_inv and "invoice" not in text_inv:
-            warnings.append("The file in the Invoice slot looks like a Remittance document!")
-        if "purchase order" in text_inv or "po no" in text_inv[:200]:
-            if "invoice" not in text_inv:
-                warnings.append("The file in the Invoice slot looks like a Purchase Order!")
-                
-        if "invoice" in text_rem and "remittance" not in text_rem and "payment" not in text_rem:
-            warnings.append("The file in the Remittance slot looks like an Invoice!")
-            
-        if "invoice" in text_po and "purchase order" not in text_po:
-            warnings.append("The file in the PO slot looks like an Invoice!")
-            
-        # ── Extract ──────────────────────────────────────────────────────────
+        # ── Smart Strict Document Classification & Validation ────────────────
+        from utils.pdf_utils import classify_pdf_document
+
+        inv_class = classify_pdf_document(inv_path)
+        po_class  = classify_pdf_document(po_path)
+        rem_class = classify_pdf_document(rem_path)
+
+        mismatches = []
+        if inv_class["type"] != "INVOICE":
+            mismatches.append({
+                "slot": "invoice",
+                "slot_label": "Invoice PDF Slot",
+                "filename": inv_name,
+                "detected_type": inv_class["type"],
+                "detected_label": inv_class["label"],
+                "expected_type": "INVOICE",
+                "expected_label": "Tax Invoice",
+                "message": f"Uploaded file is a {inv_class['label']}. Expected: Tax Invoice.",
+            })
+        if po_class["type"] != "PURCHASE_ORDER":
+            mismatches.append({
+                "slot": "po",
+                "slot_label": "Purchase Order Slot",
+                "filename": po_name,
+                "detected_type": po_class["type"],
+                "detected_label": po_class["label"],
+                "expected_type": "PURCHASE_ORDER",
+                "expected_label": "Purchase Order",
+                "message": f"Uploaded file is a {po_class['label']}. Expected: Purchase Order.",
+            })
+        if rem_class["type"] != "REMITTANCE":
+            mismatches.append({
+                "slot": "remittance",
+                "slot_label": "Remittance PDF Slot",
+                "filename": remittance_pdf.filename or "remittance.pdf",
+                "detected_type": rem_class["type"],
+                "detected_label": rem_class["label"],
+                "expected_type": "REMITTANCE",
+                "expected_label": "Remittance Advice",
+                "message": f"Uploaded file is a {rem_class['label']}. Expected: Remittance Advice.",
+            })
+
+        if mismatches:
+            can_swap = False
+            swap_pair = None
+            if len(mismatches) == 2:
+                s1, s2 = mismatches[0], mismatches[1]
+                if s1["detected_type"] == s2["expected_type"] and s2["detected_type"] == s1["expected_type"]:
+                    can_swap = True
+                    swap_pair = [s1["slot"], s2["slot"]]
+
+            return JSONResponse(
+                status_code=422,
+                content={
+                    "success": False,
+                    "error_type": "WRONG_FILE_MISMATCH",
+                    "title": "Wrong PDF Document Detected",
+                    "message": "One or more documents were placed in the wrong upload slot. Extraction and database saving have been blocked to protect your records.",
+                    "mismatches": mismatches,
+                    "can_auto_swap": can_swap,
+                    "swap_pair": swap_pair,
+                },
+            )
+
+        # ── Extract (Only runs when all 3 documents are 100% verified) ───────
         po_data         = po_extractor.extract(po_path,  po_name)
         invoice_data    = invoice_extractor.extract(inv_path, inv_name)
         remittance_data = remittance_extractor.extract(rem_path, invoice_data.get("invoice_number", ""))
-        
+
         print("\n=== DEBUG EXTRACTION ===")
         print("PO DATA:", po_data)
         print("INVOICE DATA:", invoice_data)

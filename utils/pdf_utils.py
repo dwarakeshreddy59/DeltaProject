@@ -249,3 +249,130 @@ def find_amount_after_label(text: str, label_patterns: list, line_lookahead: int
                         if amt > 1:
                             return amt
     return 0.0
+
+
+def classify_pdf_document(source: str) -> dict:
+    """
+    Analyzes a PDF file path or text and determines whether it is:
+      - 'INVOICE' (Tax Invoice / e-Invoice)
+      - 'PURCHASE_ORDER' (Purchase Order / PO Change)
+      - 'REMITTANCE' (Remittance Advice / Payment Advice)
+      - 'UNKNOWN' (Unrecognized document)
+
+    Returns:
+      {
+        'type': 'INVOICE' | 'PURCHASE_ORDER' | 'REMITTANCE' | 'UNKNOWN',
+        'label': 'Tax Invoice' | 'Purchase Order' | 'Remittance Advice' | 'Unrecognized Document',
+        'confidence': float,
+        'scores': dict,
+        'matched_cues': list
+      }
+    """
+    text = ""
+    if os.path.isfile(source):
+        text = get_pdf_text(source)
+    else:
+        text = str(source)
+    
+    t = text.lower()
+    scores = {"INVOICE": 0, "PURCHASE_ORDER": 0, "REMITTANCE": 0}
+    cues = {"INVOICE": [], "PURCHASE_ORDER": [], "REMITTANCE": []}
+
+    # 1. Remittance cues
+    if "remittance advice" in t:
+        scores["REMITTANCE"] += 15
+        cues["REMITTANCE"].append("remittance advice")
+    if "invoices identified below have now been cleared" in t or "have now been cleared" in t:
+        scores["REMITTANCE"] += 15
+        cues["REMITTANCE"].append("cleared invoices notice")
+    if "our accounting clerk" in t or "your account with us" in t:
+        scores["REMITTANCE"] += 10
+        cues["REMITTANCE"].append("accounting clerk / account reference")
+    if "payment advice" in t:
+        scores["REMITTANCE"] += 12
+        cues["REMITTANCE"].append("payment advice")
+    if "remittance" in t:
+        scores["REMITTANCE"] += 5
+        cues["REMITTANCE"].append("remittance keyword")
+
+    # 2. Purchase Order cues
+    if "purchase order change" in t:
+        scores["PURCHASE_ORDER"] += 15
+        cues["PURCHASE_ORDER"].append("purchase order change")
+    if "purchase order" in t:
+        scores["PURCHASE_ORDER"] += 12
+        cues["PURCHASE_ORDER"].append("purchase order")
+    if "po nr" in t or "po no" in t or "po number" in t:
+        scores["PURCHASE_ORDER"] += 10
+        cues["PURCHASE_ORDER"].append("po number identifier")
+    if "purchasing company" in t:
+        scores["PURCHASE_ORDER"] += 10
+        cues["PURCHASE_ORDER"].append("purchasing company")
+    if "delivery and payment terms" in t:
+        scores["PURCHASE_ORDER"] += 8
+        cues["PURCHASE_ORDER"].append("delivery and payment terms")
+    if "vendor (agco" in t or "buyer order" in t:
+        scores["PURCHASE_ORDER"] += 8
+        cues["PURCHASE_ORDER"].append("vendor / buyer order")
+
+    # 3. Invoice cues
+    if "tax invoice" in t:
+        scores["INVOICE"] += 15
+        cues["INVOICE"].append("tax invoice header")
+    if "e-invoice" in t:
+        scores["INVOICE"] += 12
+        cues["INVOICE"].append("e-invoice header")
+    if "irn :" in t or "irn:" in t:
+        scores["INVOICE"] += 12
+        cues["INVOICE"].append("irn (invoice reference number)")
+    if "acknowledgement no" in t:
+        scores["INVOICE"] += 10
+        cues["INVOICE"].append("acknowledgement number")
+    if "details of receiver" in t or "details of consignee" in t:
+        scores["INVOICE"] += 10
+        cues["INVOICE"].append("details of receiver / consignee")
+    if "supply type code" in t or "reverse charge" in t:
+        scores["INVOICE"] += 8
+        cues["INVOICE"].append("gst supply type / reverse charge")
+    if "document no :" in t and ("acknowledgement" in t or "b2b" in t):
+        scores["INVOICE"] += 10
+        cues["INVOICE"].append("b2b document number")
+
+    best_type = max(scores, key=scores.get)
+    best_score = scores[best_type]
+
+    # Penalize cross-matches if contradictory strong cues exist
+    # e.g., if a remittance has the word 'invoice' in 'invoices identified below have now been cleared'
+    if best_type == "REMITTANCE" and "cleared invoices notice" in cues["REMITTANCE"]:
+        scores["INVOICE"] = 0
+
+    best_type = max(scores, key=scores.get)
+    best_score = scores[best_type]
+
+    LABELS = {
+        "INVOICE": "Tax Invoice",
+        "PURCHASE_ORDER": "Purchase Order",
+        "REMITTANCE": "Remittance Advice",
+        "UNKNOWN": "Unrecognized Document",
+    }
+
+    if best_score < 10:
+        return {
+            "type": "UNKNOWN",
+            "label": "Unrecognized Document",
+            "confidence": 0.0,
+            "scores": scores,
+            "matched_cues": [],
+        }
+
+    total_sc = sum(scores.values()) or 1
+    confidence = round(best_score / total_sc, 2)
+
+    return {
+        "type": best_type,
+        "label": LABELS[best_type],
+        "confidence": confidence,
+        "scores": scores,
+        "matched_cues": cues[best_type],
+    }
+

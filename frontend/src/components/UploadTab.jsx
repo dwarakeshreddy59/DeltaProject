@@ -8,13 +8,27 @@ import RemittanceCard from "./RemittanceCard";
 import ExtractedTableView from "./ExtractedTableView";
 import CalculationPanel from "./CalculationPanel";
 
-export default function UploadTab({ loading, results, calcData, onExtract, onRecalc, onViewRecords }) {
+export default function UploadTab({
+  loading,
+  results,
+  calcData,
+  mismatchError,
+  onExtract,
+  onRecalc,
+  onViewRecords,
+  onClearMismatch,
+}) {
   const [viewMode, setViewMode] = useState("cards");
 
   return (
     <>
-      {/* Upload Form */}
-      <UploadForm onSubmit={onExtract} loading={loading} />
+      {/* Upload Form with Centered Error Modal & Auto-Swap */}
+      <UploadForm
+        onSubmit={onExtract}
+        loading={loading}
+        mismatchError={mismatchError}
+        onClearMismatch={onClearMismatch}
+      />
 
       {/* Results */}
       {results && (

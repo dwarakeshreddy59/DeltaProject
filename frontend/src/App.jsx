@@ -12,7 +12,7 @@ const TABS = [
 ];
 
 export default function App() {
-  const { loading, results, calcData, extract, recalc } = useExtraction();
+  const { loading, results, calcData, mismatchError, extract, recalc, clearMismatchError } = useExtraction();
   const [activeTab,      setActiveTab]      = useState("upload");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [uploadCount,    setUploadCount]    = useState(0);
@@ -32,10 +32,11 @@ export default function App() {
   };
 
   const handleExtract = async (formData) => {
-    await extract(formData);
-    setRefreshTrigger((n) => n + 1);
-    setUploadCount((n) => n + 1);
-    // Auto-switch to records tab after successful extraction
+    const res = await extract(formData);
+    if (res?.success) {
+      setRefreshTrigger((n) => n + 1);
+      setUploadCount((n) => n + 1);
+    }
   };
 
   return (
@@ -94,9 +95,11 @@ export default function App() {
               loading={loading}
               results={results}
               calcData={calcData}
+              mismatchError={mismatchError}
               onExtract={handleExtract}
               onRecalc={recalc}
               onViewRecords={() => setActiveTab("records")}
+              onClearMismatch={clearMismatchError}
             />
           )}
           {activeTab === "records" && (

@@ -6,7 +6,7 @@ const SLOT_CONFIG = {
   remittance: { icon: "bi-cash-stack", color: "#22C55E", bg: "linear-gradient(135deg, #16A34A, #22C55E)" },
 };
 
-export default function DropZone({ slot, label, hint, file, onFile, hasError }) {
+export default function DropZone({ slot, label, hint, file, onFile, hasError, mismatch }) {
   const inputRef = useRef(null);
   const cfg = SLOT_CONFIG[slot] || SLOT_CONFIG.invoice;
 
@@ -31,7 +31,7 @@ export default function DropZone({ slot, label, hint, file, onFile, hasError }) 
 
   return (
     <div
-      className={`drop-zone dz-${slot}${file ? " has-file" : ""}${hasError ? " dz-error" : ""}`}
+      className={`drop-zone dz-${slot}${file ? " has-file" : ""}${hasError ? " dz-error" : ""}${mismatch ? " dz-mismatch animate-neonpulse" : ""}`}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onClick={() => !file && inputRef.current?.click()}
@@ -47,17 +47,33 @@ export default function DropZone({ slot, label, hint, file, onFile, hasError }) 
       />
 
       {/* Icon */}
-      <div className="drop-icon-wrap" style={{ background: cfg.bg }}>
-        {file
-          ? <i className="bi bi-check-circle-fill" style={{ color: "#fff", fontSize: "1.3rem" }} />
-          : <i className={`bi ${cfg.icon}`} style={{ color: "#fff" }} />
-        }
+      <div
+        className="drop-icon-wrap"
+        style={{ background: mismatch ? "linear-gradient(135deg, #EF4444, #DC2626)" : cfg.bg }}
+      >
+        {mismatch ? (
+          <i className="bi bi-exclamation-triangle-fill" style={{ color: "#fff", fontSize: "1.3rem" }} />
+        ) : file ? (
+          <i className="bi bi-check-circle-fill" style={{ color: "#fff", fontSize: "1.3rem" }} />
+        ) : (
+          <i className={`bi ${cfg.icon}`} style={{ color: "#fff" }} />
+        )}
       </div>
 
       {/* Label */}
-      <div className="drop-label" style={{ color: file ? "#22C55E" : undefined }}>
-        {file ? `${label} ✓` : label}
+      <div
+        className="drop-label"
+        style={{ color: mismatch ? "var(--danger-red)" : file ? "#22C55E" : undefined }}
+      >
+        {mismatch ? `${label} (Wrong Type!)` : file ? `${label} ✓` : label}
       </div>
+
+      {mismatch && (
+        <div className="dz-mismatch-pill animate-popin">
+          <i className="bi bi-x-octagon-fill me-1" />
+          Detected: <strong>{mismatch.detected_label}</strong>
+        </div>
+      )}
 
       {file ? (
         /* File info + change/clear buttons */

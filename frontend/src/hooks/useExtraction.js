@@ -6,17 +6,19 @@ import { uploadPDFs, recalculate as apiRecalculate } from "../services/api";
  * Custom hook – manages all extraction + calculation state.
  */
 export function useExtraction() {
-  const [loading, setLoading]   = useState(false);
-  const [results, setResults]   = useState(null);   // { po, invoice, remittance }
-  const [calcData, setCalcData] = useState(null);   // live calculation result
+  const [loading, setLoading]             = useState(false);
+  const [results, setResults]             = useState(null);       // { po, invoice, remittance }
+  const [calcData, setCalcData]           = useState(null);       // live calculation result
+  const [mismatchError, setMismatchError] = useState(null);       // 422 wrong file diagnostic data
 
   const extract = useCallback(async (formData) => {
     setLoading(true);
+    setMismatchError(null);
     try {
       const { data } = await uploadPDFs(formData);
       if (!data.success) {
         toast.error(data.errors?.join(" | ") || "Extraction failed.");
-        return;
+        return { success: false };
       }
       setResults(data);
       setCalcData({
@@ -33,11 +35,21 @@ export function useExtraction() {
       } else {
         toast.success("Extraction complete & saved to DB!");
       }
+      return { success: true, data };
     } catch (err) {
-      toast.error("Network error: " + err.message);
+      if (err.response?.status === 422 && err.response?.data?.error_type === "WRONG_FILE_MISMATCH") {
+        setMismatchError(err.response.data);
+        return { success: false, mismatch: err.response.data };
+      }
+      toast.error("Upload error: " + (err.response?.data?.detail || err.message));
+      return { success: false, error: err };
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const clearMismatchError = useCallback(() => {
+    setMismatchError(null);
   }, []);
 
   const recalc = useCallback(async (tdsRate) => {
@@ -56,5 +68,5 @@ export function useExtraction() {
     }
   }, [results, calcData]);
 
-  return { loading, results, calcData, extract, recalc };
+  return { loading, results, calcData, mismatchError, extract, recalc, clearMismatchError };
 }
