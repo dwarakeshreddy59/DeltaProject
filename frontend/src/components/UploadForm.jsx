@@ -64,19 +64,22 @@ export default function UploadForm({ onSubmit, loading, mismatchError, onClearMi
     if (onClearMismatch) onClearMismatch();
   };
 
-  const handleAutoSwap = (slotA, slotB) => {
-    const fileA = files[slotA];
-    const fileB = files[slotB];
-    const swapped = { ...files, [slotA]: fileB, [slotB]: fileA };
-    setFiles(swapped);
+  const handleAutoFix = (mapping) => {
+    // mapping is { invoice: sourceSlot, po: sourceSlot, remittance: sourceSlot }
+    const fixedFiles = {
+      invoice: mapping.invoice ? files[mapping.invoice] : files.invoice,
+      po: mapping.po ? files[mapping.po] : files.po,
+      remittance: mapping.remittance ? files[mapping.remittance] : files.remittance,
+    };
+    setFiles(fixedFiles);
     if (onClearMismatch) onClearMismatch();
 
-    // Auto resubmit swapped files immediately
-    if (swapped.invoice && swapped.po && swapped.remittance) {
+    // Auto resubmit correctly ordered files immediately
+    if (fixedFiles.invoice && fixedFiles.po && fixedFiles.remittance) {
       const fd = new FormData();
-      fd.append("invoice_pdf", swapped.invoice);
-      fd.append("po_pdf", swapped.po);
-      fd.append("remittance_pdf", swapped.remittance);
+      fd.append("invoice_pdf", fixedFiles.invoice);
+      fd.append("po_pdf", fixedFiles.po);
+      fd.append("remittance_pdf", fixedFiles.remittance);
       fd.append("tds_rate", 2.0);
       onSubmit(fd);
     }
@@ -92,7 +95,7 @@ export default function UploadForm({ onSubmit, loading, mismatchError, onClearMi
       <WrongFileModal
         errorData={mismatchError}
         onClose={onClearMismatch}
-        onAutoSwap={handleAutoSwap}
+        onAutoFix={handleAutoFix}
       />
 
       <div className="upload-header">

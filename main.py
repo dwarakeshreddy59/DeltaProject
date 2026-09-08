@@ -168,6 +168,24 @@ async def upload(
             })
 
         if mismatches:
+            slot_types = {
+                "invoice": inv_class["type"],
+                "po": po_class["type"],
+                "remittance": rem_class["type"],
+            }
+            inv_source = next((s for s, t in slot_types.items() if t == "INVOICE"), None)
+            po_source  = next((s for s, t in slot_types.items() if t == "PURCHASE_ORDER"), None)
+            rem_source = next((s for s, t in slot_types.items() if t == "REMITTANCE"), None)
+
+            can_auto_fix = (inv_source is not None and po_source is not None and rem_source is not None)
+            auto_fix_mapping = None
+            if can_auto_fix:
+                auto_fix_mapping = {
+                    "invoice": inv_source,
+                    "po": po_source,
+                    "remittance": rem_source,
+                }
+
             can_swap = False
             swap_pair = None
             if len(mismatches) == 2:
@@ -184,6 +202,8 @@ async def upload(
                     "title": "Wrong PDF Document Detected",
                     "message": "One or more documents were placed in the wrong upload slot. Extraction and database saving have been blocked to protect your records.",
                     "mismatches": mismatches,
+                    "can_auto_fix": can_auto_fix,
+                    "auto_fix_mapping": auto_fix_mapping,
                     "can_auto_swap": can_swap,
                     "swap_pair": swap_pair,
                 },

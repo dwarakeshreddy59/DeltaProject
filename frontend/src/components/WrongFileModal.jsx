@@ -5,10 +5,11 @@ import React from "react";
  * invalid PDFs are uploaded. Blocks corrupted database saving and provides
  * clear diagnosis plus an instant one-click auto-swap action.
  */
-export default function WrongFileModal({ errorData, onClose, onAutoSwap }) {
+export default function WrongFileModal({ errorData, onClose, onAutoFix }) {
   if (!errorData) return null;
 
-  const { title, message, mismatches = [], can_auto_swap, swap_pair } = errorData;
+  const { title, message, mismatches = [], can_auto_fix, auto_fix_mapping, can_auto_swap, swap_pair } = errorData;
+  const showAutoFix = can_auto_fix && auto_fix_mapping;
 
   return (
     <div className="modal-backdrop-overlay animate-fadein" onClick={onClose}>
@@ -96,20 +97,29 @@ export default function WrongFileModal({ errorData, onClose, onAutoSwap }) {
 
         {/* Action Buttons */}
         <div className="modal-actions-row">
-          {can_auto_swap && swap_pair && (
+          {showAutoFix ? (
             <button
               type="button"
               className="btn-action-swap btn-shine animate-neonpulse"
-              onClick={() => onAutoSwap(swap_pair[0], swap_pair[1])}
+              onClick={() => onAutoFix(auto_fix_mapping)}
             >
-              <i className="bi bi-arrow-left-right me-1" />
-              Auto-Swap {swap_pair[0].toUpperCase()} &amp; {swap_pair[1].toUpperCase()} Slots &amp; Re-Extract
+              <i className="bi bi-magic me-2" />
+              Fix Automatically
             </button>
-          )}
+          ) : can_auto_swap && swap_pair ? (
+            <button
+              type="button"
+              className="btn-action-swap btn-shine animate-neonpulse"
+              onClick={() => onAutoFix({ [swap_pair[0]]: swap_pair[1], [swap_pair[1]]: swap_pair[0] })}
+            >
+              <i className="bi bi-magic me-2" />
+              Fix Automatically
+            </button>
+          ) : null}
 
           <button type="button" className="btn-action-dismiss" onClick={onClose}>
-            <i className="bi bi-pencil-square me-1" />
-            Fix Slots Manually
+            <i className="bi bi-pencil-square me-2" />
+            Fix Manually
           </button>
         </div>
       </div>
