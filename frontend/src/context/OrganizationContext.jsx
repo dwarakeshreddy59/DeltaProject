@@ -12,13 +12,13 @@ const DEFAULT_NOMENCLATURE = {
 
 const DEFAULT_CLIENT = {
   id: 1,
-  client_name: "Delta Admin",
-  organization_name: "Delta IoT Solutions Private Limited",
+  client_name: "AGCO Admin",
+  organization_name: "AGCO",
   logo_url: "",
   gst_number: "27AAHCD2212P1ZJ",
   pan_number: "AAHCD2212P",
-  address: "Plot 42, Electronics City Phase 1, Bangalore 560100",
-  point_of_contact: "contact@deltaiotsolutions.com",
+  address: "Flat No 203, 2nd Floor, Lumbni Rockdale Compound, Diamond Block, Somajiguda, Hyderabad, Telangana - 500082",
+  point_of_contact: "accounts@agco.com",
   ...DEFAULT_NOMENCLATURE,
 };
 

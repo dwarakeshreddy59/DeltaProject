@@ -53,7 +53,7 @@ export default function Navbar({ theme = "dark", onToggleTheme }) {
             <div className="org-switcher-text">
               <span className="org-switcher-label">Organization</span>
               <span className="org-switcher-name">
-                {activeClient?.organization_name || "Delta IoT Solutions"}
+                {activeClient?.organization_name || "AGCO"}
               </span>
             </div>
             <i className={`bi bi-chevron-${dropdownOpen ? "up" : "down"} org-switcher-chevron`} />

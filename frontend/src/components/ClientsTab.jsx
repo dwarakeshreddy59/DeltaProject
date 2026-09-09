@@ -19,7 +19,7 @@ export default function ClientsTab() {
 
   const handleDelete = async (client) => {
     if (client.id === 1) {
-      toast.error("Initial Organization (Delta IoT Solutions) cannot be deleted.");
+      toast.error("Initial Organization (AGCO) cannot be deleted.");
       return;
     }
     if (

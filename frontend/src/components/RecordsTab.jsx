@@ -572,7 +572,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                           }}
                         >
                           <i className="bi bi-building" />
-                          {r.organization_name || "Delta IoT Solutions"}
+                          {r.organization_name || "AGCO"}
                         </span>
                       </td>
                       <td><span className="id-badge">{r.invoice_number || "—"}</span></td>
