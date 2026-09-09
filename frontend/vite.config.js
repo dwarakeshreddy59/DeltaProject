@@ -13,6 +13,8 @@ export default defineConfig({
       "/search":      "http://localhost:8000",
       "/export":      "http://localhost:8000",
       "/debug":       "http://localhost:8000",
+      "/clients":     "http://localhost:8000",
+      "/uploads":     "http://localhost:8000",
     },
   },
   build: {
