@@ -7423,3 +7423,305 @@ body {
 [data-theme="bright"] .pure-text-table tbody tr:hover {
   background: #F1F5F9;
 }
+
+
+/* ==========================================================================
+   CHANGE / ADD LOGO ANYTIME MODAL & TRIGGER STYLES
+   ========================================================================== */
+
+/* Workspace Header Logo Button */
+.btn-ws-logo {
+  background: rgba(168, 85, 247, 0.15);
+  border: 1.5px solid #A855F7;
+  color: #E9D5FF;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-ws-logo:hover {
+  background: #7C3AED;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
+  transform: translateY(-1px);
+}
+
+/* Card Camera Button */
+.btn-card-logo {
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #C084FC;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-card-logo:hover {
+  background: #7C3AED;
+  border-color: #A855F7;
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+/* Avatar Hover Camera Badge */
+.workspace-avatar,
+.hub-card-avatar {
+  position: relative;
+  cursor: pointer;
+}
+
+.avatar-edit-hover-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #7C3AED;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.workspace-avatar:hover .avatar-edit-hover-badge,
+.hub-card-avatar:hover .avatar-edit-hover-badge {
+  transform: scale(1.15);
+  background: #9333EA;
+}
+
+/* Logo Modal Card */
+.logo-modal-card {
+  max-width: 520px;
+  width: 95%;
+  background: linear-gradient(135deg, rgba(26, 16, 50, 0.98), rgba(38, 20, 70, 0.95));
+  border: 1.5px solid rgba(168, 85, 247, 0.4);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  padding: 1.75rem;
+}
+
+.logo-modal-badge-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7C3AED, #9333EA);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.25rem;
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.5);
+  flex-shrink: 0;
+}
+
+/* Live Preview Box */
+.logo-preview-box {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+}
+
+.logo-preview-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  background: #ffffff !important;
+  border: 2px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.logo-preview-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+
+.logo-preview-initials {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1E1B4B;
+}
+
+.logo-preview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.btn-remove-logo-inline {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #FCA5A5;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-top: 0.35rem;
+  transition: all 0.2s;
+}
+
+.btn-remove-logo-inline:hover {
+  background: #EF4444;
+  color: #ffffff;
+}
+
+/* Mode Switcher Tabs */
+.logo-mode-tabs {
+  display: flex;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 0.3rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 0.4rem;
+}
+
+.logo-mode-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #9CA3AF;
+  padding: 0.5rem 0.75rem;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.logo-mode-tab:hover {
+  color: #ffffff;
+}
+
+.logo-mode-tab.active {
+  background: linear-gradient(135deg, #7C3AED, #9333EA);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+}
+
+/* Dropzone */
+.logo-dropzone {
+  border: 2px dashed rgba(168, 85, 247, 0.45);
+  background: rgba(124, 58, 237, 0.08);
+  border-radius: 14px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo-dropzone:hover {
+  border-color: #C084FC;
+  background: rgba(124, 58, 237, 0.15);
+}
+
+.logo-dropzone-icon {
+  font-size: 2rem;
+  color: #A855F7;
+  margin-bottom: 0.5rem;
+}
+
+.logo-selected-file-chip {
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid #10B981;
+  color: #6EE7B7;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 50px;
+  margin-top: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ── Bright Theme Overrides ── */
+[data-theme="bright"] .logo-modal-card {
+  background: #ffffff;
+  border-color: #E2E8F0;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="bright"] .logo-preview-box {
+  background: #F8FAFC;
+  border-color: #E2E8F0;
+}
+
+[data-theme="bright"] .logo-mode-tabs {
+  background: #F1F5F9;
+  border-color: #E2E8F0;
+}
+
+[data-theme="bright"] .logo-mode-tab {
+  color: #4B5563;
+}
+
+[data-theme="bright"] .logo-mode-tab:hover {
+  color: #111827;
+}
+
+[data-theme="bright"] .logo-mode-tab.active {
+  background: #7C3AED;
+  color: #ffffff;
+}
+
+[data-theme="bright"] .logo-dropzone {
+  background: #FAF5FF;
+  border-color: #C084FC;
+}
+
+[data-theme="bright"] .btn-card-logo {
+  background: #FAF5FF;
+  border-color: #D8B4FE;
+  color: #6B21A8;
+}
+
+[data-theme="bright"] .btn-card-logo:hover {
+  background: #7C3AED;
+  color: #ffffff;
+}
+
+[data-theme="bright"] .btn-ws-logo {
+  background: #FAF5FF;
+  border-color: #D8B4FE;
+  color: #6B21A8;
+}
+
+[data-theme="bright"] .btn-ws-logo:hover {
+  background: #7C3AED;
+  color: #ffffff;
+}

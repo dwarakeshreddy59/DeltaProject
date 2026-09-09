@@ -2,7 +2,7 @@ import React from "react";
 import { useOrganization } from "../context/OrganizationContext";
 
 export default function CompanyWorkspaceHeader() {
-  const { activeCompany, nomenclature, goToHub, openRegisterModal } = useOrganization();
+  const { activeCompany, nomenclature, goToHub, openRegisterModal, openLogoModal } = useOrganization();
 
   if (!activeCompany) return null;
 
@@ -27,6 +27,15 @@ export default function CompanyWorkspaceHeader() {
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: ".6rem" }}>
           <button
             type="button"
+            onClick={() => openLogoModal(activeCompany)}
+            className="btn-ws-logo"
+            title="Add or change company logo anytime"
+          >
+            <i className="bi bi-camera-fill me-1" />
+            {activeCompany.logo_url ? "Change Logo" : "Add Logo"}
+          </button>
+          <button
+            type="button"
             onClick={openRegisterModal}
             className="btn-ws-register"
           >
@@ -46,7 +55,13 @@ export default function CompanyWorkspaceHeader() {
       <div className="workspace-main-row">
         {/* Company Identity */}
         <div className="workspace-identity">
-          <div className="workspace-avatar">
+          <div
+            className="workspace-avatar"
+            onClick={() => openLogoModal(activeCompany)}
+            title="Click to Add or Change Logo anytime"
+            role="button"
+            tabIndex={0}
+          >
             {activeCompany.logo_url ? (
               <img
                 src={activeCompany.logo_url}
@@ -60,6 +75,9 @@ export default function CompanyWorkspaceHeader() {
             <span style={{ display: activeCompany.logo_url ? "none" : "inline" }}>
               {activeCompany.organization_name?.slice(0, 2).toUpperCase() || "CO"}
             </span>
+            <div className="avatar-edit-hover-badge" title="Change Logo">
+              <i className="bi bi-camera-fill" />
+            </div>
           </div>
 
           <div className="workspace-details">

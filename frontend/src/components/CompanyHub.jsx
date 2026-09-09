@@ -5,7 +5,7 @@ import PDFReferenceTable from "./PDFReferenceTable";
 import toast from "react-hot-toast";
 
 export default function CompanyHub() {
-  const { clients, selectCompany, openRegisterModal, refreshClients } = useOrganization();
+  const { clients, selectCompany, openRegisterModal, refreshClients, openLogoModal } = useOrganization();
   const [searchTerm, setSearchTerm] = useState("");
   const [hubView, setHubView] = useState("cards"); // 'cards' | 'table'
   const [deletingId, setDeletingId] = useState(null);
@@ -184,7 +184,16 @@ export default function CompanyHub() {
                 >
                   {/* Top Bar: Avatar & Title */}
                   <div className="hub-card-head">
-                    <div className="hub-card-avatar">
+                    <div
+                      className="hub-card-avatar"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openLogoModal(client);
+                      }}
+                      title="Click to Add or Change Logo anytime"
+                      role="button"
+                      tabIndex={0}
+                    >
                       {client.logo_url ? (
                         <img
                           src={client.logo_url}
@@ -198,6 +207,9 @@ export default function CompanyHub() {
                       <span style={{ display: client.logo_url ? "none" : "inline" }}>
                         {client.organization_name?.slice(0, 2).toUpperCase() || "CO"}
                       </span>
+                      <div className="avatar-edit-hover-badge" title="Change Logo">
+                        <i className="bi bi-camera-fill" />
+                      </div>
                     </div>
 
                     <div className="hub-card-info">
@@ -261,6 +273,18 @@ export default function CompanyHub() {
                     </span>
 
                     <div style={{ display: "flex", alignItems: "center", gap: ".45rem" }}>
+                      <button
+                        type="button"
+                        className="btn-card-logo"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openLogoModal(client);
+                        }}
+                        title="Add or Change Logo anytime"
+                      >
+                        <i className="bi bi-camera-fill" />
+                      </button>
+
                       {client.id !== 1 && (
                         <button
                           type="button"

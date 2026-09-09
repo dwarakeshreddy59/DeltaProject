@@ -7,6 +7,7 @@ import RecordsTab from "./components/RecordsTab";
 import PDFFieldReferenceTab from "./components/PDFFieldReferenceTab";
 import SearchTab from "./components/SearchTab";
 import ClientRegistrationModal from "./components/ClientRegistrationModal";
+import ChangeLogoModal from "./components/ChangeLogoModal";
 import { OrganizationProvider, useOrganization } from "./context/OrganizationContext";
 import { useExtraction } from "./hooks/useExtraction";
 
@@ -19,6 +20,9 @@ function AppContent() {
     isRegisterModalOpen,
     closeRegisterModal,
     refreshClients,
+    logoModalCompany,
+    isLogoModalOpen,
+    closeLogoModal,
   } = useOrganization();
 
   const {
@@ -95,6 +99,13 @@ function AppContent() {
       <ClientRegistrationModal
         isOpen={isRegisterModalOpen}
         onClose={closeRegisterModal}
+      />
+
+      {/* Global Change/Add Logo Modal (Available Anytime) */}
+      <ChangeLogoModal
+        company={logoModalCompany}
+        isOpen={isLogoModalOpen}
+        onClose={closeLogoModal}
       />
 
       <Navbar theme={theme} onToggleTheme={toggleTheme} />

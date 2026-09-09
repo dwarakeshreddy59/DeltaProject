@@ -41,6 +41,7 @@ export function OrganizationProvider({ children }) {
   });
   const [loadingClients, setLoadingClients] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [logoModalCompany, setLogoModalCompany] = useState(null);
 
   const loadClients = useCallback(async () => {
     setLoadingClients(true);
@@ -94,6 +95,14 @@ export function OrganizationProvider({ children }) {
   const openRegisterModal = () => setIsRegisterModalOpen(true);
   const closeRegisterModal = () => setIsRegisterModalOpen(false);
 
+  const openLogoModal = useCallback((company) => {
+    setLogoModalCompany(company || activeCompany || clients[0] || null);
+  }, [activeCompany, clients]);
+
+  const closeLogoModal = useCallback(() => {
+    setLogoModalCompany(null);
+  }, []);
+
   const value = {
     clients,
     activeCompany,
@@ -111,6 +120,10 @@ export function OrganizationProvider({ children }) {
     isRegisterModalOpen,
     openRegisterModal,
     closeRegisterModal,
+    logoModalCompany,
+    isLogoModalOpen: Boolean(logoModalCompany),
+    openLogoModal,
+    closeLogoModal,
   };
 
   return (
