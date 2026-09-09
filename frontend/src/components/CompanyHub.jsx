@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useOrganization } from "../context/OrganizationContext";
 import { deleteClient } from "../services/api";
+import PDFReferenceTable from "./PDFReferenceTable";
 import toast from "react-hot-toast";
 
 export default function CompanyHub() {
   const { clients, selectCompany, openRegisterModal, refreshClients } = useOrganization();
   const [searchTerm, setSearchTerm] = useState("");
+  const [hubView, setHubView] = useState("cards"); // 'cards' | 'table'
   const [deletingId, setDeletingId] = useState(null);
 
   const filteredClients = clients.filter((c) => {
@@ -81,19 +83,25 @@ export default function CompanyHub() {
               )}
             </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                if (clients.length > 0) selectCompany(clients[0].id);
-                setTimeout(() => {
-                  window.dispatchEvent(new CustomEvent("switch_tab", { detail: "reference" }));
-                }, 50);
-              }}
-              className="btn-register-company-secondary"
-              title="Open the PDF Field Reference & Nomenclature Guide"
-            >
-              <i className="bi bi-journal-bookmark-fill" /> PDF Field Reference
-            </button>
+            {/* View Switcher on Home: Cards vs Table */}
+            <div className="hub-view-mode-toggle">
+              <button
+                type="button"
+                className={`btn-hub-toggle ${hubView === "cards" ? "active" : ""}`}
+                onClick={() => setHubView("cards")}
+                title="View Company Workspaces"
+              >
+                <i className="bi bi-grid-fill me-1" /> Workspaces
+              </button>
+              <button
+                type="button"
+                className={`btn-hub-toggle ${hubView === "table" ? "active" : ""}`}
+                onClick={() => setHubView("table")}
+                title="View PDF Field Reference Table"
+              >
+                <i className="bi bi-table me-1" /> PDF Field Reference Table
+              </button>
+            </div>
 
             <button
               type="button"
@@ -106,28 +114,43 @@ export default function CompanyHub() {
         </div>
       </div>
 
-      {/* ── Companies Grid ── */}
-      <div className="hub-grid-section">
-        <div className="hub-section-header">
-          <div style={{ display: "flex", alignItems: "center", gap: ".6rem" }}>
-            <span style={{ fontSize: "1rem", fontWeight: 800, color: "var(--text-main)" }}>
-              Registered Organizations
-            </span>
-            <span className="hub-count-pill">
-              {clients.length} {clients.length === 1 ? "Company" : "Companies"}
-            </span>
-          </div>
-          <span style={{ fontSize: ".8rem", color: "var(--text-muted)" }}>
-            Click any company card to open its workspace
-          </span>
+      {/* ── Home Content: Either Table or Cards ── */}
+      {hubView === "table" ? (
+        <div className="hub-table-section animate-fadein">
+          <PDFReferenceTable onOpenRegisterModal={openRegisterModal} />
         </div>
+      ) : (
+        <div className="hub-grid-section animate-fadein">
+          <div className="hub-section-header">
+            <div style={{ display: "flex", alignItems: "center", gap: ".6rem" }}>
+              <span style={{ fontSize: "1rem", fontWeight: 800, color: "var(--text-main)" }}>
+                Registered Organizations
+              </span>
+              <span className="hub-count-pill">
+                {clients.length} {clients.length === 1 ? "Company" : "Companies"}
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+              <span style={{ fontSize: ".8rem", color: "var(--text-muted)" }}>
+                Click any company card to open its workspace
+              </span>
+              <button
+                type="button"
+                onClick={() => setHubView("table")}
+                className="btn-ref-switch-inline"
+                title="Switch to PDF Field Reference Table"
+              >
+                <i className="bi bi-table me-1" /> Open Table View
+              </button>
+            </div>
+          </div>
 
-        <div className="row g-4">
-          {/* Action Card: Register New Company (Always First Card) */}
-          <div className="col-lg-6 col-xl-4">
-            <div
-              className="hub-add-card animate-popin"
-              onClick={openRegisterModal}
+          <div className="row g-4">
+            {/* Action Card: Register New Company (Always First Card) */}
+            <div className="col-lg-6 col-xl-4">
+              <div
+                className="hub-add-card animate-popin"
+                onClick={openRegisterModal}
               role="button"
               tabIndex={0}
             >
@@ -268,6 +291,7 @@ export default function CompanyHub() {
           })}
         </div>
       </div>
+      )}
     </div>
   );
 }
