@@ -19,6 +19,14 @@ const DEFAULT_CLIENT = {
   pan_number: "AAHCD2212P",
   address: "Flat No 203, 2nd Floor, Lumbni Rockdale Compound, Diamond Block, Somajiguda, Hyderabad, Telangana - 500082",
   point_of_contact: "accounts@agco.com",
+  invoices_count: 0,
+  total_receivable: 0,
+  total_assessable: 0,
+  total_tax: 0,
+  pos_count: 0,
+  total_po_amount: 0,
+  remittances_count: 0,
+  total_remittance_gross: 0,
   ...DEFAULT_NOMENCLATURE,
 };
 

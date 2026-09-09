@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 const PAGE_SIZE = 10;
 
 export default function RecordsTab({ refreshTrigger = 0 }) {
-  const { clients, activeClient, nomenclature } = useOrganization();
+  const { clients, activeClient, nomenclature, refreshClients } = useOrganization();
 
   // Organization filter: defaults to active organization or "" for all
   const [selectedOrgFilter, setSelectedOrgFilter] = useState(() => {
@@ -127,7 +127,11 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
     setDeletingKey(invNum);
     try {
       const { data: res } = await deleteInvoice(invNum);
-      if (res.success) { toast.success(`Deleted #${invNum}`); load(); }
+      if (res.success) {
+        toast.success(`Deleted #${invNum}`);
+        load();
+        if (refreshClients) refreshClients();
+      }
     } catch (e) { toast.error("Delete failed: " + (e?.response?.data?.detail || e.message)); }
     finally { setDeletingKey(null); }
   };
@@ -137,7 +141,11 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
     setDeletingKey(poNum);
     try {
       const { data: res } = await deletePO(poNum);
-      if (res.success) { toast.success(`Deleted #${poNum}`); load(); }
+      if (res.success) {
+        toast.success(`Deleted #${poNum}`);
+        load();
+        if (refreshClients) refreshClients();
+      }
     } catch (e) { toast.error("Delete failed: " + (e?.response?.data?.detail || e.message)); }
     finally { setDeletingKey(null); }
   };
@@ -147,7 +155,11 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
     setDeletingKey(remNum);
     try {
       const { data: res } = await deleteRemittance(remNum);
-      if (res.success) { toast.success(`Deleted #${remNum}`); load(); }
+      if (res.success) {
+        toast.success(`Deleted #${remNum}`);
+        load();
+        if (refreshClients) refreshClients();
+      }
     } catch (e) { toast.error("Delete failed: " + (e?.response?.data?.detail || e.message)); }
     finally { setDeletingKey(null); }
   };
@@ -160,12 +172,23 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
     setLoading(true);
     try {
       const { data: res } = await clearAllRecords();
-      if (res.success) { toast.success("All tables cleared in DB"); load(); }
+      if (res.success) {
+        toast.success("All tables cleared in DB");
+        load();
+        if (refreshClients) refreshClients();
+      }
     } catch (e) { toast.error("Clear failed: " + (e?.response?.data?.detail || e.message)); }
     finally { setLoading(false); }
   };
 
   const activeOrgName = clients.find((c) => String(c.id) === String(selectedOrgFilter))?.organization_name;
+
+  // Cumulative Financial & Extraction Aggregates for Selected Filter Scope
+  const totalAssessable = data.invoices.reduce((acc, curr) => acc + Number(curr.assessable_value || 0), 0);
+  const totalTax = data.invoices.reduce((acc, curr) => acc + Number(curr.total_tax || 0), 0);
+  const totalReceivable = data.invoices.reduce((acc, curr) => acc + Number(curr.receivable || 0), 0);
+  const totalPOAmount = data.purchase_orders.reduce((acc, curr) => acc + Number(curr.total_amount || 0), 0);
+  const totalRemittanceGross = data.remittances.reduce((acc, curr) => acc + Number(curr.gross_amount || 0), 0);
 
   return (
     <div className="search-wrapper animate-fadein">
@@ -264,6 +287,75 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
               <i className="bi bi-trash3-fill" /> Clear DB
             </button>
           )}
+        </div>
+      </div>
+
+      {/* ── Total Extractions & Financial Aggregates Strip on Top ── */}
+      <div className="records-summary-strip">
+        <div className="summary-strip-card">
+          <div className="summary-strip-icon" style={{ background: "linear-gradient(135deg, #7C3AED, #5B21B6)" }}>
+            <i className="bi bi-file-earmark-bar-graph-fill" />
+          </div>
+          <div className="summary-strip-info">
+            <span className="summary-strip-label">Total Extractions</span>
+            <span className="summary-strip-val">{data.invoices.length} Sets</span>
+            <span className="summary-strip-sub">{data.purchase_orders.length} POs · {data.remittances.length} Remittances</span>
+          </div>
+        </div>
+
+        <div className="summary-strip-card">
+          <div className="summary-strip-icon" style={{ background: "linear-gradient(135deg, #10B981, #059669)" }}>
+            <i className="bi bi-wallet2" />
+          </div>
+          <div className="summary-strip-info">
+            <span className="summary-strip-label">Total Net Receivable</span>
+            <span className="summary-strip-val" style={{ color: "#10b981" }}>{fmt(totalReceivable)}</span>
+            <span className="summary-strip-sub">Cumulative Post-TDS / GST</span>
+          </div>
+        </div>
+
+        <div className="summary-strip-card">
+          <div className="summary-strip-icon" style={{ background: "linear-gradient(135deg, #8B5CF6, #6D28D9)" }}>
+            <i className="bi bi-calculator" />
+          </div>
+          <div className="summary-strip-info">
+            <span className="summary-strip-label">Total Assessable Value</span>
+            <span className="summary-strip-val">{fmt(totalAssessable)}</span>
+            <span className="summary-strip-sub">Taxable base amount</span>
+          </div>
+        </div>
+
+        <div className="summary-strip-card">
+          <div className="summary-strip-icon" style={{ background: "linear-gradient(135deg, #EC4899, #BE185D)" }}>
+            <i className="bi bi-percent" />
+          </div>
+          <div className="summary-strip-info">
+            <span className="summary-strip-label">Total Tax (18% GST)</span>
+            <span className="summary-strip-val">{fmt(totalTax)}</span>
+            <span className="summary-strip-sub">CGST + SGST / IGST</span>
+          </div>
+        </div>
+
+        <div className="summary-strip-card">
+          <div className="summary-strip-icon" style={{ background: "linear-gradient(135deg, #3B82F6, #1D4ED8)" }}>
+            <i className="bi bi-file-earmark-check-fill" />
+          </div>
+          <div className="summary-strip-info">
+            <span className="summary-strip-label">Total PO Amount</span>
+            <span className="summary-strip-val">{fmt(totalPOAmount)}</span>
+            <span className="summary-strip-sub">Purchase Orders placed</span>
+          </div>
+        </div>
+
+        <div className="summary-strip-card">
+          <div className="summary-strip-icon" style={{ background: "linear-gradient(135deg, #F59E0B, #D97706)" }}>
+            <i className="bi bi-check2-circle" />
+          </div>
+          <div className="summary-strip-info">
+            <span className="summary-strip-label">Total Remittance Cleared</span>
+            <span className="summary-strip-val">{fmt(totalRemittanceGross)}</span>
+            <span className="summary-strip-sub">Gross payout cleared</span>
+          </div>
         </div>
       </div>
 

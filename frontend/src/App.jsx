@@ -17,6 +17,7 @@ function AppContent() {
     nomenclature,
     isRegisterModalOpen,
     closeRegisterModal,
+    refreshClients,
   } = useOrganization();
 
   const {
@@ -52,6 +53,7 @@ function AppContent() {
     if (res?.success) {
       setRefreshTrigger((n) => n + 1);
       setUploadCount((n) => n + 1);
+      if (refreshClients) refreshClients();
     }
   };
 
@@ -93,43 +95,41 @@ function AppContent() {
           {/* Top Company Identity & Switcher Banner */}
           <CompanyWorkspaceHeader />
 
-          {/* Mini Stats Bar for Active Company */}
+          {/* Mini Stats Bar for Active Company — Total Extraction Metrics on Top */}
           <div className="ws-stats-row">
             <HeroStat
               icon="bi-file-earmark-text"
               bg="linear-gradient(135deg, #7C3AED, #5B21B6)"
-              value={uploadCount}
-              label="Session Extractions"
-              trend="Current session"
+              value={(activeCompany?.invoices_count || 0) + uploadCount}
+              label="Total Extractions"
+              trend={`${activeCompany?.invoices_count || 0} in Database · ${uploadCount} new`}
             />
             <HeroStat
               icon="bi-currency-rupee"
               bg="linear-gradient(135deg, #22C55E, #15803D)"
-              value={
-                results
-                  ? `₹${Number(calcData?.receivable || 0).toLocaleString("en-IN", {
-                      minimumFractionDigits: 2,
-                    })}`
-                  : "₹0"
-              }
-              label="Net Receivable"
-              trend="Last extracted"
+              value={`₹${Number(
+                (activeCompany?.total_receivable || 0) + (results ? (calcData?.receivable || 0) : 0)
+              ).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`}
+              label="Total Net Receivable"
+              trend="Cumulative across invoices"
               isStr
             />
             <HeroStat
-              icon="bi-percent"
+              icon="bi-cash-coin"
               bg="linear-gradient(135deg, #A855F7, #7C3AED)"
-              value={results ? `${calcData?.tds_rate ?? 2}%` : "—"}
-              label="Selected TDS Rate"
-              trend="Configurable"
+              value={`₹${Number(
+                (activeCompany?.total_assessable || 0) + (results ? (calcData?.assessable_value || 0) : 0)
+              ).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`}
+              label="Total Assessable Value"
+              trend="Taxable base (18% GST)"
               isStr
             />
             <HeroStat
               icon="bi-database-check"
               bg="linear-gradient(135deg, #C084FC, #9333EA)"
               value="Live DB"
-              label="PostgreSQL"
-              trend={`Auto-tagged: ${activeCompany.organization_name}`}
+              label="PostgreSQL Stored"
+              trend={`${activeCompany?.pos_count || 0} POs · ${activeCompany?.remittances_count || 0} Remittances`}
               isStr
             />
           </div>

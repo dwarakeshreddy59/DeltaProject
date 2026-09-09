@@ -290,7 +290,7 @@ async def recalculate(body: RecalculateRequest):
 
 @app.get("/clients")
 async def get_clients():
-    """List all registered clients/companies with record counts."""
+    """List all registered clients/companies with record counts and financial sums."""
     sql = """
         SELECT
             c.id, c.client_name, c.organization_name, c.logo_url,
@@ -299,14 +299,38 @@ async def get_clients():
             c.po_doc_label, c.po_num_label,
             c.remittance_doc_label, c.remittance_num_label,
             c.created_at,
-            COUNT(DISTINCT i.id) as invoices_count,
-            COUNT(DISTINCT p.id) as pos_count,
-            COUNT(DISTINCT r.id) as remittances_count
+            COALESCE(inv_stats.invoices_count, 0) as invoices_count,
+            COALESCE(inv_stats.total_receivable, 0) as total_receivable,
+            COALESCE(inv_stats.total_assessable, 0) as total_assessable,
+            COALESCE(inv_stats.total_tax, 0) as total_tax,
+            COALESCE(po_stats.pos_count, 0) as pos_count,
+            COALESCE(po_stats.total_po_amount, 0) as total_po_amount,
+            COALESCE(rem_stats.remittances_count, 0) as remittances_count,
+            COALESCE(rem_stats.total_remittance_gross, 0) as total_remittance_gross
         FROM clients c
-        LEFT JOIN invoices i ON i.client_id = c.id
-        LEFT JOIN purchase_orders p ON p.client_id = c.id
-        LEFT JOIN remittances r ON r.client_id = c.id
-        GROUP BY c.id
+        LEFT JOIN (
+            SELECT client_id,
+                   COUNT(id) as invoices_count,
+                   SUM(receivable) as total_receivable,
+                   SUM(assessable_value) as total_assessable,
+                   SUM(total_tax) as total_tax
+            FROM invoices
+            GROUP BY client_id
+        ) inv_stats ON inv_stats.client_id = c.id
+        LEFT JOIN (
+            SELECT client_id,
+                   COUNT(id) as pos_count,
+                   SUM(total_amount) as total_po_amount
+            FROM purchase_orders
+            GROUP BY client_id
+        ) po_stats ON po_stats.client_id = c.id
+        LEFT JOIN (
+            SELECT client_id,
+                   COUNT(id) as remittances_count,
+                   SUM(gross_amount) as total_remittance_gross
+            FROM remittances
+            GROUP BY client_id
+        ) rem_stats ON rem_stats.client_id = c.id
         ORDER BY c.id ASC;
     """
     try:
@@ -319,8 +343,50 @@ async def get_clients():
 
 @app.get("/clients/{client_id}")
 async def get_client(client_id: int):
-    """Retrieve a single registered client."""
-    row = db.execute_query("SELECT * FROM clients WHERE id = %s;", (client_id,), fetch="one")
+    """Retrieve a single registered client with stats."""
+    sql = """
+        SELECT
+            c.id, c.client_name, c.organization_name, c.logo_url,
+            c.gst_number, c.pan_number, c.address, c.point_of_contact,
+            c.invoice_doc_label, c.invoice_num_label,
+            c.po_doc_label, c.po_num_label,
+            c.remittance_doc_label, c.remittance_num_label,
+            c.created_at,
+            COALESCE(inv_stats.invoices_count, 0) as invoices_count,
+            COALESCE(inv_stats.total_receivable, 0) as total_receivable,
+            COALESCE(inv_stats.total_assessable, 0) as total_assessable,
+            COALESCE(inv_stats.total_tax, 0) as total_tax,
+            COALESCE(po_stats.pos_count, 0) as pos_count,
+            COALESCE(po_stats.total_po_amount, 0) as total_po_amount,
+            COALESCE(rem_stats.remittances_count, 0) as remittances_count,
+            COALESCE(rem_stats.total_remittance_gross, 0) as total_remittance_gross
+        FROM clients c
+        LEFT JOIN (
+            SELECT client_id,
+                   COUNT(id) as invoices_count,
+                   SUM(receivable) as total_receivable,
+                   SUM(assessable_value) as total_assessable,
+                   SUM(total_tax) as total_tax
+            FROM invoices
+            GROUP BY client_id
+        ) inv_stats ON inv_stats.client_id = c.id
+        LEFT JOIN (
+            SELECT client_id,
+                   COUNT(id) as pos_count,
+                   SUM(total_amount) as total_po_amount
+            FROM purchase_orders
+            GROUP BY client_id
+        ) po_stats ON po_stats.client_id = c.id
+        LEFT JOIN (
+            SELECT client_id,
+                   COUNT(id) as remittances_count,
+                   SUM(gross_amount) as total_remittance_gross
+            FROM remittances
+            GROUP BY client_id
+        ) rem_stats ON rem_stats.client_id = c.id
+        WHERE c.id = %s;
+    """
+    row = db.execute_query(sql, (client_id,), fetch="one")
     if not row:
         raise HTTPException(status_code=404, detail=f"Client {client_id} not found.")
     return {"success": True, "client": dict(row)}
