@@ -259,27 +259,29 @@ export default function ClientRegistrationModal({ isOpen, onClose }) {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}>
               <div
+                className="client-modal-logo-preview"
                 style={{
                   width: 72,
                   height: 72,
                   borderRadius: 14,
-                  background: "var(--bg-card-subtle)",
-                  border: "2px dashed var(--border-medium)",
+                  background: "#FFFFFF",
+                  border: "2px dashed #CBD5E1",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   overflow: "hidden",
                   flexShrink: 0,
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
                 }}
               >
                 {logoPreview ? (
                   <img
                     src={logoPreview}
                     alt="Logo preview"
-                    style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }}
+                    style={{ width: "100%", height: "100%", objectFit: "contain", padding: 6, background: "#FFFFFF" }}
                   />
                 ) : (
-                  <i className="bi bi-buildings" style={{ fontSize: "1.8rem", color: "var(--text-muted)" }} />
+                  <i className="bi bi-buildings" style={{ fontSize: "1.8rem", color: "#94A3B8" }} />
                 )}
               </div>
 

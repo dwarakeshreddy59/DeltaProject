@@ -53,11 +53,13 @@ export default function CompanyWorkspaceHeader() {
                 alt={activeCompany.organization_name}
                 onError={(e) => {
                   e.target.style.display = "none";
+                  if (e.target.nextSibling) e.target.nextSibling.style.display = "inline";
                 }}
               />
-            ) : (
-              <span>{activeCompany.organization_name?.slice(0, 2).toUpperCase() || "CO"}</span>
-            )}
+            ) : null}
+            <span style={{ display: activeCompany.logo_url ? "none" : "inline" }}>
+              {activeCompany.organization_name?.slice(0, 2).toUpperCase() || "CO"}
+            </span>
           </div>
 
           <div className="workspace-details">

@@ -154,11 +154,13 @@ export default function CompanyHub() {
                           alt={client.organization_name}
                           onError={(e) => {
                             e.target.style.display = "none";
+                            if (e.target.nextSibling) e.target.nextSibling.style.display = "inline";
                           }}
                         />
-                      ) : (
-                        <span>{client.organization_name?.slice(0, 2).toUpperCase() || "CO"}</span>
-                      )}
+                      ) : null}
+                      <span style={{ display: client.logo_url ? "none" : "inline" }}>
+                        {client.organization_name?.slice(0, 2).toUpperCase() || "CO"}
+                      </span>
                     </div>
 
                     <div className="hub-card-info">
