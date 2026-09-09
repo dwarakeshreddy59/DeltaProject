@@ -4,7 +4,7 @@ import CompanyHub from "./components/CompanyHub";
 import CompanyWorkspaceHeader from "./components/CompanyWorkspaceHeader";
 import UploadTab from "./components/UploadTab";
 import RecordsTab from "./components/RecordsTab";
-import DeltaIoTTab from "./components/DeltaIoTTab";
+import PDFFieldReferenceTab from "./components/PDFFieldReferenceTab";
 import SearchTab from "./components/SearchTab";
 import ClientRegistrationModal from "./components/ClientRegistrationModal";
 import { OrganizationProvider, useOrganization } from "./context/OrganizationContext";
@@ -78,9 +78,9 @@ function AppContent() {
       label: `${activeCompany?.organization_name || "Company"} Records`,
     },
     {
-      id: "delta_iot",
-      icon: "bi-diagram-3-fill",
-      label: "Delta IoT Projections",
+      id: "reference",
+      icon: "bi-journal-bookmark-fill",
+      label: "PDF Field Reference",
     },
     {
       id: "search",
@@ -195,8 +195,8 @@ function AppContent() {
               {activeTab === "records" && (
                 <RecordsTab refreshTrigger={refreshTrigger} />
               )}
-              {activeTab === "delta_iot" && (
-                <DeltaIoTTab refreshTrigger={refreshTrigger} />
+              {activeTab === "reference" && (
+                <PDFFieldReferenceTab refreshTrigger={refreshTrigger} />
               )}
               {activeTab === "search" && (
                 <SearchTab />

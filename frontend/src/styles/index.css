@@ -5632,3 +5632,1140 @@ body {
   background: linear-gradient(135deg, #FAF5FF, #F3E8FF);
   border-color: #C084FC;
 }
+
+
+/* ==========================================================================
+   PDF FIELD REFERENCE & DOCUMENT GUIDE TAB STYLES
+   ========================================================================== */
+
+.pdf-ref-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 3rem;
+}
+
+/* ── Hero Section ── */
+.ref-hero {
+  background: linear-gradient(135deg, rgba(26, 16, 50, 0.95), rgba(40, 20, 75, 0.9));
+  border: 1.5px solid rgba(168, 85, 247, 0.35);
+  border-radius: 20px;
+  padding: 1.75rem 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ref-hero-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ref-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid #C084FC;
+  color: #E9D5FF;
+  padding: 0.35rem 0.85rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ref-sync-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid #10B981;
+  color: #6EE7B7;
+  padding: 0.35rem 0.85rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.ref-hero-title {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.35rem 0;
+  letter-spacing: -0.01em;
+}
+
+.ref-hero-subtitle {
+  font-size: 0.9rem;
+  color: #D1D5DB;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 900px;
+}
+
+.ref-hero-subtitle strong {
+  color: #FBBF24;
+}
+
+/* Master Origin Callout Strip */
+.ref-master-banner {
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.ref-master-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7C3AED, #9333EA);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+}
+
+.ref-master-title {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #F3E8FF;
+  margin-bottom: 0.25rem;
+}
+
+.ref-master-desc {
+  font-size: 0.82rem;
+  color: #D8B4FE;
+  line-height: 1.5;
+}
+
+.ref-master-desc code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  color: #FDE047;
+  font-weight: 700;
+}
+
+/* ── Controls Bar ── */
+.ref-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ref-views-toggle {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.3rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  flex-wrap: wrap;
+}
+
+.ref-toggle-btn {
+  background: transparent;
+  border: none;
+  color: #9CA3AF;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.ref-toggle-btn:hover {
+  color: #ffffff;
+}
+
+.ref-toggle-btn.active {
+  background: linear-gradient(135deg, #7C3AED, #9333EA);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+}
+
+.ref-search-wrap {
+  position: relative;
+  min-width: 280px;
+  flex: 1;
+  max-width: 380px;
+}
+
+.ref-search-wrap i.bi-search {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #A855F7;
+  font-size: 0.85rem;
+}
+
+.ref-search-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 10px;
+  padding: 0.5rem 2rem 0.5rem 2.2rem;
+  color: #ffffff;
+  font-size: 0.82rem;
+}
+
+.ref-search-input:focus {
+  outline: none;
+  border-color: #C084FC;
+  box-shadow: 0 0 10px rgba(192, 132, 252, 0.3);
+}
+
+.ref-search-clear {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  cursor: pointer;
+  padding: 0.2rem;
+}
+
+/* ── Filter Chips Strip ── */
+.ref-org-chips-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ref-chips-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #9CA3AF;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ref-org-chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #D1D5DB;
+  padding: 0.3rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s;
+}
+
+.ref-org-chip:hover {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: #A855F7;
+  color: #ffffff;
+}
+
+.ref-org-chip.active {
+  background: #7C3AED;
+  border-color: #A855F7;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.4);
+}
+
+.ref-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10B981;
+}
+
+/* ── Company Field Cards Grid ── */
+.ref-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .ref-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ref-company-card {
+  background: linear-gradient(135deg, rgba(25, 18, 45, 0.95), rgba(35, 22, 60, 0.9));
+  border: 1.5px solid rgba(168, 85, 247, 0.25);
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.ref-company-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(168, 85, 247, 0.5);
+}
+
+/* Highlight AGCO card with distinct gold/purple border */
+.ref-card-agco {
+  border-color: #F59E0B;
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.15);
+}
+
+/* ── Card Header ── */
+.ref-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ref-card-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+/* Crisp Pure White Logo Avatar */
+.ref-company-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: #ffffff !important;
+  border: 1.5px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.ref-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+
+.ref-avatar-initials {
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #1E1B4B;
+}
+
+.ref-company-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ref-company-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.ref-agco-badge {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid #F59E0B;
+  color: #FCD34D;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ref-custom-badge {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid #10B981;
+  color: #6EE7B7;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ref-company-sub {
+  font-size: 0.78rem;
+  color: #9CA3AF;
+  margin-top: 0.15rem;
+}
+
+.btn-ref-open-workspace {
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid #A855F7;
+  color: #E9D5FF;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-ref-open-workspace:hover {
+  background: #7C3AED;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+}
+
+/* Identification Pills */
+.ref-card-id-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ref-id-pill {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.74rem;
+  color: #D1D5DB;
+}
+
+.ref-id-pill strong {
+  color: #9CA3AF;
+}
+
+.ref-buyer-pdf-pill {
+  background: rgba(124, 58, 237, 0.12);
+  border-color: rgba(168, 85, 247, 0.3);
+  color: #E9D5FF;
+}
+
+.ref-buyer-pdf-pill strong {
+  color: #C084FC;
+}
+
+/* ── Slots Boxes ── */
+.ref-slot-box {
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.ref-slot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.ref-slot-title {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+}
+
+.ref-slot-tag {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Remittance Slot Theme */
+.ref-slot-remittance {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1.5px solid rgba(245, 158, 11, 0.4);
+}
+
+.ref-tag-remit {
+  background: rgba(245, 158, 11, 0.25);
+  color: #FDE68A;
+  border: 1px solid #F59E0B;
+}
+
+/* Critical Alert Callout */
+.ref-alert-callout {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: #FCA5A5;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.ref-alert-callout i {
+  color: #EF4444;
+  font-size: 0.95rem;
+  margin-top: 0.1rem;
+}
+
+.ref-slot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ref-slot-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.ref-slot-k {
+  font-size: 0.7rem;
+  color: #9CA3AF;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.ref-slot-v {
+  font-size: 0.82rem;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.ref-highlight-code {
+  color: #FCD34D !important;
+  font-weight: 800 !important;
+}
+
+.ref-slot-v code {
+  background: rgba(0, 0, 0, 0.35);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  color: #67E8F9;
+}
+
+/* ── Dual Slots: Invoice & PO ── */
+.ref-dual-slots {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+@media (max-width: 580px) {
+  .ref-dual-slots {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ref-slot-invoice {
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+}
+
+.ref-tag-inv {
+  background: rgba(168, 85, 247, 0.2);
+  color: #E9D5FF;
+  border: 1px solid #A855F7;
+}
+
+.ref-slot-po {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.ref-tag-po {
+  background: rgba(59, 130, 246, 0.2);
+  color: #BFDBFE;
+  border: 1px solid #3B82F6;
+}
+
+.ref-slot-subitem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+/* ── User Notes / Tips Section ── */
+.ref-user-notes-section {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 0.75rem 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ref-notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ref-notes-title {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #A855F7;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.btn-edit-ref-note {
+  background: transparent;
+  border: none;
+  color: #C084FC;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-edit-ref-note:hover {
+  color: #ffffff;
+}
+
+.ref-note-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ref-note-textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid #A855F7;
+  border-radius: 6px;
+  padding: 0.45rem;
+  color: #ffffff;
+  font-size: 0.8rem;
+  resize: vertical;
+}
+
+.ref-note-textarea:focus {
+  outline: none;
+  border-color: #C084FC;
+}
+
+.ref-note-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.btn-ref-note-save {
+  background: #7C3AED;
+  border: none;
+  color: #ffffff;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-ref-note-cancel {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #D1D5DB;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+
+.ref-saved-note-text {
+  font-size: 0.8rem;
+  color: #E9D5FF;
+  line-height: 1.45;
+  background: rgba(124, 58, 237, 0.1);
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border-left: 3px solid #A855F7;
+}
+
+.ref-no-note-text {
+  font-size: 0.76rem;
+  color: #6B7280;
+  font-style: italic;
+}
+
+/* ── Cross-Mapping Table View ── */
+.ref-table-card {
+  background: linear-gradient(135deg, rgba(25, 18, 45, 0.95), rgba(35, 22, 60, 0.9));
+  border: 1.5px solid rgba(168, 85, 247, 0.3);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+}
+
+.ref-table-card-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ref-table-stat-pills {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ref-table-pill {
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  color: #E9D5FF;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+}
+
+.ref-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.ref-data-table th {
+  background: rgba(0, 0, 0, 0.35);
+  color: #D1D5DB;
+  font-weight: 700;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ref-data-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  vertical-align: middle;
+}
+
+.ref-data-table tbody tr:hover {
+  background: rgba(168, 85, 247, 0.06);
+}
+
+.ref-row-highlight {
+  background: rgba(245, 158, 11, 0.03);
+}
+
+.ref-table-org-badge {
+  display: inline-block;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid #A855F7;
+  color: #E9D5FF;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.ref-badge-matched {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid #10B981;
+  color: #6EE7B7;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.ref-badge-partial {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid #F59E0B;
+  color: #FCD34D;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+/* ── VIEW 3: Visual PDF Mockup Sheet ── */
+.ref-visual-guide-wrap {
+  background: linear-gradient(135deg, rgba(25, 18, 45, 0.95), rgba(35, 22, 60, 0.9));
+  border: 1.5px solid rgba(168, 85, 247, 0.3);
+  border-radius: 18px;
+  padding: 1.75rem;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+}
+
+.ref-visual-header h3 {
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+}
+
+.ref-visual-header p {
+  color: #D1D5DB;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+}
+
+.ref-mockup-sheet {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 1.5rem;
+}
+
+/* Simulated White Paper PDF */
+.ref-mockup-paper {
+  background: #ffffff;
+  color: #111827;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.ref-mockup-top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.ref-mockup-company-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.ref-mockup-company-sub {
+  font-size: 0.78rem;
+  color: #4B5563;
+  margin-top: 0.2rem;
+}
+
+.ref-mockup-date-box {
+  text-align: right;
+  font-size: 0.78rem;
+  color: #374151;
+}
+
+.ref-mockup-divider {
+  margin: 1rem 0;
+  border: 0;
+  border-top: 1.5px solid #E5E7EB;
+}
+
+.ref-mockup-callout-strip {
+  background: #FEF3C7;
+  border: 1.5px solid #F59E0B;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ref-callout-badge-danger {
+  background: #D97706;
+  color: #ffffff;
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.ref-callout-text {
+  font-size: 0.84rem;
+  color: #78350F;
+  line-height: 1.4;
+}
+
+.ref-callout-text code {
+  background: #FDE68A;
+  color: #92400E;
+  font-weight: 700;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
+.ref-mockup-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.ref-mockup-table th {
+  background: #F3F4F6;
+  color: #374151;
+  font-weight: 700;
+  padding: 0.65rem 0.75rem;
+  text-align: left;
+  border: 1px solid #E5E7EB;
+  position: relative;
+}
+
+.ref-th-highlight-remit {
+  background: #FEF3C7 !important;
+  color: #92400E !important;
+  border: 2px solid #F59E0B !important;
+}
+
+.ref-th-highlight-inv {
+  background: #EFF6FF !important;
+  color: #1E40AF !important;
+  border: 2px solid #3B82F6 !important;
+}
+
+.ref-th-pin {
+  display: block;
+  font-size: 0.64rem;
+  color: #B45309;
+  font-weight: 800;
+  margin-top: 0.15rem;
+}
+
+.ref-th-pin-blue {
+  display: block;
+  font-size: 0.64rem;
+  color: #1D4ED8;
+  font-weight: 800;
+  margin-top: 0.15rem;
+}
+
+.ref-mockup-table td {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #E5E7EB;
+  color: #1F2937;
+}
+
+.ref-tr-target {
+  background: #FFFBEB;
+}
+
+.ref-mock-val-remit {
+  display: inline-block;
+  background: #FDE68A;
+  color: #92400E;
+  font-weight: 800;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.ref-mock-val-inv {
+  display: inline-block;
+  background: #DBEAFE;
+  color: #1E40AF;
+  font-weight: 800;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.ref-val-hint {
+  font-size: 0.65rem;
+  color: #6B7280;
+  margin-top: 0.15rem;
+}
+
+.ref-mockup-legend {
+  display: flex;
+  gap: 1.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed #E5E7EB;
+  font-size: 0.76rem;
+  color: #4B5563;
+  flex-wrap: wrap;
+}
+
+.ref-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ref-legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.ref-swatch-amber {
+  background: #F59E0B;
+}
+
+.ref-swatch-blue {
+  background: #3B82F6;
+}
+
+/* Secondary Button in Hub Header */
+.btn-register-company-secondary {
+  background: rgba(168, 85, 247, 0.15);
+  border: 1.5px solid #A855F7;
+  color: #E9D5FF;
+  padding: 0.55rem 1.15rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-register-company-secondary:hover {
+  background: #7C3AED;
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+  transform: translateY(-1px);
+}
+
+/* ── Bright Theme Overrides for PDF Field Reference Tab ── */
+[data-theme="bright"] .ref-hero {
+  background: linear-gradient(135deg, #FAF5FF, #F3E8FF);
+  border-color: #C084FC;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="bright"] .ref-hero-title {
+  color: #1E1B4B;
+}
+
+[data-theme="bright"] .ref-hero-subtitle {
+  color: #4B5563;
+}
+
+[data-theme="bright"] .ref-master-banner {
+  background: #ffffff;
+  border-color: #D8B4FE;
+}
+
+[data-theme="bright"] .ref-master-title {
+  color: #581C87;
+}
+
+[data-theme="bright"] .ref-master-desc {
+  color: #374151;
+}
+
+[data-theme="bright"] .ref-master-desc code {
+  background: #EDE9FE;
+  color: #6B21A8;
+}
+
+[data-theme="bright"] .ref-company-card {
+  background: #ffffff;
+  border-color: #E9D5FF;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="bright"] .ref-company-name {
+  color: #111827;
+}
+
+[data-theme="bright"] .ref-slot-title {
+  color: #111827;
+}
+
+[data-theme="bright"] .ref-slot-v {
+  color: #1F2937;
+}
+
+[data-theme="bright"] .ref-slot-grid {
+  background: #F9FAFB;
+  border-color: #E5E7EB;
+}
+
+[data-theme="bright"] .ref-id-pill {
+  background: #F3F4F6;
+  border-color: #E5E7EB;
+  color: #374151;
+}
+
+[data-theme="bright"] .ref-id-pill strong {
+  color: #111827;
+}
+
+[data-theme="bright"] .ref-buyer-pdf-pill {
+  background: #FAF5FF;
+  border-color: #D8B4FE;
+  color: #6B21A8;
+}
+
+[data-theme="bright"] .ref-table-card {
+  background: #ffffff;
+  border-color: #E9D5FF;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="bright"] .ref-data-table th {
+  background: #FAF5FF;
+  color: #4B5563;
+  border-color: #E9D5FF;
+}
+
+[data-theme="bright"] .ref-data-table td {
+  border-color: #F3F4F6;
+  color: #111827;
+}
+
+[data-theme="bright"] .ref-visual-guide-wrap {
+  background: #ffffff;
+  border-color: #E9D5FF;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="bright"] .ref-visual-header h3 {
+  color: #111827;
+}
+
+[data-theme="bright"] .ref-visual-header p {
+  color: #4B5563;
+}
+
+[data-theme="bright"] .ref-mockup-sheet {
+  background: #F3F4F6;
+  border-color: #E5E7EB;
+}
