@@ -1,5 +1,6 @@
 import React from "react";
 import { inr } from "../utils/format";
+import { useOrganization } from "../context/OrganizationContext";
 
 const Row = ({ label, value, type = "text" }) => {
   const isEmpty = value === null || value === undefined || value === "" || value === 0;
@@ -29,20 +30,22 @@ const Row = ({ label, value, type = "text" }) => {
 };
 
 export default function POCard({ po = {} }) {
+  const { nomenclature } = useOrganization();
+
   return (
     <div className="result-card">
       <div className="card-head card-head-po">
         <div className="card-head-icon"><i className="bi bi-file-text" /></div>
-        Purchase Order
+        {nomenclature.po_doc_label || "Purchase Order"}
       </div>
       <div className="card-body-custom">
         <table className="info-table">
           <tbody>
-            <Row label="PO Number"                 value={po.po_number}     type="badge" />
-            <Row label="PO Date"                   value={po.po_date}       type="highlight" />
-            <Row label="Description"               value={po.description} />
-            <Row label="Delivery Date / PO Validity" value={po.delivery_date} />
-            <Row label="Total PO Amount"           value={po.total_amount}  type="money" />
+            <Row label={nomenclature.po_num_label || "PO Number"} value={po.po_number} type="badge" />
+            <Row label="Date (Document Date)"     value={po.po_date}       type="highlight" />
+            <Row label="Description"              value={po.description} />
+            <Row label="Delivery Date / Validity" value={po.delivery_date} />
+            <Row label="Total Amount"             value={po.total_amount}  type="money" />
           </tbody>
         </table>
       </div>

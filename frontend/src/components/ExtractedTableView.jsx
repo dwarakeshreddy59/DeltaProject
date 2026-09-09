@@ -1,32 +1,35 @@
 import React from "react";
-import { fmt, inr } from "../utils/format";
+import { fmt } from "../utils/format";
+import { useOrganization } from "../context/OrganizationContext";
 
 export default function ExtractedTableView({ po = {}, invoice = {}, remittance = {}, calcData = {} }) {
+  const { nomenclature } = useOrganization();
+
   const fields = [
     // Invoice Fields
-    { section: "Invoice", label: "Invoice Number (Document No.)", value: invoice.invoice_number || "—", type: "badge", badgeColor: "#A855F7" },
-    { section: "Invoice", label: "Invoice Date (Document Date)", value: invoice.invoice_date || "—", type: "text" },
-    { section: "Invoice", label: "PO Number (Ref in Invoice)", value: invoice.po_number || "—", type: "badge", badgeColor: "#C084FC" },
-    { section: "Invoice", label: "Description (Filename without numbers)", value: invoice.description || "—", type: "text" },
-    { section: "Invoice", label: "Invoice Period", value: invoice.invoice_period || "—", type: "text" },
-    { section: "Invoice", label: "Assessable Value (Taxable Amount)", value: fmt(invoice.assessable_value), type: "money" },
-    { section: "Invoice", label: "Total Tax", value: fmt(invoice.total_tax), type: "money" },
-    { section: "Invoice", label: "Total Invoice Value", value: fmt(invoice.total_invoice_value), type: "money" },
+    { section: nomenclature.invoice_doc_label, label: `${nomenclature.invoice_num_label} (Document No.)`, value: invoice.invoice_number || "—", type: "badge", badgeColor: "#A855F7" },
+    { section: nomenclature.invoice_doc_label, label: `${nomenclature.invoice_doc_label} Date`, value: invoice.invoice_date || "—", type: "text" },
+    { section: nomenclature.invoice_doc_label, label: `${nomenclature.po_num_label} (Ref in ${nomenclature.invoice_doc_label})`, value: invoice.po_number || "—", type: "badge", badgeColor: "#C084FC" },
+    { section: nomenclature.invoice_doc_label, label: "Description (Filename without numbers)", value: invoice.description || "—", type: "text" },
+    { section: nomenclature.invoice_doc_label, label: "Billing Period", value: invoice.invoice_period || "—", type: "text" },
+    { section: nomenclature.invoice_doc_label, label: "Assessable Value (Taxable Amount)", value: fmt(invoice.assessable_value), type: "money" },
+    { section: nomenclature.invoice_doc_label, label: "Total Tax", value: fmt(invoice.total_tax), type: "money" },
+    { section: nomenclature.invoice_doc_label, label: "Total Document Value", value: fmt(invoice.total_invoice_value), type: "money" },
 
     // Purchase Order Fields
-    { section: "Purchase Order", label: "PO Number", value: po.po_number || "—", type: "badge", badgeColor: "#C084FC" },
-    { section: "Purchase Order", label: "PO Date", value: po.po_date || "—", type: "text" },
-    { section: "Purchase Order", label: "PO Description (Filename)", value: po.description || "—", type: "text" },
-    { section: "Purchase Order", label: "Delivery Date / PO Validity", value: po.delivery_date || "—", type: "text" },
-    { section: "Purchase Order", label: "Total PO Amount", value: fmt(po.total_amount), type: "money" },
+    { section: nomenclature.po_doc_label, label: `${nomenclature.po_num_label}`, value: po.po_number || "—", type: "badge", badgeColor: "#C084FC" },
+    { section: nomenclature.po_doc_label, label: `${nomenclature.po_doc_label} Date`, value: po.po_date || "—", type: "text" },
+    { section: nomenclature.po_doc_label, label: `${nomenclature.po_doc_label} Description`, value: po.description || "—", type: "text" },
+    { section: nomenclature.po_doc_label, label: "Delivery Date / Validity", value: po.delivery_date || "—", type: "text" },
+    { section: nomenclature.po_doc_label, label: `Total ${nomenclature.po_doc_label} Amount`, value: fmt(po.total_amount), type: "money" },
 
     // Remittance Fields
-    { section: "Remittance", label: "Remittance Number (Document No.)", value: remittance.remittance_number || "—", type: "badge", badgeColor: "#22C55E" },
-    { section: "Remittance", label: "Remittance Date (Document Date)", value: remittance.remittance_date || "—", type: "text" },
-    { section: "Remittance", label: "Invoice Number (Ref in Remittance)", value: remittance.invoice_number || "—", type: "badge", badgeColor: "#A855F7" },
-    { section: "Remittance", label: "Remittance Description / Notes", value: remittance.description || "—", type: "text" },
-    { section: "Remittance", label: "Gross Amount", value: fmt(remittance.gross_amount), type: "money" },
-    { section: "Remittance", label: "Total Gross Amount", value: fmt(remittance.total_gross_amount), type: "money" },
+    { section: nomenclature.remittance_doc_label, label: `${nomenclature.remittance_num_label} (Document No.)`, value: remittance.remittance_number || "—", type: "badge", badgeColor: "#22C55E" },
+    { section: nomenclature.remittance_doc_label, label: `${nomenclature.remittance_doc_label} Date`, value: remittance.remittance_date || "—", type: "text" },
+    { section: nomenclature.remittance_doc_label, label: `${nomenclature.invoice_num_label} (Ref in Remittance)`, value: remittance.invoice_number || "—", type: "badge", badgeColor: "#A855F7" },
+    { section: nomenclature.remittance_doc_label, label: "Description / Notes", value: remittance.description || "—", type: "text" },
+    { section: nomenclature.remittance_doc_label, label: "Gross Amount", value: fmt(remittance.gross_amount), type: "money" },
+    { section: nomenclature.remittance_doc_label, label: "Total Gross Amount", value: fmt(remittance.total_gross_amount), type: "money" },
 
     // Financial Calculation Fields
     { section: "Calculations", label: "GST Rate (Fixed)", value: `${calcData.gst_rate ?? 18}%`, type: "text" },
@@ -58,20 +61,20 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
             <table className="history-table">
               <thead>
                 <tr>
-                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice No</th>
-                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice Date</th>
-                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice Period</th>
+                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>{nomenclature.invoice_num_label}</th>
+                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Date</th>
+                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Period</th>
                   <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Assessable Val</th>
                   <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Tax</th>
-                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Inv Val</th>
-                  <th style={{ background: "#9333EA", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>PO Number</th>
+                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Value</th>
+                  <th style={{ background: "#9333EA", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>{nomenclature.po_num_label}</th>
                   <th style={{ background: "#9333EA", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>PO Date</th>
                   <th style={{ background: "#9333EA", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Delivery Date</th>
-                  <th style={{ background: "#9333EA", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total PO Amt</th>
-                  <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Remittance No</th>
-                  <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Remittance Date</th>
+                  <th style={{ background: "#9333EA", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Amount</th>
+                  <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>{nomenclature.remittance_num_label}</th>
+                  <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Payment Date</th>
                   <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Gross Amt</th>
-                  <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Gross Amt</th>
+                  <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Gross</th>
                   <th style={{ background: "#6D28D9", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>GST (18%)</th>
                   <th style={{ background: "#6D28D9", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>TDS ({calcData.tds_rate}%)</th>
                   <th style={{ background: "#6D28D9", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Receivable</th>
@@ -125,9 +128,9 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
                       borderRadius: 4,
                       fontSize: ".72rem",
                       fontWeight: 700,
-                      background: f.section === "Invoice" ? "rgba(124, 58, 237, 0.15)" : f.section === "Purchase Order" ? "rgba(192, 132, 252, 0.15)" : f.section === "Remittance" ? "rgba(34, 197, 94, 0.15)" : "rgba(168, 85, 247, 0.15)",
-                      color: f.section === "Invoice" ? "#A855F7" : f.section === "Purchase Order" ? "#C084FC" : f.section === "Remittance" ? "#22C55E" : "#C084FC",
-                      border: f.section === "Invoice" ? "1px solid rgba(168, 85, 247, 0.3)" : f.section === "Purchase Order" ? "1px solid rgba(192, 132, 252, 0.3)" : f.section === "Remittance" ? "1px solid rgba(34, 197, 94, 0.3)" : "1px solid rgba(168, 85, 247, 0.3)"
+                      background: "rgba(168, 85, 247, 0.12)",
+                      color: "var(--purple-violet)",
+                      border: "1px solid rgba(168, 85, 247, 0.25)"
                     }}>
                       {f.section}
                     </span>
@@ -139,7 +142,7 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
                     {f.type === "money" && <span className="val-money" style={{ fontWeight: 700, fontFamily: "Courier New, monospace" }}>{f.value}</span>}
                     {f.type === "tds" && <span style={{ fontWeight: 700, color: "var(--danger-red)", fontFamily: "Courier New, monospace" }}>{f.value}</span>}
                     {f.type === "receivable" && <span style={{ fontWeight: 800, color: "var(--success-green)", fontFamily: "Courier New, monospace", fontSize: ".95rem" }}>{f.value}</span>}
-                    {f.type === "badge" && <span className={`id-badge ${f.section === "Purchase Order" ? "badge-po" : f.section === "Remittance" ? "badge-remit" : ""}`}>{f.value}</span>}
+                    {f.type === "badge" && <span className="id-badge">{f.value}</span>}
                     {f.type === "text" && <span style={{ fontWeight: 600, color: "var(--text-main)" }}>{f.value}</span>}
                   </td>
                 </tr>

@@ -1,8 +1,28 @@
 -- schema.sql – Drop FK constraints; use soft references only (app-level joining)
 
+-- 0. Clients & Organizations
+CREATE TABLE IF NOT EXISTS clients (
+    id                   SERIAL PRIMARY KEY,
+    client_name          VARCHAR(255) NOT NULL,
+    organization_name    VARCHAR(255) NOT NULL,
+    logo_url             TEXT,
+    gst_number           VARCHAR(50),
+    pan_number           VARCHAR(50),
+    address              TEXT,
+    point_of_contact     VARCHAR(255),
+    invoice_doc_label    VARCHAR(100) DEFAULT 'Tax Invoice',
+    invoice_num_label    VARCHAR(100) DEFAULT 'Invoice Number',
+    po_doc_label         VARCHAR(100) DEFAULT 'Purchase Order',
+    po_num_label         VARCHAR(100) DEFAULT 'PO Number',
+    remittance_doc_label VARCHAR(100) DEFAULT 'Remittance Advice',
+    remittance_num_label VARCHAR(100) DEFAULT 'Remittance Number',
+    created_at           TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- 1. Purchase Orders
 CREATE TABLE IF NOT EXISTS purchase_orders (
     id            SERIAL PRIMARY KEY,
+    client_id     INTEGER,
     po_number     VARCHAR(200) UNIQUE NOT NULL,
     po_date       VARCHAR(50),
     description   TEXT,
@@ -14,6 +34,7 @@ CREATE TABLE IF NOT EXISTS purchase_orders (
 -- 2. Invoices (no FK constraint on po_number — soft reference)
 CREATE TABLE IF NOT EXISTS invoices (
     id                  SERIAL PRIMARY KEY,
+    client_id           INTEGER,
     invoice_number      VARCHAR(200) UNIQUE NOT NULL,
     invoice_date        VARCHAR(50),
     po_number           VARCHAR(200),        -- soft ref, no FK
@@ -33,6 +54,7 @@ CREATE TABLE IF NOT EXISTS invoices (
 -- 3. Remittances (no FK constraint on invoice_number — soft reference)
 CREATE TABLE IF NOT EXISTS remittances (
     id                 SERIAL PRIMARY KEY,
+    client_id          INTEGER,
     remittance_number  VARCHAR(200) UNIQUE NOT NULL,
     remittance_date    VARCHAR(50),
     invoice_number     VARCHAR(200),        -- soft ref, no FK
@@ -41,6 +63,15 @@ CREATE TABLE IF NOT EXISTS remittances (
     created_at         TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Add client_id columns to existing tables if table already exists
+ALTER TABLE purchase_orders ADD COLUMN IF NOT EXISTS client_id INTEGER;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS client_id INTEGER;
+ALTER TABLE remittances ADD COLUMN IF NOT EXISTS client_id INTEGER;
+
+CREATE INDEX IF NOT EXISTS idx_clients_org ON clients(organization_name);
+CREATE INDEX IF NOT EXISTS idx_inv_client  ON invoices(client_id);
+CREATE INDEX IF NOT EXISTS idx_po_client   ON purchase_orders(client_id);
+CREATE INDEX IF NOT EXISTS idx_rem_client  ON remittances(client_id);
 CREATE INDEX IF NOT EXISTS idx_inv_po     ON invoices(po_number);
 CREATE INDEX IF NOT EXISTS idx_rem_inv    ON remittances(invoice_number);
 CREATE INDEX IF NOT EXISTS idx_inv_date   ON invoices(invoice_date);

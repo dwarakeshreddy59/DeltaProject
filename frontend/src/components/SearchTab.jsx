@@ -1,21 +1,24 @@
 import React, { useState } from "react";
 import { fmt } from "../utils/format";
 import { searchById, deleteInvoice } from "../services/api";
+import { useOrganization } from "../context/OrganizationContext";
 import toast from "react-hot-toast";
 
 const PAGE_SIZE = 10;
 
-const FIELDS = [
-  { label: "All Fields",         value: "all",               icon: "bi-search" },
-  { label: "Invoice No.",        value: "invoice_number",    icon: "bi-receipt" },
-  { label: "PO No.",             value: "po_number",         icon: "bi-file-earmark-text" },
-  { label: "Remittance No.",     value: "remittance_number", icon: "bi-cash-stack" },
-  { label: "Description",        value: "description",       icon: "bi-card-text" },
-  { label: "Invoice Date",       value: "invoice_date",      icon: "bi-calendar3" },
-  { label: "PO Date",            value: "po_date",           icon: "bi-calendar-event" },
-];
-
 export default function SearchTab() {
+  const { nomenclature } = useOrganization();
+
+  const fields = [
+    { label: "All Fields",         value: "all",               icon: "bi-search" },
+    { label: nomenclature.invoice_num_label || "Invoice No.", value: "invoice_number", icon: "bi-receipt" },
+    { label: nomenclature.po_num_label || "PO No.",          value: "po_number",      icon: "bi-file-earmark-text" },
+    { label: nomenclature.remittance_num_label || "Remittance No.", value: "remittance_number", icon: "bi-cash-stack" },
+    { label: "Description",        value: "description",       icon: "bi-card-text" },
+    { label: `${nomenclature.invoice_doc_label || "Invoice"} Date`, value: "invoice_date", icon: "bi-calendar3" },
+    { label: `${nomenclature.po_doc_label || "PO"} Date`,           value: "po_date",      icon: "bi-calendar-event" },
+  ];
+
   const [query,      setQuery]      = useState("");
   const [field,      setField]      = useState("all");
   const [records,    setRecords]    = useState([]);
@@ -68,12 +71,12 @@ export default function SearchTab() {
   };
 
   const handleDelete = async (invNum) => {
-    if (!invNum || !window.confirm(`Are you sure you want to delete invoice #${invNum} and linked data?`)) return;
+    if (!invNum || !window.confirm(`Are you sure you want to delete #${invNum} and linked data?`)) return;
     setDeletingId(invNum);
     try {
       const { data } = await deleteInvoice(invNum);
       if (data.success) {
-        toast.success(`Invoice #${invNum} deleted.`);
+        toast.success(`Record #${invNum} deleted.`);
         setRecords((prev) => prev.filter((r) => r.invoice_number !== invNum));
       }
     } catch (e) {
@@ -115,7 +118,7 @@ export default function SearchTab() {
       <div className="search-header" style={{ background: "linear-gradient(135deg, #181033 0%, #24134d 50%, #361775 100%)", borderBottom: "2px solid #7C3AED" }}>
         <div className="search-title" style={{ color: "#ffffff" }}>
           <i className="bi bi-search-heart-fill" style={{ color: "#A855F7" }} />
-          Smart Database Search &amp; Discovery
+          Smart Multi-Field Search &amp; Discovery
         </div>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: ".65rem" }}>
           <a href="/export/excel" className="btn-nav btn-green" style={{ textDecoration: "none", padding: ".4rem .85rem", fontSize: ".78rem" }}>
@@ -126,12 +129,12 @@ export default function SearchTab() {
 
       {/* ── Search Controls Panel ── */}
       <div style={{ padding: "1.75rem", background: "var(--bg-card)", borderBottom: "1px solid var(--border-subtle)" }}>
-        {/* Quick field selector pills */}
+        {/* Quick field selector pills with active nomenclature */}
         <div style={{ display: "flex", gap: ".6rem", flexWrap: "wrap", marginBottom: "1.25rem", alignItems: "center" }}>
           <span style={{ fontSize: ".75rem", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: ".05em", marginRight: ".3rem" }}>
             Search Target:
           </span>
-          {FIELDS.map((f) => {
+          {fields.map((f) => {
             const isSelected = field === f.value;
             return (
               <button
@@ -181,7 +184,7 @@ export default function SearchTab() {
                 outline: "none",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
               }}
-              placeholder={`Type to search in ${FIELDS.find((f2) => f2.value === field)?.label}... (e.g. invoice no, PO no, description, date)`}
+              placeholder={`Search in ${fields.find((f2) => f2.value === field)?.label}... (e.g. document no, description, date)`}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -298,7 +301,7 @@ export default function SearchTab() {
               Instant Multi-Field Search
             </h5>
             <p style={{ fontSize: ".88rem", maxWidth: 520, margin: "0 auto 1.5rem", lineHeight: 1.5, color: "var(--text-muted)" }}>
-              Search across <strong>Invoices</strong>, <strong>Purchase Orders</strong>, <strong>Remittances</strong>, <strong>Descriptions</strong>, or <strong>Dates</strong> with partial match and zero-normalization.
+              Search across <strong>{nomenclature.invoice_doc_label}s</strong>, <strong>{nomenclature.po_doc_label}s</strong>, <strong>{nomenclature.remittance_doc_label}s</strong>, <strong>Descriptions</strong>, or <strong>Dates</strong>.
             </p>
           </div>
         )}
@@ -320,7 +323,7 @@ export default function SearchTab() {
               No matches found for "<strong>{query}</strong>"
             </h5>
             <p style={{ fontSize: ".83rem", color: "var(--text-muted)", marginTop: ".25rem" }}>
-              Target: {FIELDS.find((f) => f.value === field)?.label}. Try searching with a broader keyword or switch to "All Fields".
+              Target: {fields.find((f) => f.value === field)?.label}. Try searching with a broader keyword or switch to "All Fields".
             </p>
             <button
               onClick={() => { setField("all"); handleSearch(query, "all"); }}
@@ -364,7 +367,7 @@ export default function SearchTab() {
               <div style={{ display: "flex", alignItems: "center", gap: ".6rem" }}>
                 <i className="bi bi-check-circle-fill" style={{ color: "#22C55E", fontSize: "1.1rem" }} />
                 <span>
-                  Found <strong>{records.length}</strong> matching record(s) for <strong>"{query}"</strong> in <strong>{FIELDS.find((f) => f.value === field)?.label}</strong>
+                  Found <strong>{records.length}</strong> matching record(s) for <strong>"{query}"</strong> in <strong>{fields.find((f) => f.value === field)?.label}</strong>
                 </span>
               </div>
               <span style={{ fontSize: ".75rem", fontWeight: 800, color: "#ffffff", background: "linear-gradient(135deg, #7C3AED, #A855F7)", border: "1px solid #C084FC", padding: ".2rem .6rem", borderRadius: 6, boxShadow: "0 0 10px rgba(168, 85, 247, 0.4)" }}>
@@ -378,20 +381,20 @@ export default function SearchTab() {
                 <thead>
                   <tr>
                     <th style={{ width: 65, textAlign: "center" }}>Action</th>
-                    <th onClick={() => handleSort("invoice_number")}>Invoice No. <SortIcon col="invoice_number" /></th>
-                    <th onClick={() => handleSort("invoice_date")}>Inv. Date <SortIcon col="invoice_date" /></th>
+                    <th onClick={() => handleSort("invoice_number")}>{nomenclature.invoice_num_label} <SortIcon col="invoice_number" /></th>
+                    <th onClick={() => handleSort("invoice_date")}>Date <SortIcon col="invoice_date" /></th>
                     <th onClick={() => handleSort("inv_description")}>Description <SortIcon col="inv_description" /></th>
                     <th onClick={() => handleSort("assessable_value")}>Assessable Val <SortIcon col="assessable_value" /></th>
                     <th onClick={() => handleSort("gst_amount")}>GST (18%) <SortIcon col="gst_amount" /></th>
-                    <th onClick={() => handleSort("total_invoice_value")}>Total Inv. Val <SortIcon col="total_invoice_value" /></th>
+                    <th onClick={() => handleSort("total_invoice_value")}>Total Value <SortIcon col="total_invoice_value" /></th>
                     <th onClick={() => handleSort("tds_rate")}>TDS% <SortIcon col="tds_rate" /></th>
                     <th onClick={() => handleSort("tds_amount")}>TDS Amt <SortIcon col="tds_amount" /></th>
                     <th onClick={() => handleSort("receivable")}>Net Receivable <SortIcon col="receivable" /></th>
-                    <th onClick={() => handleSort("po_number")}>PO No. <SortIcon col="po_number" /></th>
+                    <th onClick={() => handleSort("po_number")}>{nomenclature.po_num_label} <SortIcon col="po_number" /></th>
                     <th onClick={() => handleSort("po_date")}>PO Date <SortIcon col="po_date" /></th>
                     <th onClick={() => handleSort("total_amount")}>PO Total <SortIcon col="total_amount" /></th>
-                    <th onClick={() => handleSort("remittance_number")}>Remittance No. <SortIcon col="remittance_number" /></th>
-                    <th onClick={() => handleSort("remittance_date")}>Rem. Date <SortIcon col="remittance_date" /></th>
+                    <th onClick={() => handleSort("remittance_number")}>{nomenclature.remittance_num_label} <SortIcon col="remittance_number" /></th>
+                    <th onClick={() => handleSort("remittance_date")}>Payment Date <SortIcon col="remittance_date" /></th>
                     <th onClick={() => handleSort("gross_amount")}>Gross Amt <SortIcon col="gross_amount" /></th>
                   </tr>
                 </thead>
@@ -413,7 +416,7 @@ export default function SearchTab() {
                           className="id-badge"
                           style={{ cursor: "pointer" }}
                           title="Click to copy"
-                          onClick={() => handleCopy(r.invoice_number, "Invoice No")}
+                          onClick={() => handleCopy(r.invoice_number, nomenclature.invoice_num_label)}
                         >
                           {r.invoice_number || "—"}
                           {r.invoice_number && <i className="bi bi-copy ms-1" style={{ opacity: 0.5, fontSize: ".65rem" }} />}
@@ -434,7 +437,7 @@ export default function SearchTab() {
                           className="id-badge badge-po"
                           style={{ cursor: "pointer" }}
                           title="Click to copy"
-                          onClick={() => handleCopy(r.po_number, "PO No")}
+                          onClick={() => handleCopy(r.po_number, nomenclature.po_num_label)}
                         >
                           {r.po_number || "—"}
                           {r.po_number && <i className="bi bi-copy ms-1" style={{ opacity: 0.5, fontSize: ".65rem" }} />}
@@ -447,7 +450,7 @@ export default function SearchTab() {
                           className="id-badge badge-remit"
                           style={{ cursor: "pointer" }}
                           title="Click to copy"
-                          onClick={() => handleCopy(r.remittance_number, "Remittance No")}
+                          onClick={() => handleCopy(r.remittance_number, nomenclature.remittance_num_label)}
                         >
                           {r.remittance_number || "—"}
                           {r.remittance_number && <i className="bi bi-copy ms-1" style={{ opacity: 0.5, fontSize: ".65rem" }} />}
@@ -490,4 +493,3 @@ export default function SearchTab() {
     </div>
   );
 }
-

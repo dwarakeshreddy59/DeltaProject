@@ -66,6 +66,9 @@ app.add_middleware(
 )
 
 os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
+LOGOS_FOLDER = os.path.join(Config.UPLOAD_FOLDER, "logos")
+os.makedirs(LOGOS_FOLDER, exist_ok=True)
+app.mount("/uploads/logos", StaticFiles(directory=LOGOS_FOLDER), name="client_logos")
 
 ALLOWED_EXT = {"pdf"}
 
@@ -100,6 +103,7 @@ async def upload(
     po_pdf:         UploadFile = File(...),
     remittance_pdf: UploadFile = File(...),
     tds_rate:       float      = Form(2.0),
+    client_id:      Optional[int] = Form(None),
 ):
     """
     Accept three PDFs + a TDS rate.
@@ -234,7 +238,7 @@ async def upload(
 
         # ── Persist ───────────────────────────────────────────────────────────
         try:
-            _save_to_db(po_data, invoice_data, remittance_data)
+            _save_to_db(po_data, invoice_data, remittance_data, client_id=client_id)
         except Exception as e:
             warnings.append(f"DB save warning: {str(e)}")
 
@@ -248,6 +252,7 @@ async def upload(
 
     return JSONResponse({
         "success":    True,
+        "client_id":  client_id,
         "errors":     warnings,
         "po":         po_data,
         "invoice":    invoice_data,
@@ -281,10 +286,227 @@ async def recalculate(body: RecalculateRequest):
     return {"success": True, **calc}
 
 
+# ── Client / Organization Endpoints ──────────────────────────────────────────
+
+@app.get("/clients")
+async def get_clients():
+    """List all registered clients/companies with record counts."""
+    sql = """
+        SELECT
+            c.id, c.client_name, c.organization_name, c.logo_url,
+            c.gst_number, c.pan_number, c.address, c.point_of_contact,
+            c.invoice_doc_label, c.invoice_num_label,
+            c.po_doc_label, c.po_num_label,
+            c.remittance_doc_label, c.remittance_num_label,
+            c.created_at,
+            COUNT(DISTINCT i.id) as invoices_count,
+            COUNT(DISTINCT p.id) as pos_count,
+            COUNT(DISTINCT r.id) as remittances_count
+        FROM clients c
+        LEFT JOIN invoices i ON i.client_id = c.id
+        LEFT JOIN purchase_orders p ON p.client_id = c.id
+        LEFT JOIN remittances r ON r.client_id = c.id
+        GROUP BY c.id
+        ORDER BY c.id ASC;
+    """
+    try:
+        rows = db.execute_query(sql, fetch="all")
+        clients = [dict(r) for r in (rows or [])]
+        return {"success": True, "total": len(clients), "clients": clients}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/clients/{client_id}")
+async def get_client(client_id: int):
+    """Retrieve a single registered client."""
+    row = db.execute_query("SELECT * FROM clients WHERE id = %s;", (client_id,), fetch="one")
+    if not row:
+        raise HTTPException(status_code=404, detail=f"Client {client_id} not found.")
+    return {"success": True, "client": dict(row)}
+
+
+@app.post("/clients")
+async def register_client(
+    client_name: str = Form(...),
+    organization_name: str = Form(...),
+    gst_number: Optional[str] = Form(""),
+    pan_number: Optional[str] = Form(""),
+    address: Optional[str] = Form(""),
+    point_of_contact: Optional[str] = Form(""),
+    invoice_doc_label: Optional[str] = Form("Tax Invoice"),
+    invoice_num_label: Optional[str] = Form("Invoice Number"),
+    po_doc_label: Optional[str] = Form("Purchase Order"),
+    po_num_label: Optional[str] = Form("PO Number"),
+    remittance_doc_label: Optional[str] = Form("Remittance Advice"),
+    remittance_num_label: Optional[str] = Form("Remittance Number"),
+    logo_file: Optional[UploadFile] = File(None),
+    logo_url: Optional[str] = Form(""),
+):
+    """Register a new client/organization with optional logo and custom document nomenclature."""
+    def _unwrap(v, d=""):
+        return d if (v is None or hasattr(v, "default")) else str(v)
+
+    c_name = _unwrap(client_name, "").strip()
+    org_name = _unwrap(organization_name, "").strip()
+    gst = _unwrap(gst_number, "").strip().upper()
+    pan = _unwrap(pan_number, "").strip().upper()
+    addr = _unwrap(address, "").strip()
+    poc = _unwrap(point_of_contact, "").strip()
+    inv_doc = _unwrap(invoice_doc_label, "Tax Invoice").strip() or "Tax Invoice"
+    inv_num = _unwrap(invoice_num_label, "Invoice Number").strip() or "Invoice Number"
+    po_doc = _unwrap(po_doc_label, "Purchase Order").strip() or "Purchase Order"
+    po_num = _unwrap(po_num_label, "PO Number").strip() or "PO Number"
+    rem_doc = _unwrap(remittance_doc_label, "Remittance Advice").strip() or "Remittance Advice"
+    rem_num = _unwrap(remittance_num_label, "Remittance Number").strip() or "Remittance Number"
+    l_url = _unwrap(logo_url, "")
+
+    try:
+        final_logo_url = l_url
+        if logo_file and hasattr(logo_file, "filename") and logo_file.filename:
+            logo_ext = logo_file.filename.rsplit(".", 1)[-1].lower() if "." in logo_file.filename else "png"
+            logo_fname = f"logo_{uuid.uuid4().hex[:12]}.{logo_ext}"
+            logo_dest = os.path.join(LOGOS_FOLDER, logo_fname)
+            with open(logo_dest, "wb") as f:
+                f.write(logo_file.file.read())
+            final_logo_url = f"/uploads/logos/{logo_fname}"
+
+        inserted = db.execute_query(
+            """
+            INSERT INTO clients (
+                client_name, organization_name, logo_url, gst_number, pan_number,
+                address, point_of_contact,
+                invoice_doc_label, invoice_num_label,
+                po_doc_label, po_num_label,
+                remittance_doc_label, remittance_num_label
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING *;
+            """,
+            (
+                c_name, org_name, final_logo_url,
+                gst, pan, addr, poc,
+                inv_doc, inv_num,
+                po_doc, po_num,
+                rem_doc, rem_num,
+            ),
+            fetch="one",
+        )
+        return {"success": True, "client": dict(inserted)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/clients/{client_id}")
+async def update_client(
+    client_id: int,
+    client_name: Optional[str] = Form(None),
+    organization_name: Optional[str] = Form(None),
+    gst_number: Optional[str] = Form(None),
+    pan_number: Optional[str] = Form(None),
+    address: Optional[str] = Form(None),
+    point_of_contact: Optional[str] = Form(None),
+    invoice_doc_label: Optional[str] = Form(None),
+    invoice_num_label: Optional[str] = Form(None),
+    po_doc_label: Optional[str] = Form(None),
+    po_num_label: Optional[str] = Form(None),
+    remittance_doc_label: Optional[str] = Form(None),
+    remittance_num_label: Optional[str] = Form(None),
+    logo_file: Optional[UploadFile] = File(None),
+    logo_url: Optional[str] = Form(None),
+):
+    """Update an existing client's details or nomenclature."""
+    def _unwrap(v, d=None):
+        return d if (v is None or hasattr(v, "default")) else str(v)
+
+    c_name = _unwrap(client_name, None)
+    org_name = _unwrap(organization_name, None)
+    gst = _unwrap(gst_number, None)
+    if gst: gst = gst.upper()
+    pan = _unwrap(pan_number, None)
+    if pan: pan = pan.upper()
+    addr = _unwrap(address, None)
+    poc = _unwrap(point_of_contact, None)
+    inv_doc = _unwrap(invoice_doc_label, None)
+    inv_num = _unwrap(invoice_num_label, None)
+    po_doc = _unwrap(po_doc_label, None)
+    po_num = _unwrap(po_num_label, None)
+    rem_doc = _unwrap(remittance_doc_label, None)
+    rem_num = _unwrap(remittance_num_label, None)
+    l_url = _unwrap(logo_url, None)
+
+    try:
+        existing = db.execute_query("SELECT * FROM clients WHERE id = %s;", (client_id,), fetch="one")
+        if not existing:
+            raise HTTPException(status_code=404, detail=f"Client {client_id} not found.")
+
+        final_logo_url = existing["logo_url"]
+        if logo_file and hasattr(logo_file, "filename") and logo_file.filename:
+            logo_ext = logo_file.filename.rsplit(".", 1)[-1].lower() if "." in logo_file.filename else "png"
+            logo_fname = f"logo_{uuid.uuid4().hex[:12]}.{logo_ext}"
+            logo_dest = os.path.join(LOGOS_FOLDER, logo_fname)
+            with open(logo_dest, "wb") as f:
+                f.write(logo_file.file.read())
+            final_logo_url = f"/uploads/logos/{logo_fname}"
+        elif l_url is not None:
+            final_logo_url = l_url
+
+        updated = db.execute_query(
+            """
+            UPDATE clients SET
+                client_name          = COALESCE(%s, client_name),
+                organization_name    = COALESCE(%s, organization_name),
+                logo_url             = %s,
+                gst_number           = COALESCE(%s, gst_number),
+                pan_number           = COALESCE(%s, pan_number),
+                address              = COALESCE(%s, address),
+                point_of_contact     = COALESCE(%s, point_of_contact),
+                invoice_doc_label    = COALESCE(%s, invoice_doc_label),
+                invoice_num_label    = COALESCE(%s, invoice_num_label),
+                po_doc_label         = COALESCE(%s, po_doc_label),
+                po_num_label         = COALESCE(%s, po_num_label),
+                remittance_doc_label = COALESCE(%s, remittance_doc_label),
+                remittance_num_label = COALESCE(%s, remittance_num_label)
+            WHERE id = %s
+            RETURNING *;
+            """,
+            (
+                c_name, org_name, final_logo_url,
+                gst, pan, addr, poc,
+                inv_doc, inv_num,
+                po_doc, po_num,
+                rem_doc, rem_num,
+                client_id,
+            ),
+            fetch="one",
+        )
+        return {"success": True, "client": dict(updated)}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/clients/{client_id}")
+async def delete_client(client_id: int):
+    """Delete a client and unassign its records."""
+    if client_id == 1:
+        raise HTTPException(status_code=400, detail="Default organization (Client #1) cannot be deleted.")
+    try:
+        db.execute_query("UPDATE invoices SET client_id = NULL WHERE client_id = %s;", (client_id,))
+        db.execute_query("UPDATE purchase_orders SET client_id = NULL WHERE client_id = %s;", (client_id,))
+        db.execute_query("UPDATE remittances SET client_id = NULL WHERE client_id = %s;", (client_id,))
+        db.execute_query("DELETE FROM clients WHERE id = %s;", (client_id,))
+        return {"success": True, "message": f"Client {client_id} deleted."}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/history")
-async def history():
+async def history(client_id: Optional[int] = None):
     """Kept for backward compat — delegates to /records/all."""
-    return await records_all()
+    return await records_all(client_id=client_id)
 
 
 _RECORDS_SQL = """
@@ -297,44 +519,68 @@ _RECORDS_SQL = """
         p.delivery_date, p.total_amount,
         r.remittance_number, r.remittance_date, r.description AS rem_description,
         r.gross_amount, r.total_gross_amount, r.line_items AS rem_items,
+        i.client_id,
+        c.organization_name, c.client_name, c.logo_url, c.gst_number AS client_gstin,
         i.created_at
     FROM invoices i
     LEFT JOIN purchase_orders p ON (p.po_number = i.po_number OR LTRIM(COALESCE(p.po_number, ''), '0') = LTRIM(COALESCE(i.po_number, ''), '0'))
     LEFT JOIN remittances r     ON (r.invoice_number = i.invoice_number OR POSITION(COALESCE(i.invoice_number, '___') IN COALESCE(r.invoice_number, '')) > 0)
+    LEFT JOIN clients c         ON c.id = i.client_id
 """
 
 
 @app.get("/records/all")
-async def records_all():
+async def records_all(client_id: Optional[int] = None):
     """Return ALL saved records: combined joined list, plus individual tables for Invoices, POs, and Remittances."""
     try:
-        combined_rows = db.execute_query(
-            _RECORDS_SQL + " ORDER BY i.created_at DESC",
-            fetch="all",
-        )
+        if client_id:
+            combined_rows = db.execute_query(
+                _RECORDS_SQL + " WHERE i.client_id = %s ORDER BY i.created_at DESC",
+                (client_id,),
+                fetch="all",
+            )
+            invoice_rows = db.execute_query(
+                "SELECT * FROM invoices WHERE client_id = %s ORDER BY created_at DESC",
+                (client_id,),
+                fetch="all",
+            )
+            po_rows = db.execute_query(
+                "SELECT * FROM purchase_orders WHERE client_id = %s ORDER BY created_at DESC",
+                (client_id,),
+                fetch="all",
+            )
+            rem_rows = db.execute_query(
+                "SELECT * FROM remittances WHERE client_id = %s ORDER BY created_at DESC",
+                (client_id,),
+                fetch="all",
+            )
+        else:
+            combined_rows = db.execute_query(
+                _RECORDS_SQL + " ORDER BY i.created_at DESC",
+                fetch="all",
+            )
+            invoice_rows = db.execute_query(
+                "SELECT * FROM invoices ORDER BY created_at DESC",
+                fetch="all",
+            )
+            po_rows = db.execute_query(
+                "SELECT * FROM purchase_orders ORDER BY created_at DESC",
+                fetch="all",
+            )
+            rem_rows = db.execute_query(
+                "SELECT * FROM remittances ORDER BY created_at DESC",
+                fetch="all",
+            )
+
         combined = [dict(r) for r in (combined_rows or [])]
-
-        invoice_rows = db.execute_query(
-            "SELECT * FROM invoices ORDER BY created_at DESC",
-            fetch="all",
-        )
         invoices = [dict(r) for r in (invoice_rows or [])]
-
-        po_rows = db.execute_query(
-            "SELECT * FROM purchase_orders ORDER BY created_at DESC",
-            fetch="all",
-        )
         pos = [dict(r) for r in (po_rows or [])]
-
-        rem_rows = db.execute_query(
-            "SELECT * FROM remittances ORDER BY created_at DESC",
-            fetch="all",
-        )
         remittances = [dict(r) for r in (rem_rows or [])]
 
         return {
             "success":         True,
             "total":           len(combined),
+            "client_id":       client_id,
             "records":         combined,
             "combined":        combined,
             "invoices":        invoices,
@@ -519,9 +765,9 @@ def _normalize_id(val: str) -> str:
     return str(val).strip().lstrip("0") or "0"
 
 
-def _save_to_db(po: dict, inv: dict, rem: dict) -> None:
+def _save_to_db(po: dict, inv: dict, rem: dict, client_id: Optional[int] = None) -> None:
     """
-    Upsert all three documents with detailed logging.
+    Upsert all three documents with detailed logging and optional client_id association.
     No FK constraints in DB — all references are soft (plain VARCHAR).
     """
 
@@ -530,18 +776,19 @@ def _save_to_db(po: dict, inv: dict, rem: dict) -> None:
     if po.get("po_number"):
         db.execute_query(
             """INSERT INTO purchase_orders
-                   (po_number, po_date, description, delivery_date, total_amount)
-               VALUES (%s,%s,%s,%s,%s)
+                   (client_id, po_number, po_date, description, delivery_date, total_amount)
+               VALUES (%s,%s,%s,%s,%s,%s)
                ON CONFLICT (po_number) DO UPDATE SET
+                   client_id     = COALESCE(EXCLUDED.client_id, purchase_orders.client_id),
                    po_date       = EXCLUDED.po_date,
                    description   = EXCLUDED.description,
                    delivery_date = EXCLUDED.delivery_date,
                    total_amount  = EXCLUDED.total_amount""",
-            (po["po_number"], po.get("po_date"), po.get("description"),
+            (client_id, po["po_number"], po.get("po_date"), po.get("description"),
              po.get("delivery_date"), po.get("total_amount", 0)),
         )
         saved_po_number = po["po_number"]
-        print(f"[DB] PO saved: {saved_po_number}")
+        print(f"[DB] PO saved: {saved_po_number} (client_id={client_id})")
 
     # 2. Resolve invoice → PO link using normalized (leading-zero-stripped) comparison
     inv_po_ref = None
@@ -562,11 +809,12 @@ def _save_to_db(po: dict, inv: dict, rem: dict) -> None:
     if inv.get("invoice_number"):
         db.execute_query(
             """INSERT INTO invoices
-                   (invoice_number, invoice_date, po_number, description,
+                   (client_id, invoice_number, invoice_date, po_number, description,
                     invoice_period, assessable_value, total_tax, total_invoice_value,
                     gst_rate, gst_amount, tds_rate, tds_amount, receivable)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                ON CONFLICT (invoice_number) DO UPDATE SET
+                   client_id           = COALESCE(EXCLUDED.client_id, invoices.client_id),
                    invoice_date        = EXCLUDED.invoice_date,
                    po_number           = EXCLUDED.po_number,
                    description         = EXCLUDED.description,
@@ -579,7 +827,7 @@ def _save_to_db(po: dict, inv: dict, rem: dict) -> None:
                    tds_rate            = EXCLUDED.tds_rate,
                    tds_amount          = EXCLUDED.tds_amount,
                    receivable          = EXCLUDED.receivable""",
-            (inv["invoice_number"], inv.get("invoice_date"),
+            (client_id, inv["invoice_number"], inv.get("invoice_date"),
              inv_po_ref,            # safe FK or None
              inv.get("description"),
              inv.get("invoice_period"), inv.get("assessable_value", 0),
@@ -589,6 +837,7 @@ def _save_to_db(po: dict, inv: dict, rem: dict) -> None:
              inv.get("receivable", 0)),
         )
         saved_inv_number = inv["invoice_number"]
+        print(f"[DB] Invoice saved: {saved_inv_number} (client_id={client_id})")
 
     # 4. Resolve safe FK for remittance → invoice
     rem_inv_ref = None
@@ -606,21 +855,23 @@ def _save_to_db(po: dict, inv: dict, rem: dict) -> None:
         rem_inv_num = rem.get("invoice_number") or saved_inv_number or ""
         db.execute_query(
             """INSERT INTO remittances
-                   (remittance_number, remittance_date, invoice_number, description,
+                   (client_id, remittance_number, remittance_date, invoice_number, description,
                     gross_amount, total_gross_amount, line_items)
-               VALUES (%s,%s,%s,%s,%s,%s,%s)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
                ON CONFLICT (remittance_number) DO UPDATE SET
+                   client_id          = COALESCE(EXCLUDED.client_id, remittances.client_id),
                    remittance_date    = EXCLUDED.remittance_date,
                    invoice_number     = EXCLUDED.invoice_number,
                    description        = EXCLUDED.description,
                    gross_amount       = EXCLUDED.gross_amount,
                    total_gross_amount = EXCLUDED.total_gross_amount,
                    line_items         = EXCLUDED.line_items""",
-            (rem["remittance_number"], rem.get("remittance_date"),
+            (client_id, rem["remittance_number"], rem.get("remittance_date"),
              rem_inv_num, rem.get("description", ""),
              rem.get("gross_amount", 0), rem.get("total_gross_amount", 0),
              line_items_json),
         )
+        print(f"[DB] Remittance saved: {rem['remittance_number']} (client_id={client_id})")
 
 
 # ── Serve React build in production ──────────────────────────────────────────

@@ -13,11 +13,32 @@ export const recalculate = (assessable_value, tds_rate, invoice_number) =>
   axios.post(`${BASE}/recalculate`, { assessable_value, tds_rate, invoice_number });
 
 /** All saved records (joined view + individual tables) */
-export const fetchHistory = () => axios.get(`${BASE}/records/all`);
+export const fetchHistory = (clientId = null) =>
+  axios.get(`${BASE}/records/all`, {
+    params: clientId ? { client_id: clientId } : {},
+  });
 
 /** Search DB by a specific field value */
 export const searchById = (field, query) =>
   axios.get(`${BASE}/search`, { params: { field, q: query } });
+
+/** Client / Organization Management API */
+export const fetchClients = () => axios.get(`${BASE}/clients`);
+
+export const fetchClient = (clientId) => axios.get(`${BASE}/clients/${clientId}`);
+
+export const registerClient = (formData) =>
+  axios.post(`${BASE}/clients`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+export const updateClient = (clientId, formData) =>
+  axios.put(`${BASE}/clients/${clientId}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+export const deleteClient = (clientId) =>
+  axios.delete(`${BASE}/clients/${clientId}`);
 
 /** Delete an invoice record */
 export const deleteInvoice = (invoiceNumber) =>
@@ -37,3 +58,4 @@ export const clearAllRecords = () =>
 
 /** Excel export URL */
 export const exportExcelUrl = () => `${BASE}/export/excel`;
+

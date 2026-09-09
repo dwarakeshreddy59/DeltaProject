@@ -1,37 +1,39 @@
 import React, { useState } from "react";
 import DropZone from "./DropZone";
 import WrongFileModal from "./WrongFileModal";
-
-const SLOTS = [
-  {
-    key: "invoice",
-    label: "Invoice PDF",
-    hint: "Tax Invoice / e-Invoice & Details",
-    icon: "bi-receipt",
-    color: "#A855F7",
-    bg: "linear-gradient(135deg, #7C3AED, #A855F7)",
-  },
-  {
-    key: "po",
-    label: "Purchase Order PDF",
-    hint: "PO No. & Delivery Date",
-    icon: "bi-file-text",
-    color: "#C084FC",
-    bg: "linear-gradient(135deg, #9333EA, #C084FC)",
-  },
-  {
-    key: "remittance",
-    label: "Remittance PDF",
-    hint: "Remittance Advice & Cleared Items",
-    icon: "bi-cash-stack",
-    color: "#22C55E",
-    bg: "linear-gradient(135deg, #16A34A, #22C55E)",
-  },
-];
+import { useOrganization } from "../context/OrganizationContext";
 
 export default function UploadForm({ onSubmit, loading, mismatchError, onClearMismatch }) {
+  const { activeClient, nomenclature, openRegisterModal } = useOrganization();
   const [files, setFiles] = useState({ invoice: null, po: null, remittance: null });
   const [errors, setErrors] = useState({});
+
+  const slots = [
+    {
+      key: "invoice",
+      label: `${nomenclature.invoice_doc_label} PDF`,
+      hint: `${nomenclature.invoice_num_label} & Tax Details`,
+      icon: "bi-receipt",
+      color: "#A855F7",
+      bg: "linear-gradient(135deg, #7C3AED, #A855F7)",
+    },
+    {
+      key: "po",
+      label: `${nomenclature.po_doc_label} PDF`,
+      hint: `${nomenclature.po_num_label} & Delivery Date`,
+      icon: "bi-file-text",
+      color: "#C084FC",
+      bg: "linear-gradient(135deg, #9333EA, #C084FC)",
+    },
+    {
+      key: "remittance",
+      label: `${nomenclature.remittance_doc_label} PDF`,
+      hint: `${nomenclature.remittance_num_label} & Cleared Items`,
+      icon: "bi-cash-stack",
+      color: "#22C55E",
+      bg: "linear-gradient(135deg, #16A34A, #22C55E)",
+    },
+  ];
 
   const setFile = (key) => (f) => {
     setFiles((prev) => ({ ...prev, [key]: f }));
@@ -55,6 +57,9 @@ export default function UploadForm({ onSubmit, loading, mismatchError, onClearMi
     fd.append("po_pdf",         files.po);
     fd.append("remittance_pdf", files.remittance);
     fd.append("tds_rate",       2.0); // default 2%
+    if (activeClient?.id) {
+      fd.append("client_id", activeClient.id);
+    }
     onSubmit(fd);
   };
 
@@ -81,6 +86,9 @@ export default function UploadForm({ onSubmit, loading, mismatchError, onClearMi
       fd.append("po_pdf", fixedFiles.po);
       fd.append("remittance_pdf", fixedFiles.remittance);
       fd.append("tds_rate", 2.0);
+      if (activeClient?.id) {
+        fd.append("client_id", activeClient.id);
+      }
       onSubmit(fd);
     }
   };
@@ -98,14 +106,26 @@ export default function UploadForm({ onSubmit, loading, mismatchError, onClearMi
         onAutoFix={handleAutoFix}
       />
 
+      {/* Upload Header with Active Client Indicator */}
       <div className="upload-header">
-        <div style={{ display: "flex", alignItems: "center", gap: ".6rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: ".75rem", flexWrap: "wrap" }}>
           <span className="header-icon-glow">
             <i className="bi bi-cloud-arrow-up-fill" />
           </span>
-          <span style={{ fontWeight: 800, letterSpacing: "-0.01em" }}>Upload &amp; Extract Documents</span>
+          <div>
+            <span style={{ fontWeight: 800, letterSpacing: "-0.01em", fontSize: "1.02rem" }}>
+              Upload &amp; Extract Documents
+            </span>
+            {activeClient && (
+              <div style={{ fontSize: ".76rem", color: "var(--purple-neon)", fontWeight: 600 }}>
+                <i className="bi bi-building me-1" />
+                Target Organization: <strong>{activeClient.organization_name}</strong>
+              </div>
+            )}
+          </div>
         </div>
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: ".5rem" }}>
+
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: ".6rem" }}>
           <span className="upload-counter-pill">
             <i className="bi bi-layers-fill me-1" />
             {filled}/3 PDFs Loaded
@@ -127,10 +147,54 @@ export default function UploadForm({ onSubmit, loading, mismatchError, onClearMi
       </div>
 
       <div className="upload-body">
+        {/* Dynamic Nomenclature Notice */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            background: "var(--bg-card-subtle)",
+            border: "1px solid var(--border-subtle)",
+            borderRadius: 10,
+            padding: ".55rem .9rem",
+            marginBottom: "1.2rem",
+            fontSize: ".78rem",
+            flexWrap: "wrap",
+            gap: ".5rem",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: ".5rem", color: "var(--text-muted)" }}>
+            <i className="bi bi-info-circle-fill" style={{ color: "var(--purple-neon)" }} />
+            <span>
+              Configured document labels for <strong>{activeClient?.organization_name}</strong>:{" "}
+              <span style={{ color: "#A855F7", fontWeight: 700 }}>{nomenclature.invoice_doc_label}</span>,{" "}
+              <span style={{ color: "#C084FC", fontWeight: 700 }}>{nomenclature.po_doc_label}</span>,{" "}
+              <span style={{ color: "#22C55E", fontWeight: 700 }}>{nomenclature.remittance_doc_label}</span>.
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={openRegisterModal}
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--purple-violet)",
+              fontWeight: 700,
+              fontSize: ".76rem",
+              cursor: "pointer",
+              padding: 0,
+              textDecoration: "underline",
+            }}
+          >
+            + Register Another Company
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit}>
           {/* Drop zones for all 3 PDFs */}
           <div className="row g-3" style={{ marginBottom: "1.25rem" }}>
-            {SLOTS.map(({ key, label, hint }) => {
+            {slots.map(({ key, label, hint }) => {
               const slotMismatch = mismatches.find((m) => m.slot === key);
               return (
                 <div key={key} className="col-md-4">
@@ -167,7 +231,7 @@ export default function UploadForm({ onSubmit, loading, mismatchError, onClearMi
           >
             <div style={{ display: "flex", alignItems: "center", gap: ".6rem", color: "var(--text-muted)", fontSize: ".82rem" }}>
               <i className="bi bi-shield-check" style={{ color: "var(--purple-neon)", fontSize: "1.1rem" }} />
-              <span>PDFs will be parsed &amp; auto-saved to PostgreSQL</span>
+              <span>Parsed &amp; saved to PostgreSQL under <strong>{activeClient?.organization_name}</strong></span>
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: ".75rem" }}>

@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { fmt } from "../utils/format";
 import { fetchHistory, deleteInvoice, deletePO, deleteRemittance, clearAllRecords } from "../services/api";
+import { useOrganization } from "../context/OrganizationContext";
 import toast from "react-hot-toast";
 
 const PAGE_SIZE = 10;
 
-const VIEW_OPTIONS = [
-  { id: "invoices",        label: "1. Invoices",         icon: "bi-receipt",           desc: "Tax Invoices & Financials" },
-  { id: "purchase_orders", label: "2. Purchase Orders",  icon: "bi-file-earmark-text", desc: "POs & Delivery Dates" },
-  { id: "remittances",     label: "3. Remittances",      icon: "bi-cash-stack",        desc: "Payment Advices & Gross" },
-  { id: "combined",        label: "4. Combined Master",  icon: "bi-table",             desc: "Full 22-Column Joined View" },
-];
-
 export default function RecordsTab({ refreshTrigger = 0 }) {
+  const { clients, activeClient, nomenclature } = useOrganization();
+
+  // Organization filter: defaults to active organization or "" for all
+  const [selectedOrgFilter, setSelectedOrgFilter] = useState(() => {
+    return activeClient?.id ? String(activeClient.id) : "";
+  });
+
   const [data,        setData]        = useState({ combined: [], invoices: [], purchase_orders: [], remittances: [] });
   const [activeView,  setActiveView]  = useState("invoices"); // default to 1. Invoices
   const [loading,     setLoading]     = useState(false);
@@ -23,11 +24,46 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
   const [filter,      setFilter]      = useState("");
   const [deletingKey, setDeletingKey] = useState(null);
 
+  // Sync selected filter with activeClient changes
+  useEffect(() => {
+    if (activeClient?.id) {
+      setSelectedOrgFilter(String(activeClient.id));
+    }
+  }, [activeClient?.id]);
+
+  const viewOptions = [
+    {
+      id: "invoices",
+      label: `1. ${nomenclature.invoice_doc_label}s`,
+      icon: "bi-receipt",
+      desc: `${nomenclature.invoice_doc_label}s & Financials`,
+    },
+    {
+      id: "purchase_orders",
+      label: `2. ${nomenclature.po_doc_label}s`,
+      icon: "bi-file-earmark-text",
+      desc: `${nomenclature.po_doc_label}s & Delivery Dates`,
+    },
+    {
+      id: "remittances",
+      label: `3. ${nomenclature.remittance_doc_label}s`,
+      icon: "bi-cash-stack",
+      desc: `${nomenclature.remittance_doc_label}s & Gross Amounts`,
+    },
+    {
+      id: "combined",
+      label: "4. Combined Master",
+      icon: "bi-table",
+      desc: "Full 22-Column Joined Multi-Organization View",
+    },
+  ];
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetchHistory();
+      const clientIdParam = selectedOrgFilter ? Number(selectedOrgFilter) : null;
+      const res = await fetchHistory(clientIdParam);
       const resData = res.data;
       if (resData.success) {
         setData({
@@ -47,9 +83,11 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedOrgFilter]);
 
-  useEffect(() => { load(); }, [refreshTrigger, load]);
+  useEffect(() => {
+    load();
+  }, [refreshTrigger, load]);
 
   // Current list based on active view
   const currentList = data[activeView] || [];
@@ -85,31 +123,31 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
 
   // Delete Handlers
   const handleDeleteInvoice = async (invNum) => {
-    if (!invNum || !window.confirm(`Delete Invoice #${invNum}?`)) return;
+    if (!invNum || !window.confirm(`Delete ${nomenclature.invoice_doc_label} #${invNum}?`)) return;
     setDeletingKey(invNum);
     try {
       const { data: res } = await deleteInvoice(invNum);
-      if (res.success) { toast.success(`Deleted invoice #${invNum}`); load(); }
+      if (res.success) { toast.success(`Deleted #${invNum}`); load(); }
     } catch (e) { toast.error("Delete failed: " + (e?.response?.data?.detail || e.message)); }
     finally { setDeletingKey(null); }
   };
 
   const handleDeletePO = async (poNum) => {
-    if (!poNum || !window.confirm(`Delete Purchase Order #${poNum}?`)) return;
+    if (!poNum || !window.confirm(`Delete ${nomenclature.po_doc_label} #${poNum}?`)) return;
     setDeletingKey(poNum);
     try {
       const { data: res } = await deletePO(poNum);
-      if (res.success) { toast.success(`Deleted PO #${poNum}`); load(); }
+      if (res.success) { toast.success(`Deleted #${poNum}`); load(); }
     } catch (e) { toast.error("Delete failed: " + (e?.response?.data?.detail || e.message)); }
     finally { setDeletingKey(null); }
   };
 
   const handleDeleteRemittance = async (remNum) => {
-    if (!remNum || !window.confirm(`Delete Remittance #${remNum}?`)) return;
+    if (!remNum || !window.confirm(`Delete ${nomenclature.remittance_doc_label} #${remNum}?`)) return;
     setDeletingKey(remNum);
     try {
       const { data: res } = await deleteRemittance(remNum);
-      if (res.success) { toast.success(`Deleted Remittance #${remNum}`); load(); }
+      if (res.success) { toast.success(`Deleted #${remNum}`); load(); }
     } catch (e) { toast.error("Delete failed: " + (e?.response?.data?.detail || e.message)); }
     finally { setDeletingKey(null); }
   };
@@ -127,27 +165,63 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
     finally { setLoading(false); }
   };
 
+  const activeOrgName = clients.find((c) => String(c.id) === String(selectedOrgFilter))?.organization_name;
+
   return (
     <div className="search-wrapper animate-fadein">
       {/* ── Header ── */}
       <div className="search-header">
         <div className="search-title">
           <i className="bi bi-database-fill" />
-          All Database Records
+          Database Records
           <span className="rec-count-badge">
-            {data.invoices.length} Invoices · {data.purchase_orders.length} POs · {data.remittances.length} Remittances
+            {data.invoices.length} {nomenclature.invoice_doc_label}s · {data.purchase_orders.length} {nomenclature.po_doc_label}s · {data.remittances.length} {nomenclature.remittance_doc_label}s
           </span>
         </div>
+
         <div className="search-controls">
+          {/* Organization Scope Dropdown Filter */}
+          <div style={{ display: "flex", alignItems: "center", gap: ".4rem" }}>
+            <span style={{ fontSize: ".75rem", fontWeight: 700, color: "var(--text-muted)" }}>
+              <i className="bi bi-building me-1" />Org:
+            </span>
+            <select
+              value={selectedOrgFilter}
+              onChange={(e) => {
+                setSelectedOrgFilter(e.target.value);
+                setPage(1);
+              }}
+              style={{
+                background: "var(--bg-card)",
+                color: "var(--text-main)",
+                border: "1.5px solid var(--border-medium)",
+                borderRadius: 8,
+                padding: ".4rem .75rem",
+                fontSize: ".8rem",
+                fontWeight: 700,
+                outline: "none",
+                cursor: "pointer",
+                maxWidth: 220,
+              }}
+            >
+              <option value="">🌐 All Organizations</option>
+              {clients.map((c) => (
+                <option key={c.id} value={String(c.id)}>
+                  🏢 {c.organization_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="search-input-wrap">
             <i className="bi bi-funnel" style={{ color: "#64748b" }} />
             <input
               className="search-input"
-              placeholder={`Filter in ${VIEW_OPTIONS.find((v) => v.id === activeView)?.label}...`}
+              placeholder={`Filter in ${viewOptions.find((v) => v.id === activeView)?.label}...`}
               value={filter}
               onChange={(e) => { setFilter(e.target.value); setPage(1); }}
               style={{
-                minWidth: 200,
+                minWidth: 180,
                 background: "var(--bg-card)",
                 color: "var(--text-main)",
                 fontWeight: 700,
@@ -160,12 +234,15 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
               </button>
             )}
           </div>
+
           <button className="btn-refresh" onClick={load} title="Reload DB">
             <i className="bi bi-arrow-clockwise" /> Refresh
           </button>
+
           <a href="/export/excel" className="btn-nav btn-green" style={{ textDecoration: "none", padding: ".42rem .85rem" }}>
             <i className="bi bi-file-earmark-excel-fill" /> Export Excel
           </a>
+
           {(data.invoices.length > 0 || data.purchase_orders.length > 0 || data.remittances.length > 0) && (
             <button
               onClick={handleClearAll}
@@ -184,18 +261,18 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
               }}
               title="Delete all records from PostgreSQL"
             >
-              <i className="bi bi-trash3-fill" /> Clear All DB
+              <i className="bi bi-trash3-fill" /> Clear DB
             </button>
           )}
         </div>
       </div>
 
-      {/* ── 4 Option Sub-Tabs ── */}
+      {/* ── 4 Option Sub-Tabs with Dynamic Nomenclature ── */}
       <div style={{ background: "var(--bg-card-subtle)", borderBottom: "1px solid var(--border-subtle)", padding: ".75rem 1.25rem", display: "flex", gap: ".65rem", flexWrap: "wrap", alignItems: "center" }}>
         <span style={{ fontSize: ".74rem", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: ".05em", marginRight: ".25rem" }}>
           Select View:
         </span>
-        {VIEW_OPTIONS.map((opt) => {
+        {viewOptions.map((opt) => {
           const count = opt.id === "combined" ? data.combined.length : data[opt.id]?.length || 0;
           const isActive = activeView === opt.id;
           return (
@@ -243,7 +320,12 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
       <div className="db-verify-bar" style={{ background: "var(--bg-card)", borderBottom: "1px solid var(--border-subtle)" }}>
         <i className="bi bi-info-circle-fill" style={{ color: "#A855F7" }} />
         <span style={{ color: "var(--text-muted)" }}>
-          Viewing <strong>{VIEW_OPTIONS.find((v) => v.id === activeView)?.desc}</strong> ({filtered.length} of {currentList.length} records). Delete anytime using the red Action buttons.
+          Viewing <strong>{viewOptions.find((v) => v.id === activeView)?.desc}</strong> ({filtered.length} of {currentList.length} records)
+          {selectedOrgFilter ? (
+            <> filtered for <strong>{activeOrgName || "Selected Organization"}</strong>.</>
+          ) : (
+            <> across <strong>All Organizations</strong>.</>
+          )}
         </span>
       </div>
 
@@ -269,7 +351,9 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
           <div className="empty-state animate-fadein">
             <i className="bi bi-inbox empty-icon" />
             <p style={{ fontWeight: 600 }}>
-              {filter ? `No records match "${filter}" in ${VIEW_OPTIONS.find((v) => v.id === activeView)?.label}` : `No records found in ${VIEW_OPTIONS.find((v) => v.id === activeView)?.label}.`}
+              {filter
+                ? `No records match "${filter}" in ${viewOptions.find((v) => v.id === activeView)?.label}`
+                : `No records found in ${viewOptions.find((v) => v.id === activeView)?.label}${selectedOrgFilter ? ` for ${activeOrgName}` : ""}.`}
             </p>
             {filter && (
               <button onClick={() => setFilter("")} className="btn-refresh" style={{ marginTop: ".75rem" }}>
@@ -279,7 +363,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
           </div>
         )}
 
-        {/* ── 1. INVOICES TABLE ── */}
+        {/* ── 1. INVOICES TABLE (Dynamic Header) ── */}
         {!loading && pageData.length > 0 && activeView === "invoices" && (
           <div className="animate-fadein">
             <div className="history-table-wrap">
@@ -287,14 +371,14 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                 <thead>
                   <tr>
                     <th style={{ width: 70, textAlign: "center" }}>Action</th>
-                    <th onClick={() => handleSort("invoice_number")}>Invoice No. <Ico col="invoice_number" /></th>
-                    <th onClick={() => handleSort("invoice_date")}>Inv. Date <Ico col="invoice_date" /></th>
-                    <th onClick={() => handleSort("po_number")}>Linked PO <Ico col="po_number" /></th>
+                    <th onClick={() => handleSort("invoice_number")}>{nomenclature.invoice_num_label} <Ico col="invoice_number" /></th>
+                    <th onClick={() => handleSort("invoice_date")}>Date <Ico col="invoice_date" /></th>
+                    <th onClick={() => handleSort("po_number")}>Linked {nomenclature.po_num_label} <Ico col="po_number" /></th>
                     <th onClick={() => handleSort("description")}>Description <Ico col="description" /></th>
                     <th onClick={() => handleSort("invoice_period")}>Period <Ico col="invoice_period" /></th>
                     <th onClick={() => handleSort("assessable_value")}>Assessable Value <Ico col="assessable_value" /></th>
                     <th onClick={() => handleSort("total_tax")}>Tax Amount <Ico col="total_tax" /></th>
-                    <th onClick={() => handleSort("total_invoice_value")}>Total Invoice Value <Ico col="total_invoice_value" /></th>
+                    <th onClick={() => handleSort("total_invoice_value")}>Total Value <Ico col="total_invoice_value" /></th>
                     <th onClick={() => handleSort("gst_amount")}>GST (18%) <Ico col="gst_amount" /></th>
                     <th onClick={() => handleSort("tds_rate")}>TDS% <Ico col="tds_rate" /></th>
                     <th onClick={() => handleSort("tds_amount")}>TDS Amount <Ico col="tds_amount" /></th>
@@ -338,7 +422,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
           </div>
         )}
 
-        {/* ── 2. PURCHASE ORDERS TABLE ── */}
+        {/* ── 2. PURCHASE ORDERS TABLE (Dynamic Header) ── */}
         {!loading && pageData.length > 0 && activeView === "purchase_orders" && (
           <div className="animate-fadein">
             <div className="history-table-wrap">
@@ -346,11 +430,11 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                 <thead>
                   <tr>
                     <th style={{ width: 70, textAlign: "center" }}>Action</th>
-                    <th onClick={() => handleSort("po_number")}>PO Number <Ico col="po_number" /></th>
-                    <th onClick={() => handleSort("po_date")}>PO Date <Ico col="po_date" /></th>
+                    <th onClick={() => handleSort("po_number")}>{nomenclature.po_num_label} <Ico col="po_number" /></th>
+                    <th onClick={() => handleSort("po_date")}>Date <Ico col="po_date" /></th>
                     <th onClick={() => handleSort("description")}>Description <Ico col="description" /></th>
                     <th onClick={() => handleSort("delivery_date")}>Delivery Date / Validity <Ico col="delivery_date" /></th>
-                    <th onClick={() => handleSort("total_amount")}>Total PO Amount <Ico col="total_amount" /></th>
+                    <th onClick={() => handleSort("total_amount")}>Total Amount <Ico col="total_amount" /></th>
                     <th onClick={() => handleSort("created_at")}>Saved At <Ico col="created_at" /></th>
                   </tr>
                 </thead>
@@ -383,7 +467,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
           </div>
         )}
 
-        {/* ── 3. REMITTANCES TABLE ── */}
+        {/* ── 3. REMITTANCES TABLE (Dynamic Header) ── */}
         {!loading && pageData.length > 0 && activeView === "remittances" && (
           <div className="animate-fadein">
             <div className="history-table-wrap">
@@ -391,9 +475,9 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                 <thead>
                   <tr>
                     <th style={{ width: 70, textAlign: "center" }}>Action</th>
-                    <th onClick={() => handleSort("remittance_number")}>Remittance No. / Ref <Ico col="remittance_number" /></th>
-                    <th onClick={() => handleSort("remittance_date")}>Payment / Rem. Date <Ico col="remittance_date" /></th>
-                    <th onClick={() => handleSort("invoice_number")}>Linked Invoice Ref <Ico col="invoice_number" /></th>
+                    <th onClick={() => handleSort("remittance_number")}>{nomenclature.remittance_num_label} <Ico col="remittance_number" /></th>
+                    <th onClick={() => handleSort("remittance_date")}>Payment Date <Ico col="remittance_date" /></th>
+                    <th onClick={() => handleSort("invoice_number")}>Linked {nomenclature.invoice_num_label} <Ico col="invoice_number" /></th>
                     <th onClick={() => handleSort("description")}>Description / Notes <Ico col="description" /></th>
                     <th onClick={() => handleSort("gross_amount")}>Gross Amount <Ico col="gross_amount" /></th>
                     <th onClick={() => handleSort("total_gross_amount")}>Total Gross Amount <Ico col="total_gross_amount" /></th>
@@ -430,7 +514,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
           </div>
         )}
 
-        {/* ── 4. COMBINED MASTER VIEW ── */}
+        {/* ── 4. COMBINED MASTER VIEW (Dynamic Headers & Organization Column) ── */}
         {!loading && pageData.length > 0 && activeView === "combined" && (
           <div className="animate-fadein">
             <div className="history-table-wrap">
@@ -438,7 +522,8 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                 <thead>
                   <tr>
                     <th style={{ width: 70, textAlign: "center" }}>Action</th>
-                    <th onClick={() => handleSort("invoice_number")}>Invoice No. <Ico col="invoice_number" /></th>
+                    <th>Organization</th>
+                    <th onClick={() => handleSort("invoice_number")}>{nomenclature.invoice_num_label} <Ico col="invoice_number" /></th>
                     <th onClick={() => handleSort("invoice_date")}>Inv. Date <Ico col="invoice_date" /></th>
                     <th onClick={() => handleSort("inv_description")}>Description <Ico col="inv_description" /></th>
                     <th onClick={() => handleSort("invoice_period")}>Period <Ico col="invoice_period" /></th>
@@ -448,11 +533,11 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                     <th onClick={() => handleSort("tds_rate")}>TDS% <Ico col="tds_rate" /></th>
                     <th onClick={() => handleSort("tds_amount")}>TDS Amt <Ico col="tds_amount" /></th>
                     <th onClick={() => handleSort("receivable")}>Receivable <Ico col="receivable" /></th>
-                    <th onClick={() => handleSort("po_number")}>PO No. <Ico col="po_number" /></th>
+                    <th onClick={() => handleSort("po_number")}>{nomenclature.po_num_label} <Ico col="po_number" /></th>
                     <th onClick={() => handleSort("po_date")}>PO Date <Ico col="po_date" /></th>
                     <th onClick={() => handleSort("delivery_date")}>Delivery <Ico col="delivery_date" /></th>
                     <th onClick={() => handleSort("total_amount")}>PO Total <Ico col="total_amount" /></th>
-                    <th onClick={() => handleSort("remittance_number")}>Remittance No. <Ico col="remittance_number" /></th>
+                    <th onClick={() => handleSort("remittance_number")}>{nomenclature.remittance_num_label} <Ico col="remittance_number" /></th>
                     <th onClick={() => handleSort("remittance_date")}>Rem. Date <Ico col="remittance_date" /></th>
                     <th onClick={() => handleSort("gross_amount")}>Gross Amt <Ico col="gross_amount" /></th>
                     <th onClick={() => handleSort("total_gross_amount")}>Total Gross <Ico col="total_gross_amount" /></th>
@@ -470,6 +555,25 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                         >
                           <i className="bi bi-trash3" /> Delete
                         </button>
+                      </td>
+                      <td>
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: ".3rem",
+                            fontSize: ".75rem",
+                            fontWeight: 700,
+                            color: "var(--purple-violet)",
+                            background: "rgba(168, 85, 247, 0.12)",
+                            padding: ".2rem .55rem",
+                            borderRadius: 6,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          <i className="bi bi-building" />
+                          {r.organization_name || "Delta IoT Solutions"}
+                        </span>
                       </td>
                       <td><span className="id-badge">{r.invoice_number || "—"}</span></td>
                       <td>{r.invoice_date || "—"}</td>
