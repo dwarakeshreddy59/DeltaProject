@@ -26,9 +26,10 @@ const OrganizationContext = createContext(null);
 
 export function OrganizationProvider({ children }) {
   const [clients, setClients] = useState([DEFAULT_CLIENT]);
-  const [activeClientId, setActiveClientId] = useState(() => {
-    const saved = localStorage.getItem("active_client_id");
-    return saved ? Number(saved) : 1;
+  // activeCompanyId can be null (meaning user is on the Home Company Hub)
+  const [activeCompanyId, setActiveCompanyId] = useState(() => {
+    const saved = localStorage.getItem("active_company_id");
+    return saved ? Number(saved) : null; // default to null so landing page shows Company Hub!
   });
   const [loadingClients, setLoadingClients] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
@@ -51,36 +52,51 @@ export function OrganizationProvider({ children }) {
     loadClients();
   }, [loadClients]);
 
-  const selectClient = useCallback((id) => {
+  const selectCompany = useCallback((id) => {
     const numId = Number(id);
-    setActiveClientId(numId);
-    localStorage.setItem("active_client_id", String(numId));
+    setActiveCompanyId(numId);
+    localStorage.setItem("active_company_id", String(numId));
   }, []);
 
-  const activeClient = useMemo(() => {
-    const found = clients.find((c) => Number(c.id) === Number(activeClientId));
-    return found || clients[0] || DEFAULT_CLIENT;
-  }, [clients, activeClientId]);
+  const goToHub = useCallback(() => {
+    setActiveCompanyId(null);
+    localStorage.removeItem("active_company_id");
+  }, []);
+
+  const isAtHub = activeCompanyId === null;
+
+  const activeCompany = useMemo(() => {
+    if (activeCompanyId === null) return null;
+    const found = clients.find((c) => Number(c.id) === Number(activeCompanyId));
+    return found || null;
+  }, [clients, activeCompanyId]);
 
   const nomenclature = useMemo(() => {
+    if (!activeCompany) return DEFAULT_NOMENCLATURE;
     return {
-      invoice_doc_label: activeClient?.invoice_doc_label || DEFAULT_NOMENCLATURE.invoice_doc_label,
-      invoice_num_label: activeClient?.invoice_num_label || DEFAULT_NOMENCLATURE.invoice_num_label,
-      po_doc_label: activeClient?.po_doc_label || DEFAULT_NOMENCLATURE.po_doc_label,
-      po_num_label: activeClient?.po_num_label || DEFAULT_NOMENCLATURE.po_num_label,
-      remittance_doc_label: activeClient?.remittance_doc_label || DEFAULT_NOMENCLATURE.remittance_doc_label,
-      remittance_num_label: activeClient?.remittance_num_label || DEFAULT_NOMENCLATURE.remittance_num_label,
+      invoice_doc_label: activeCompany?.invoice_doc_label || DEFAULT_NOMENCLATURE.invoice_doc_label,
+      invoice_num_label: activeCompany?.invoice_num_label || DEFAULT_NOMENCLATURE.invoice_num_label,
+      po_doc_label: activeCompany?.po_doc_label || DEFAULT_NOMENCLATURE.po_doc_label,
+      po_num_label: activeCompany?.po_num_label || DEFAULT_NOMENCLATURE.po_num_label,
+      remittance_doc_label: activeCompany?.remittance_doc_label || DEFAULT_NOMENCLATURE.remittance_doc_label,
+      remittance_num_label: activeCompany?.remittance_num_label || DEFAULT_NOMENCLATURE.remittance_num_label,
     };
-  }, [activeClient]);
+  }, [activeCompany]);
 
   const openRegisterModal = () => setIsRegisterModalOpen(true);
   const closeRegisterModal = () => setIsRegisterModalOpen(false);
 
   const value = {
     clients,
-    activeClient,
-    activeClientId,
-    selectClient,
+    activeCompany,
+    activeCompanyId,
+    selectCompany,
+    goToHub,
+    isAtHub,
+    // Backwards-compat aliases
+    activeClient: activeCompany || DEFAULT_CLIENT,
+    activeClientId: activeCompanyId || 1,
+    selectClient: selectCompany,
     nomenclature,
     loadingClients,
     refreshClients: loadClients,

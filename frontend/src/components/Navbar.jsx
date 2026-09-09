@@ -1,129 +1,65 @@
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import { useOrganization } from "../context/OrganizationContext";
 
 export default function Navbar({ theme = "dark", onToggleTheme }) {
-  const { clients, activeClient, selectClient, openRegisterModal } = useOrganization();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  const { activeCompany, isAtHub, goToHub, openRegisterModal } = useOrganization();
 
   return (
     <nav className="portal-navbar">
-      <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}>
-        <a href="/" className="brand">
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+        <button
+          type="button"
+          onClick={goToHub}
+          className="brand"
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" }}
+          title="Return to Home Company Selection Hub"
+        >
           <div className="brand-icon">
             <i className="bi bi-file-earmark-bar-graph-fill" />
           </div>
           <div>
             PDF Data Portal
-            <span className="brand-subtitle">Invoice · PO · Remittance Extractor</span>
+            <span className="brand-subtitle">Multi-Company Financial Extraction</span>
           </div>
-        </a>
+        </button>
 
-        {/* ── Organization Switcher Dropdown ── */}
-        <div className="org-switcher-wrap" ref={dropdownRef}>
-          <button
-            type="button"
-            className={`btn-org-switcher ${dropdownOpen ? "open" : ""}`}
-            onClick={() => setDropdownOpen((v) => !v)}
-            title="Active Organization & Nomenclature Profile"
-          >
-            <div className="org-switcher-avatar">
-              {activeClient?.logo_url ? (
-                <img
-                  src={activeClient.logo_url}
-                  alt={activeClient.organization_name}
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                  }}
-                />
-              ) : (
-                <i className="bi bi-building-fill" />
-              )}
+        {/* Current Context Pill */}
+        <div style={{ display: "flex", alignItems: "center", gap: ".5rem" }}>
+          {!isAtHub && activeCompany ? (
+            <div className="nav-active-company-chip">
+              <span className="chip-dot" />
+              <i className="bi bi-building me-1" />
+              <strong>{activeCompany.organization_name}</strong>
+              <button
+                type="button"
+                onClick={goToHub}
+                className="chip-switch-btn"
+                title="Switch to another company"
+              >
+                Change
+              </button>
             </div>
-            <div className="org-switcher-text">
-              <span className="org-switcher-label">Organization</span>
-              <span className="org-switcher-name">
-                {activeClient?.organization_name || "AGCO"}
-              </span>
-            </div>
-            <i className={`bi bi-chevron-${dropdownOpen ? "up" : "down"} org-switcher-chevron`} />
-          </button>
-
-          {dropdownOpen && (
-            <div className="org-switcher-dropdown animate-popin">
-              <div className="org-dropdown-header">
-                <span>Select Organization</span>
-                <span className="badge-pill">{clients.length} Total</span>
-              </div>
-
-              <div className="org-dropdown-list">
-                {clients.map((c) => {
-                  const isSelected = Number(c.id) === Number(activeClient?.id);
-                  return (
-                    <button
-                      key={c.id}
-                      type="button"
-                      className={`org-dropdown-item ${isSelected ? "selected" : ""}`}
-                      onClick={() => {
-                        selectClient(c.id);
-                        setDropdownOpen(false);
-                      }}
-                    >
-                      <div className="org-item-avatar">
-                        {c.logo_url ? (
-                          <img
-                            src={c.logo_url}
-                            alt={c.organization_name}
-                            onError={(e) => {
-                              e.target.style.display = "none";
-                            }}
-                          />
-                        ) : (
-                          c.organization_name?.slice(0, 2).toUpperCase() || "OR"
-                        )}
-                      </div>
-                      <div className="org-item-details">
-                        <div className="org-item-title">{c.organization_name}</div>
-                        <div className="org-item-sub">
-                          {c.invoice_doc_label} · {c.po_doc_label}
-                        </div>
-                      </div>
-                      {isSelected && (
-                        <i className="bi bi-check-circle-fill org-item-check" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="org-dropdown-footer">
-                <button
-                  type="button"
-                  className="btn-add-org"
-                  onClick={() => {
-                    setDropdownOpen(false);
-                    openRegisterModal();
-                  }}
-                >
-                  <i className="bi bi-plus-circle-fill" /> Register New Company
-                </button>
-              </div>
+          ) : (
+            <div className="nav-hub-chip">
+              <i className="bi bi-grid-1x2-fill me-1" />
+              Company Selection Hub
             </div>
           )}
         </div>
       </div>
 
       <div className="nav-actions">
+        {/* Quick Register Company Action */}
+        <button
+          type="button"
+          onClick={openRegisterModal}
+          className="btn-nav btn-register-nav"
+          title="Register a new client/organization"
+        >
+          <i className="bi bi-plus-circle-fill" />
+          <span>Register Company</span>
+        </button>
+
         {/* Theme Mode Toggle (Dark Purple / Light Lavender) */}
         <button
           type="button"

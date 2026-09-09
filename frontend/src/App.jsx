@@ -1,26 +1,37 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
+import CompanyHub from "./components/CompanyHub";
+import CompanyWorkspaceHeader from "./components/CompanyWorkspaceHeader";
 import UploadTab from "./components/UploadTab";
 import RecordsTab from "./components/RecordsTab";
 import SearchTab from "./components/SearchTab";
-import ClientsTab from "./components/ClientsTab";
 import ClientRegistrationModal from "./components/ClientRegistrationModal";
 import { OrganizationProvider, useOrganization } from "./context/OrganizationContext";
 import { useExtraction } from "./hooks/useExtraction";
 
-const TABS = [
-  { id: "upload",  icon: "bi-cloud-upload-fill",     label: "Upload & Extract" },
-  { id: "records", icon: "bi-table",                  label: "All Records"      },
-  { id: "search",  icon: "bi-search",                 label: "Search by ID"     },
-  { id: "clients", icon: "bi-building-fill-gear",    label: "Organizations"    },
-];
-
 function AppContent() {
-  const { activeClient, isRegisterModalOpen, closeRegisterModal } = useOrganization();
-  const { loading, results, calcData, mismatchError, extract, recalc, clearMismatchError } = useExtraction();
-  const [activeTab,      setActiveTab]      = useState("upload");
+  const {
+    activeCompany,
+    isAtHub,
+    goToHub,
+    nomenclature,
+    isRegisterModalOpen,
+    closeRegisterModal,
+  } = useOrganization();
+
+  const {
+    loading,
+    results,
+    calcData,
+    mismatchError,
+    extract,
+    recalc,
+    clearMismatchError,
+  } = useExtraction();
+
+  const [activeTab, setActiveTab] = useState("upload");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [uploadCount,    setUploadCount]    = useState(0);
+  const [uploadCount, setUploadCount] = useState(0);
 
   // ── Theme State: 'dark' (Premium Dark Purple Luxury) or 'bright' (Light Lavender) ──
   const [theme, setTheme] = useState(() => {
@@ -44,6 +55,24 @@ function AppContent() {
     }
   };
 
+  const workspaceTabs = [
+    {
+      id: "upload",
+      icon: "bi-cloud-upload-fill",
+      label: `Upload & Extract (${nomenclature.invoice_doc_label})`,
+    },
+    {
+      id: "records",
+      icon: "bi-table",
+      label: `${activeCompany?.organization_name || "Company"} Records`,
+    },
+    {
+      id: "search",
+      icon: "bi-search",
+      label: "Search Documents",
+    },
+  ];
+
   return (
     <div className="app-shell">
       {/* Global Client Registration Modal */}
@@ -54,91 +83,111 @@ function AppContent() {
 
       <Navbar theme={theme} onToggleTheme={toggleTheme} />
 
-      {/* ── Hero ── */}
-      <div className="hero-banner">
-        <div className="hero-content">
-          <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap", marginBottom: ".5rem" }}>
-            <div className="hero-badge">
-              <i className="bi bi-lightning-charge-fill" />Powered by AI Extraction
-            </div>
-            {activeClient && (
-              <div
-                className="hero-badge"
-                style={{
-                  background: "rgba(168, 85, 247, 0.25)",
-                  borderColor: "rgba(168, 85, 247, 0.5)",
-                  color: "#ffffff",
-                }}
-              >
-                <i className="bi bi-building me-1" />
-                Active: <strong>{activeClient.organization_name}</strong>
-              </div>
-            )}
-          </div>
-          <h1 className="hero-title">PDF Data Extraction &amp;<br />Financial Analysis Portal</h1>
-          <p className="hero-subtitle">
-            Upload {activeClient?.invoice_doc_label || "Invoice"}, {activeClient?.po_doc_label || "PO"} &amp; {activeClient?.remittance_doc_label || "Remittance"} PDFs — extract data, compute GST/TDS, store in PostgreSQL.
-          </p>
+      {/* ── CONDITIONAL LAYOUT: 1. COMPANY HUB vs 2. COMPANY WORKSPACE ── */}
+      {isAtHub || !activeCompany ? (
+        /* ── 1. HOME GATEWAY: COMPANY SELECTION & REGISTRATION HUB ── */
+        <CompanyHub />
+      ) : (
+        /* ── 2. INSIDE COMPANY WORKSPACE ── */
+        <div className="company-workspace-container animate-fadein">
+          {/* Top Company Identity & Switcher Banner */}
+          <CompanyWorkspaceHeader />
 
-          <div className="hero-stats">
-            <HeroStat icon="bi-file-earmark-text" bg="linear-gradient(135deg, #7C3AED, #5B21B6)"
-              value={uploadCount} label="Extractions" trend="This session" />
-            <HeroStat icon="bi-currency-rupee" bg="linear-gradient(135deg, #22C55E, #15803D)"
-              value={results ? `₹${Number(calcData?.receivable||0).toLocaleString("en-IN",{minimumFractionDigits:2})}` : "₹0"}
-              label="Net Receivable" trend="Last extraction" isStr />
-            <HeroStat icon="bi-percent" bg="linear-gradient(135deg, #A855F7, #7C3AED)"
-              value={results ? `${calcData?.tds_rate??2}%` : "—"} label="TDS Rate" trend="Selected" isStr />
-            <HeroStat icon="bi-database-check" bg="linear-gradient(135deg, #C084FC, #9333EA)"
-              value="Live" label="PostgreSQL" trend="Auto-saving" isStr />
-          </div>
-        </div>
-      </div>
-
-      {/* ── Tab Bar ── */}
-      <div className="tab-bar-wrap">
-        <div className="tab-bar">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              className={`tab-btn ${activeTab === t.id ? "active" : ""}`}
-              onClick={() => setActiveTab(t.id)}
-            >
-              <i className={`bi ${t.icon}`} />
-              <span>{t.label}</span>
-              {t.id === "upload" && uploadCount > 0 && (
-                <span className="tab-badge">{uploadCount}</span>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Tab Content ── */}
-      <div className="main-container">
-        <div key={activeTab} className="animate-fadein">
-          {activeTab === "upload" && (
-            <UploadTab
-              loading={loading}
-              results={results}
-              calcData={calcData}
-              mismatchError={mismatchError}
-              onExtract={handleExtract}
-              onRecalc={recalc}
-              onViewRecords={() => setActiveTab("records")}
-              onClearMismatch={clearMismatchError}
+          {/* Mini Stats Bar for Active Company */}
+          <div className="ws-stats-row">
+            <HeroStat
+              icon="bi-file-earmark-text"
+              bg="linear-gradient(135deg, #7C3AED, #5B21B6)"
+              value={uploadCount}
+              label="Session Extractions"
+              trend="Current session"
             />
-          )}
-          {activeTab === "records" && (
-            <RecordsTab refreshTrigger={refreshTrigger} />
-          )}
-          {activeTab === "search" && (
-            <SearchTab />
-          )}
-          {activeTab === "clients" && (
-            <ClientsTab />
-          )}
+            <HeroStat
+              icon="bi-currency-rupee"
+              bg="linear-gradient(135deg, #22C55E, #15803D)"
+              value={
+                results
+                  ? `₹${Number(calcData?.receivable || 0).toLocaleString("en-IN", {
+                      minimumFractionDigits: 2,
+                    })}`
+                  : "₹0"
+              }
+              label="Net Receivable"
+              trend="Last extracted"
+              isStr
+            />
+            <HeroStat
+              icon="bi-percent"
+              bg="linear-gradient(135deg, #A855F7, #7C3AED)"
+              value={results ? `${calcData?.tds_rate ?? 2}%` : "—"}
+              label="Selected TDS Rate"
+              trend="Configurable"
+              isStr
+            />
+            <HeroStat
+              icon="bi-database-check"
+              bg="linear-gradient(135deg, #C084FC, #9333EA)"
+              value="Live DB"
+              label="PostgreSQL"
+              trend={`Auto-tagged: ${activeCompany.organization_name}`}
+              isStr
+            />
+          </div>
+
+          {/* ── Workspace Tab Bar ── */}
+          <div className="tab-bar-wrap" style={{ marginTop: "1rem" }}>
+            <div className="tab-bar">
+              {workspaceTabs.map((t) => (
+                <button
+                  key={t.id}
+                  className={`tab-btn ${activeTab === t.id ? "active" : ""}`}
+                  onClick={() => setActiveTab(t.id)}
+                >
+                  <i className={`bi ${t.icon}`} />
+                  <span>{t.label}</span>
+                  {t.id === "upload" && uploadCount > 0 && (
+                    <span className="tab-badge">{uploadCount}</span>
+                  )}
+                </button>
+              ))}
+
+              <button
+                type="button"
+                className="tab-btn tab-btn-all-companies"
+                onClick={goToHub}
+                title="Return to Home Company Hub"
+              >
+                <i className="bi bi-grid-fill" />
+                <span>All Companies / Hub</span>
+              </button>
+            </div>
+          </div>
+
+          {/* ── Workspace Tab Content ── */}
+          <div className="main-container">
+            <div key={activeTab} className="animate-fadein">
+              {activeTab === "upload" && (
+                <UploadTab
+                  loading={loading}
+                  results={results}
+                  calcData={calcData}
+                  mismatchError={mismatchError}
+                  onExtract={handleExtract}
+                  onRecalc={recalc}
+                  onViewRecords={() => setActiveTab("records")}
+                  onClearMismatch={clearMismatchError}
+                />
+              )}
+              {activeTab === "records" && (
+                <RecordsTab refreshTrigger={refreshTrigger} />
+              )}
+              {activeTab === "search" && (
+                <SearchTab />
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -159,7 +208,10 @@ function HeroStat({ icon, bg, value, label, trend, isStr }) {
       </div>
       <div className="stat-value">{value}</div>
       <div className="stat-label">{label}</div>
-      <div className="stat-trend"><i className="bi bi-arrow-up-right" />{trend}</div>
+      <div className="stat-trend">
+        <i className="bi bi-arrow-up-right" />
+        {trend}
+      </div>
     </div>
   );
 }
