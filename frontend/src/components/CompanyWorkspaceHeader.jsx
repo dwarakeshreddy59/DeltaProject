@@ -75,9 +75,6 @@ export default function CompanyWorkspaceHeader() {
             <span style={{ display: activeCompany.logo_url ? "none" : "inline" }}>
               {activeCompany.organization_name?.slice(0, 2).toUpperCase() || "CO"}
             </span>
-            <div className="avatar-edit-hover-badge" title="Change Logo">
-              <i className="bi bi-camera-fill" />
-            </div>
           </div>
 
           <div className="workspace-details">

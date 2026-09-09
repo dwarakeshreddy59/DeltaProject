@@ -207,9 +207,6 @@ export default function CompanyHub() {
                       <span style={{ display: client.logo_url ? "none" : "inline" }}>
                         {client.organization_name?.slice(0, 2).toUpperCase() || "CO"}
                       </span>
-                      <div className="avatar-edit-hover-badge" title="Change Logo">
-                        <i className="bi bi-camera-fill" />
-                      </div>
                     </div>
 
                     <div className="hub-card-info">
