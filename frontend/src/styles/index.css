@@ -7390,6 +7390,26 @@ body {
   background: rgba(168, 85, 247, 0.06);
 }
 
+.pure-table-section-row td.table-section-header {
+  background: rgba(124, 58, 237, 0.18) !important;
+  color: #D8B4FE !important;
+  font-weight: 800;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.65rem 1rem;
+  border-top: 2px solid rgba(168, 85, 247, 0.35);
+  border-bottom: 2px solid rgba(168, 85, 247, 0.35);
+}
+
+[data-theme="bright"] .pure-table-section-row td.table-section-header {
+  background: #F3E8FF !important;
+  color: #6D28D9 !important;
+  border-top: 2px solid #DDD6FE;
+  border-bottom: 2px solid #DDD6FE;
+}
+
+
 /* ── Bright Theme Overrides ── */
 [data-theme="bright"] .pure-ref-table-wrap {
   background: #ffffff;

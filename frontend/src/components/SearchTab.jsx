@@ -382,7 +382,7 @@ export default function SearchTab() {
                   <tr>
                     <th style={{ width: 65, textAlign: "center" }}>Action</th>
                     <th onClick={() => handleSort("invoice_number")}>{nomenclature.invoice_num_label} <SortIcon col="invoice_number" /></th>
-                    <th onClick={() => handleSort("invoice_date")}>Date <SortIcon col="invoice_date" /></th>
+                    <th onClick={() => handleSort("invoice_date")}>Invoice Date <SortIcon col="invoice_date" /></th>
                     <th onClick={() => handleSort("inv_description")}>Description <SortIcon col="inv_description" /></th>
                     <th onClick={() => handleSort("assessable_value")}>Assessable Val <SortIcon col="assessable_value" /></th>
                     <th onClick={() => handleSort("gst_amount")}>GST (18%) <SortIcon col="gst_amount" /></th>
@@ -394,7 +394,7 @@ export default function SearchTab() {
                     <th onClick={() => handleSort("po_date")}>PO Date <SortIcon col="po_date" /></th>
                     <th onClick={() => handleSort("total_amount")}>PO Total <SortIcon col="total_amount" /></th>
                     <th onClick={() => handleSort("remittance_number")}>{nomenclature.remittance_num_label} <SortIcon col="remittance_number" /></th>
-                    <th onClick={() => handleSort("remittance_date")}>Payment Date <SortIcon col="remittance_date" /></th>
+                    <th onClick={() => handleSort("remittance_date")}>Remittance Date <SortIcon col="remittance_date" /></th>
                     <th onClick={() => handleSort("gross_amount")}>Gross Amt <SortIcon col="gross_amount" /></th>
                   </tr>
                 </thead>

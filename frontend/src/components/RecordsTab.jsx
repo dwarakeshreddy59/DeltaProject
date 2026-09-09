@@ -464,7 +464,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                   <tr>
                     <th style={{ width: 70, textAlign: "center" }}>Action</th>
                     <th onClick={() => handleSort("invoice_number")}>{nomenclature.invoice_num_label} <Ico col="invoice_number" /></th>
-                    <th onClick={() => handleSort("invoice_date")}>Date <Ico col="invoice_date" /></th>
+                    <th onClick={() => handleSort("invoice_date")}>Invoice Date <Ico col="invoice_date" /></th>
                     <th onClick={() => handleSort("po_number")}>Linked {nomenclature.po_num_label} <Ico col="po_number" /></th>
                     <th onClick={() => handleSort("description")}>Description <Ico col="description" /></th>
                     <th onClick={() => handleSort("invoice_period")}>Period <Ico col="invoice_period" /></th>
@@ -523,9 +523,9 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                   <tr>
                     <th style={{ width: 70, textAlign: "center" }}>Action</th>
                     <th onClick={() => handleSort("po_number")}>{nomenclature.po_num_label} <Ico col="po_number" /></th>
-                    <th onClick={() => handleSort("po_date")}>Date <Ico col="po_date" /></th>
+                    <th onClick={() => handleSort("po_date")}>PO Date <Ico col="po_date" /></th>
                     <th onClick={() => handleSort("description")}>Description <Ico col="description" /></th>
-                    <th onClick={() => handleSort("delivery_date")}>Delivery Date / Validity <Ico col="delivery_date" /></th>
+                    <th onClick={() => handleSort("delivery_date")}>PO Validity <Ico col="delivery_date" /></th>
                     <th onClick={() => handleSort("total_amount")}>Total Amount <Ico col="total_amount" /></th>
                     <th onClick={() => handleSort("created_at")}>Saved At <Ico col="created_at" /></th>
                   </tr>
@@ -568,7 +568,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                   <tr>
                     <th style={{ width: 70, textAlign: "center" }}>Action</th>
                     <th onClick={() => handleSort("remittance_number")}>{nomenclature.remittance_num_label} <Ico col="remittance_number" /></th>
-                    <th onClick={() => handleSort("remittance_date")}>Payment Date <Ico col="remittance_date" /></th>
+                    <th onClick={() => handleSort("remittance_date")}>Remittance Date <Ico col="remittance_date" /></th>
                     <th onClick={() => handleSort("invoice_number")}>Linked {nomenclature.invoice_num_label} <Ico col="invoice_number" /></th>
                     <th onClick={() => handleSort("description")}>Description / Notes <Ico col="description" /></th>
                     <th onClick={() => handleSort("gross_amount")}>Gross Amount <Ico col="gross_amount" /></th>
@@ -616,7 +616,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                     <th style={{ width: 70, textAlign: "center" }}>Action</th>
                     <th>Organization</th>
                     <th onClick={() => handleSort("invoice_number")}>{nomenclature.invoice_num_label} <Ico col="invoice_number" /></th>
-                    <th onClick={() => handleSort("invoice_date")}>Inv. Date <Ico col="invoice_date" /></th>
+                    <th onClick={() => handleSort("invoice_date")}>Invoice Date <Ico col="invoice_date" /></th>
                     <th onClick={() => handleSort("inv_description")}>Description <Ico col="inv_description" /></th>
                     <th onClick={() => handleSort("invoice_period")}>Period <Ico col="invoice_period" /></th>
                     <th onClick={() => handleSort("assessable_value")}>Assessable <Ico col="assessable_value" /></th>
@@ -627,10 +627,10 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                     <th onClick={() => handleSort("receivable")}>Receivable <Ico col="receivable" /></th>
                     <th onClick={() => handleSort("po_number")}>{nomenclature.po_num_label} <Ico col="po_number" /></th>
                     <th onClick={() => handleSort("po_date")}>PO Date <Ico col="po_date" /></th>
-                    <th onClick={() => handleSort("delivery_date")}>Delivery <Ico col="delivery_date" /></th>
+                    <th onClick={() => handleSort("delivery_date")}>PO Validity <Ico col="delivery_date" /></th>
                     <th onClick={() => handleSort("total_amount")}>PO Total <Ico col="total_amount" /></th>
                     <th onClick={() => handleSort("remittance_number")}>{nomenclature.remittance_num_label} <Ico col="remittance_number" /></th>
-                    <th onClick={() => handleSort("remittance_date")}>Rem. Date <Ico col="remittance_date" /></th>
+                    <th onClick={() => handleSort("remittance_date")}>Remittance Date <Ico col="remittance_date" /></th>
                     <th onClick={() => handleSort("gross_amount")}>Gross Amt <Ico col="gross_amount" /></th>
                     <th onClick={() => handleSort("total_gross_amount")}>Total Gross <Ico col="total_gross_amount" /></th>
                     <th onClick={() => handleSort("created_at")}>Saved At <Ico col="created_at" /></th>

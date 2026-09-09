@@ -20,7 +20,7 @@ export default function UploadForm({ onSubmit, loading, mismatchError, onClearMi
     {
       key: "po",
       label: `${nomenclature.po_doc_label} PDF`,
-      hint: `${nomenclature.po_num_label} & Delivery Date`,
+      hint: `${nomenclature.po_num_label} & PO Validity`,
       icon: "bi-file-text",
       color: "#C084FC",
       bg: "linear-gradient(135deg, #9333EA, #C084FC)",

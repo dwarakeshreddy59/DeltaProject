@@ -43,7 +43,7 @@ export default function RemittanceCard({ remittance = {} }) {
         <table className="info-table">
           <tbody>
             <Row label={nomenclature.remittance_num_label || "Remittance Number"} value={remittance.remittance_number} type="badge" />
-            <Row label="Payment / Remittance Date" value={remittance.remittance_date}   type="highlight" />
+            <Row label="Remittance Date (Document Date)" value={remittance.remittance_date}   type="highlight" />
             <Row label={`Linked ${nomenclature.invoice_num_label || "Invoice"} (Ref)`} value={remittance.invoice_number} type="badge" />
             {remittance.description && (
               <Row label="Description / Notes" value={remittance.description} type="text" />

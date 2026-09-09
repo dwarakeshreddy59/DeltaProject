@@ -14,13 +14,13 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
     { section: nomenclature.invoice_doc_label, label: "Billing Period", value: invoice.invoice_period || "—", type: "text" },
     { section: nomenclature.invoice_doc_label, label: "Assessable Value (Taxable Amount)", value: fmt(invoice.assessable_value), type: "money" },
     { section: nomenclature.invoice_doc_label, label: "Total Tax", value: fmt(invoice.total_tax), type: "money" },
-    { section: nomenclature.invoice_doc_label, label: "Total Document Value", value: fmt(invoice.total_invoice_value), type: "money" },
+    { section: nomenclature.invoice_doc_label, label: "Total Invoice Value", value: fmt(invoice.total_invoice_value), type: "money" },
 
     // Purchase Order Fields
     { section: nomenclature.po_doc_label, label: `${nomenclature.po_num_label}`, value: po.po_number || "—", type: "badge", badgeColor: "#C084FC" },
-    { section: nomenclature.po_doc_label, label: `${nomenclature.po_doc_label} Date`, value: po.po_date || "—", type: "text" },
-    { section: nomenclature.po_doc_label, label: `${nomenclature.po_doc_label} Description`, value: po.description || "—", type: "text" },
-    { section: nomenclature.po_doc_label, label: "Delivery Date / Validity", value: po.delivery_date || "—", type: "text" },
+    { section: nomenclature.po_doc_label, label: "PO Date", value: po.po_date || "—", type: "text" },
+    { section: nomenclature.po_doc_label, label: "Original Description", value: po.description || "—", type: "text" },
+    { section: nomenclature.po_doc_label, label: "PO Validity", value: po.delivery_date || "—", type: "text" },
     { section: nomenclature.po_doc_label, label: `Total ${nomenclature.po_doc_label} Amount`, value: fmt(po.total_amount), type: "money" },
 
     // Remittance Fields
@@ -62,19 +62,19 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
               <thead>
                 <tr>
                   <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>{nomenclature.invoice_num_label}</th>
-                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Date</th>
-                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Period</th>
-                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Assessable Val</th>
+                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice Date</th>
+                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice Period</th>
+                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Assessable Value</th>
                   <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Tax</th>
-                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Value</th>
+                  <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Invoice Value</th>
                   <th style={{ background: "#9333EA", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>{nomenclature.po_num_label}</th>
                   <th style={{ background: "#9333EA", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>PO Date</th>
-                  <th style={{ background: "#9333EA", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Delivery Date</th>
+                  <th style={{ background: "#9333EA", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>PO Validity</th>
                   <th style={{ background: "#9333EA", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Amount</th>
                   <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>{nomenclature.remittance_num_label}</th>
-                  <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Payment Date</th>
-                  <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Gross Amt</th>
-                  <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Gross</th>
+                  <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Remittance Date</th>
+                  <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Gross Amount</th>
+                  <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Gross Amount</th>
                   <th style={{ background: "#6D28D9", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>GST (18%)</th>
                   <th style={{ background: "#6D28D9", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>TDS ({calcData.tds_rate}%)</th>
                   <th style={{ background: "#6D28D9", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Receivable</th>

@@ -217,7 +217,7 @@ export default function SearchPanel({ visible = true, refreshTrigger = 0 }) {
                 <thead>
                   <tr>
                     <th onClick={() => handleSort("invoice_number")}>Invoice No. <SortIcon col="invoice_number" /></th>
-                    <th onClick={() => handleSort("invoice_date")}>Inv. Date <SortIcon col="invoice_date" /></th>
+                    <th onClick={() => handleSort("invoice_date")}>Invoice Date <SortIcon col="invoice_date" /></th>
                     <th onClick={() => handleSort("inv_description")}>Description <SortIcon col="inv_description" /></th>
                     <th onClick={() => handleSort("invoice_period")}>Period <SortIcon col="invoice_period" /></th>
                     <th onClick={() => handleSort("assessable_value")}>Assessable <SortIcon col="assessable_value" /></th>
@@ -228,10 +228,10 @@ export default function SearchPanel({ visible = true, refreshTrigger = 0 }) {
                     <th onClick={() => handleSort("receivable")}>Receivable <SortIcon col="receivable" /></th>
                     <th onClick={() => handleSort("po_number")}>PO No. <SortIcon col="po_number" /></th>
                     <th onClick={() => handleSort("po_date")}>PO Date <SortIcon col="po_date" /></th>
-                    <th onClick={() => handleSort("delivery_date")}>Delivery Date <SortIcon col="delivery_date" /></th>
+                    <th onClick={() => handleSort("delivery_date")}>PO Validity <SortIcon col="delivery_date" /></th>
                     <th onClick={() => handleSort("total_amount")}>PO Total <SortIcon col="total_amount" /></th>
                     <th onClick={() => handleSort("remittance_number")}>Remittance No. <SortIcon col="remittance_number" /></th>
-                    <th onClick={() => handleSort("remittance_date")}>Rem. Date <SortIcon col="remittance_date" /></th>
+                    <th onClick={() => handleSort("remittance_date")}>Remittance Date <SortIcon col="remittance_date" /></th>
                     <th onClick={() => handleSort("gross_amount")}>Gross Amt <SortIcon col="gross_amount" /></th>
                     <th onClick={() => handleSort("total_gross_amount")}>Total Gross <SortIcon col="total_gross_amount" /></th>
                   </tr>

@@ -42,13 +42,13 @@ export default function InvoiceCard({ invoice = {} }) {
         <table className="info-table">
           <tbody>
             <Row label={nomenclature.invoice_num_label || "Invoice Number"} value={invoice.invoice_number} type="badge" />
-            <Row label="Date (Document Date)"   value={invoice.invoice_date}        type="highlight" />
+            <Row label="Invoice Date (Document Date)" value={invoice.invoice_date}        type="highlight" />
             <Row label={`${nomenclature.po_num_label || "PO Number"} (Ref)`} value={invoice.po_number} type="badge" />
             <Row label="Description"            value={invoice.description} />
-            <Row label="Billing Period"         value={invoice.invoice_period} />
+            <Row label="Invoice Period"         value={invoice.invoice_period} />
             <Row label="Assessable Value"       value={invoice.assessable_value}    type="money" />
             <Row label="Total Tax"              value={invoice.total_tax}           type="money" />
-            <Row label="Total Value"            value={invoice.total_invoice_value} type="money" />
+            <Row label="Total Invoice Value"    value={invoice.total_invoice_value} type="money" />
           </tbody>
         </table>
       </div>

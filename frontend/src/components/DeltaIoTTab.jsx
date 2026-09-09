@@ -497,7 +497,7 @@ export default function DeltaIoTTab({ refreshTrigger = 0 }) {
                           {item.remittance_number ? (
                             <div className="doc-box-info">
                               <span className="doc-num">#{item.remittance_number}</span>
-                              <span className="doc-sub">Date: {item.remittance_date || "—"}</span>
+                              <span className="doc-sub">Remittance Date: {item.remittance_date || "—"}</span>
                               <span className="doc-sub" style={{ color: "#22c55e", fontWeight: 700 }}>
                                 Gross: {fmt(item.gross_amount)}
                               </span>

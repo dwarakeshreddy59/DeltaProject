@@ -42,9 +42,9 @@ export default function POCard({ po = {} }) {
         <table className="info-table">
           <tbody>
             <Row label={nomenclature.po_num_label || "PO Number"} value={po.po_number} type="badge" />
-            <Row label="Date (Document Date)"     value={po.po_date}       type="highlight" />
-            <Row label="Description"              value={po.description} />
-            <Row label="Delivery Date / Validity" value={po.delivery_date} />
+            <Row label="PO Date (Document Date)"  value={po.po_date}       type="highlight" />
+            <Row label="Original Description"     value={po.description} />
+            <Row label="PO Validity"              value={po.delivery_date} />
             <Row label="Total Amount"             value={po.total_amount}  type="money" />
           </tbody>
         </table>
