@@ -4637,3 +4637,998 @@ body {
 
 
 
+
+/* ============================================================
+   Delta IoT Projections & Multi-Company Mapping Styles
+   ============================================================ */
+.delta-tab-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Hero Section ── */
+.delta-hero {
+  background: linear-gradient(135deg, rgba(21, 16, 41, 0.95), rgba(35, 20, 75, 0.9));
+  border: 1.5px solid rgba(168, 85, 247, 0.35);
+  border-radius: 20px;
+  padding: 1.75rem 2rem;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.45), 0 0 25px rgba(124, 58, 237, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.delta-hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.delta-hero-brand {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.delta-brand-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #7C3AED, #A855F7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.75rem;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+  flex-shrink: 0;
+}
+
+.delta-hero-title {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.delta-origin-badge {
+  background: linear-gradient(135deg, #16A34A, #22C55E);
+  color: #ffffff;
+  padding: 0.2rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+}
+
+.delta-hero-subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #D8B4FE;
+  font-weight: 500;
+}
+
+.delta-credentials-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+
+.delta-cred-pill {
+  background: rgba(14, 9, 32, 0.75);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  padding: 0.2rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  color: #E2E8F0;
+}
+.delta-cred-pill strong { color: #ffffff; }
+
+.delta-hero-note {
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px dashed rgba(168, 85, 247, 0.4);
+  border-radius: 12px;
+  padding: 0.75rem 1.1rem;
+  font-size: 0.82rem;
+  color: #E2E8F0;
+  line-height: 1.5;
+}
+
+/* ── Top Aggregate KPI Strip ── */
+.delta-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.delta-kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: rgba(14, 9, 32, 0.75);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 14px;
+  padding: 0.85rem 1.15rem;
+  transition: all 0.25s ease;
+}
+
+.delta-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: #A855F7;
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.25);
+}
+
+.delta-kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  color: #ffffff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.delta-kpi-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.delta-kpi-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #A1A1AA;
+}
+
+.delta-kpi-val {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-top: 0.2rem;
+}
+
+.delta-kpi-sub {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #A1A1AA;
+  margin-top: 0.15rem;
+}
+
+/* ── Controls Bar ── */
+.delta-controls-bar {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.delta-filter-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.delta-chip-btn {
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delta-chip-btn:hover {
+  border-color: #A855F7;
+  color: #D8B4FE;
+}
+
+.delta-chip-btn.active {
+  background: linear-gradient(135deg, #7C3AED, #A855F7);
+  color: #ffffff;
+  border-color: #C084FC;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+}
+
+.delta-search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-card-subtle);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 0.35rem 0.85rem;
+  min-width: 240px;
+}
+
+.delta-search-input {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 0.8rem;
+  font-weight: 600;
+  outline: none;
+  width: 100%;
+}
+
+.delta-view-toggle {
+  display: flex;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 3px;
+}
+
+.delta-view-toggle .toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 0.35rem 0.75rem;
+  border-radius: 7px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.delta-view-toggle .toggle-btn.active {
+  background: #7C3AED;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+}
+
+/* ── Cards List & Split Card ── */
+.delta-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.delta-split-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+
+.delta-split-card:hover {
+  border-color: #A855F7;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45), 0 0 25px rgba(168, 85, 247, 0.2);
+}
+
+.delta-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.5rem;
+  background: var(--bg-card-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.delta-card-seq {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.delta-seq-badge {
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #C084FC;
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.delta-inv-anchor {
+  font-size: 0.88rem;
+  color: var(--text-main);
+}
+.delta-inv-anchor strong {
+  font-family: monospace;
+  font-size: 0.98rem;
+  color: #A855F7;
+  letter-spacing: 0.5px;
+}
+
+.badge-reconciled-full {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #22C55E;
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.badge-reconciled-partial {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #60A5FA;
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.badge-reconciled-pending {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #FBBF24;
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* ── Split Grid: Left vs Right ── */
+.delta-split-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  padding: 1.5rem;
+  gap: 1.25rem;
+}
+
+@media (max-width: 992px) {
+  .delta-split-grid {
+    grid-template-columns: 1fr;
+  }
+  .delta-connector {
+    display: none !important;
+  }
+}
+
+.delta-side-col {
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.delta-issuer-col {
+  background: rgba(14, 9, 32, 0.85);
+  border: 1.5px solid rgba(168, 85, 247, 0.35);
+  box-shadow: inset 0 0 25px rgba(124, 58, 237, 0.08);
+}
+
+.delta-target-col {
+  background: rgba(18, 12, 40, 0.85);
+  border: 1.5px solid rgba(192, 132, 252, 0.35);
+}
+
+.side-col-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.75rem;
+}
+
+.side-col-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.delta-badge {
+  background: rgba(124, 58, 237, 0.25);
+  color: #C084FC;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+.client-badge {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93C5FD;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+.side-col-entity-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+/* Connector */
+.delta-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.connector-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7C3AED, #A855F7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.1rem;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+}
+
+.connector-text {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+/* Financials Box (Left Side) */
+.delta-box-financials {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.delta-spec-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.delta-spec-item.highlight-inv {
+  background: rgba(124, 58, 237, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.delta-spec-item.highlight-receivable {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.35rem;
+}
+
+.spec-lbl {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.spec-val-inv code {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #A855F7;
+  letter-spacing: 0.5px;
+}
+
+.spec-val {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.spec-val-rec {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #22C55E;
+}
+
+.delta-specs-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.delta-desc-box {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.spec-val-desc {
+  color: #D4D4D8;
+  font-style: italic;
+}
+
+/* Target Side (Right Side) */
+.target-company-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #FFFFFF !important;
+  border: 1.5px solid #CBD5E1 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #0F172A !important;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+.target-company-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 2px;
+  background: #FFFFFF !important;
+}
+
+.delta-target-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* Exact Name in PDF Highlight Card */
+.pdf-name-highlight-card {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(168, 85, 247, 0.12));
+  border: 1.5px solid rgba(239, 68, 68, 0.35);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.pdf-name-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #F87171;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.pdf-name-value-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pdf-name-value {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.btn-edit-pdf-name {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #CBD5E1;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+.btn-edit-pdf-name:hover {
+  background: #7C3AED;
+  color: #ffffff;
+}
+
+.edit-pdf-input {
+  flex: 1;
+  background: #0A0618;
+  border: 1.5px solid #A855F7;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  color: #ffffff;
+  font-size: 0.8rem;
+  outline: none;
+}
+
+.btn-save-pdf {
+  background: #22C55E;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-cancel-pdf {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+}
+
+/* Associated Docs Sub-grid */
+.target-docs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.doc-box {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.doc-box-title {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.doc-box-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-num {
+  font-family: monospace;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #60A5FA;
+}
+
+.doc-sub {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.doc-empty {
+  font-size: 0.72rem;
+  color: #71717A;
+  font-style: italic;
+}
+
+/* Nomenclature Profile Preview */
+.client-nomen-preview {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.nomen-tag {
+  background: rgba(168, 85, 247, 0.1);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  color: #D8B4FE;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
+}
+.nomen-tag strong { color: #ffffff; }
+
+/* ── Matrix Table ── */
+.delta-table-container {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: 16px;
+  overflow-x: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.delta-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.delta-matrix-table th {
+  background: var(--bg-card-subtle);
+  padding: 0.85rem 1rem;
+  text-align: left;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  border-bottom: 1.5px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.delta-matrix-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.delta-matrix-table tr:hover td {
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.delta-table-issuer-tag {
+  background: rgba(124, 58, 237, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #C084FC;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+
+.delta-code-inv {
+  font-family: monospace;
+  font-size: 0.92rem;
+  color: #A855F7;
+}
+
+.company-table-badge {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.pdf-name-table-badge {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #F87171;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  max-width: 260px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.status-badge-green {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #22C55E;
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.status-badge-blue {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #60A5FA;
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.status-badge-amber {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #FBBF24;
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+/* ── Empty State ── */
+.delta-empty-state {
+  background: var(--bg-card);
+  border: 1.5px dashed var(--border-subtle);
+  border-radius: 20px;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+.delta-empty-state i {
+  font-size: 3rem;
+  color: #A855F7;
+  margin-bottom: 1rem;
+}
+.delta-empty-state h4 {
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+}
+
+/* ── Quick Banner on CompanyHub ── */
+.hub-delta-banner-wrap {
+  max-width: 1400px;
+  margin: 0 auto 1.75rem;
+  padding: 0 1.5rem;
+}
+
+.delta-hub-card {
+  background: linear-gradient(135deg, rgba(30, 20, 65, 0.95), rgba(45, 25, 95, 0.9));
+  border: 1.5px solid #A855F7;
+  border-radius: 18px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  box-shadow: 0 8px 30px rgba(124, 58, 237, 0.25);
+}
+
+.delta-hub-badge-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #7C3AED, #9333EA);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.5rem;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.5);
+  flex-shrink: 0;
+}
+
+.btn-delta-hub-jump {
+  background: linear-gradient(135deg, #7C3AED, #A855F7);
+  border: 1px solid #C084FC;
+  color: #ffffff;
+  padding: 0.55rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-delta-hub-jump:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.6);
+  transform: translateY(-1px);
+}
+
+/* ── Bright Theme Overrides for Delta IoT Tab ── */
+[data-theme="bright"] .delta-hero {
+  background: linear-gradient(135deg, #FAF5FF, #F3E8FF);
+  border-color: #C084FC;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+}
+[data-theme="bright"] .delta-hero-title {
+  color: #1E1B4B;
+}
+[data-theme="bright"] .delta-hero-subtitle {
+  color: #581C87;
+}
+[data-theme="bright"] .delta-cred-pill {
+  background: #ffffff;
+  border-color: #E9D5FF;
+  color: #374151;
+}
+[data-theme="bright"] .delta-cred-pill strong {
+  color: #111827;
+}
+[data-theme="bright"] .delta-hero-note {
+  background: #ffffff;
+  border-color: #C084FC;
+  color: #374151;
+}
+[data-theme="bright"] .delta-kpi-row {
+  border-top-color: #E9D5FF;
+}
+[data-theme="bright"] .delta-kpi-card {
+  background: #ffffff;
+  border-color: #E9D5FF;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+[data-theme="bright"] .delta-kpi-label {
+  color: #6B7280;
+}
+[data-theme="bright"] .delta-kpi-val {
+  color: #111827;
+}
+[data-theme="bright"] .delta-kpi-sub {
+  color: #6B7280;
+}
+[data-theme="bright"] .delta-controls-bar {
+  background: #ffffff;
+  border-color: #E9D5FF;
+}
+[data-theme="bright"] .delta-split-card {
+  background: #ffffff;
+  border-color: #E9D5FF;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+[data-theme="bright"] .delta-card-header {
+  background: #FAF5FF;
+  border-color: #E9D5FF;
+}
+[data-theme="bright"] .delta-issuer-col {
+  background: #FAF5FF;
+  border-color: #D8B4FE;
+}
+[data-theme="bright"] .delta-target-col {
+  background: #FDFBFF;
+  border-color: #E9D5FF;
+}
+[data-theme="bright"] .pdf-name-highlight-card {
+  background: #FFF1F2;
+  border-color: #FECDD3;
+}
+[data-theme="bright"] .pdf-name-value {
+  color: #9F1239;
+}
+[data-theme="bright"] .doc-box {
+  background: #F9FAFB;
+  border-color: #E5E7EB;
+}
+[data-theme="bright"] .delta-desc-box {
+  background: #F3F4F6;
+}
+[data-theme="bright"] .spec-val-desc {
+  color: #374151;
+}
+[data-theme="bright"] .delta-hub-card {
+  background: linear-gradient(135deg, #FAF5FF, #F3E8FF);
+  border-color: #C084FC;
+}

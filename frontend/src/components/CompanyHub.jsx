@@ -92,6 +92,37 @@ export default function CompanyHub() {
         </div>
       </div>
 
+      {/* ── Quick Access: Delta IoT Master Projections ── */}
+      <div className="hub-delta-banner-wrap animate-slideup">
+        <div className="delta-hub-card">
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem", flex: 1, minWidth: 280 }}>
+            <div className="delta-hub-badge-icon">
+              <i className="bi bi-diagram-3-fill" />
+            </div>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: "1.05rem", color: "var(--text-main)" }}>
+                Delta IoT Solutions — Master Invoicing &amp; Multi-Company Projections
+              </div>
+              <div style={{ fontSize: ".8rem", color: "var(--text-muted)", marginTop: ".15rem" }}>
+                Standardized master invoices mapped against client buyer names, POs, and remittances from PDFs.
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="btn-delta-hub-jump"
+            onClick={() => {
+              if (clients.length > 0) selectCompany(clients[0].id);
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent("switch_tab", { detail: "delta_iot" }));
+              }, 50);
+            }}
+          >
+            <i className="bi bi-diagram-3 me-1" /> View Delta IoT Projections ➔
+          </button>
+        </div>
+      </div>
+
       {/* ── Companies Grid ── */}
       <div className="hub-grid-section">
         <div className="hub-section-header">

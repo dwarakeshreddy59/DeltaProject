@@ -4,6 +4,7 @@ import CompanyHub from "./components/CompanyHub";
 import CompanyWorkspaceHeader from "./components/CompanyWorkspaceHeader";
 import UploadTab from "./components/UploadTab";
 import RecordsTab from "./components/RecordsTab";
+import DeltaIoTTab from "./components/DeltaIoTTab";
 import SearchTab from "./components/SearchTab";
 import ClientRegistrationModal from "./components/ClientRegistrationModal";
 import { OrganizationProvider, useOrganization } from "./context/OrganizationContext";
@@ -44,6 +45,14 @@ function AppContent() {
     localStorage.setItem("app_theme", theme);
   }, [theme]);
 
+  useEffect(() => {
+    const handleSwitchTab = (e) => {
+      if (e?.detail) setActiveTab(e.detail);
+    };
+    window.addEventListener("switch_tab", handleSwitchTab);
+    return () => window.removeEventListener("switch_tab", handleSwitchTab);
+  }, []);
+
   const toggleTheme = () => {
     setTheme((prev) => (prev === "dark" ? "bright" : "dark"));
   };
@@ -67,6 +76,11 @@ function AppContent() {
       id: "records",
       icon: "bi-table",
       label: `${activeCompany?.organization_name || "Company"} Records`,
+    },
+    {
+      id: "delta_iot",
+      icon: "bi-diagram-3-fill",
+      label: "Delta IoT Projections",
     },
     {
       id: "search",
@@ -180,6 +194,9 @@ function AppContent() {
               )}
               {activeTab === "records" && (
                 <RecordsTab refreshTrigger={refreshTrigger} />
+              )}
+              {activeTab === "delta_iot" && (
+                <DeltaIoTTab refreshTrigger={refreshTrigger} />
               )}
               {activeTab === "search" && (
                 <SearchTab />
