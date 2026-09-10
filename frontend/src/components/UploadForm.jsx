@@ -3,15 +3,38 @@ import DropZone from "./DropZone";
 import WrongFileModal from "./WrongFileModal";
 import { useOrganization } from "../context/OrganizationContext";
 
+const TDS_PRESETS = [
+  { value: 0.0,  label: "0% (Nil)",        title: "Section 197 (Nil Exemption)" },
+  { value: 0.1,  label: "0.1% (Goods)",    title: "Section 194Q (Purchase of Goods)" },
+  { value: 1.0,  label: "1% (Contractor)", title: "Section 194C (Individual / HUF)" },
+  { value: 2.0,  label: "2% (Standard)",   title: "Section 194C (Corporate) / 194J (Tech)" },
+  { value: 5.0,  label: "5% (Rent)",       title: "Section 194I (Rent) / 194H (Commission)" },
+  { value: 10.0, label: "10% (Prof)",      title: "Section 194J (Professional Fees)" },
+];
+
 export default function UploadForm({ onSubmit, loading, mismatchError, onClearMismatch, resetTrigger, onPreviewFile }) {
   const { activeClient, nomenclature, openRegisterModal } = useOrganization();
   const [files, setFiles] = useState({ invoice: null, po: null, remittance: null });
   const [errors, setErrors] = useState({});
+  const [tdsRate, setTdsRate] = useState(2.0);
+  const [isCustomTds, setIsCustomTds] = useState(false);
+  const [customTdsVal, setCustomTdsVal] = useState("2.0");
+
+  const getFinalTds = () => {
+    if (isCustomTds) {
+      const parsed = parseFloat(customTdsVal);
+      return !isNaN(parsed) && parsed >= 0 && parsed <= 100 ? parsed : 2.0;
+    }
+    return Number(tdsRate);
+  };
 
   useEffect(() => {
     if (resetTrigger) {
       setFiles({ invoice: null, po: null, remittance: null });
       setErrors({});
+      setTdsRate(2.0);
+      setIsCustomTds(false);
+      setCustomTdsVal("2.0");
       if (onClearMismatch) onClearMismatch();
     }
   }, [resetTrigger]);
@@ -64,7 +87,7 @@ export default function UploadForm({ onSubmit, loading, mismatchError, onClearMi
     fd.append("invoice_pdf",    files.invoice);
     fd.append("po_pdf",         files.po);
     fd.append("remittance_pdf", files.remittance);
-    fd.append("tds_rate",       2.0); // default 2%
+    fd.append("tds_rate",       getFinalTds());
     if (activeClient?.id) {
       fd.append("client_id", activeClient.id);
     }
@@ -74,6 +97,9 @@ export default function UploadForm({ onSubmit, loading, mismatchError, onClearMi
   const handleReset = () => {
     setFiles({ invoice: null, po: null, remittance: null });
     setErrors({});
+    setTdsRate(2.0);
+    setIsCustomTds(false);
+    setCustomTdsVal("2.0");
     if (onClearMismatch) onClearMismatch();
   };
 
@@ -93,7 +119,7 @@ export default function UploadForm({ onSubmit, loading, mismatchError, onClearMi
       fd.append("invoice_pdf", fixedFiles.invoice);
       fd.append("po_pdf", fixedFiles.po);
       fd.append("remittance_pdf", fixedFiles.remittance);
-      fd.append("tds_rate", 2.0);
+      fd.append("tds_rate", getFinalTds());
       if (activeClient?.id) {
         fd.append("client_id", activeClient.id);
       }
@@ -224,6 +250,83 @@ export default function UploadForm({ onSubmit, loading, mismatchError, onClearMi
                 </div>
               );
             })}
+          </div>
+
+          {/* TDS Rate Configuration Strip */}
+          <div className="upload-tds-strip">
+            <div className="upload-tds-left">
+              <div className="upload-tds-title">
+                <i className="bi bi-percent" />
+                <span>TDS Rate Configuration:</span>
+              </div>
+              <div className="upload-tds-chips">
+                {TDS_PRESETS.map((p) => {
+                  const active = !isCustomTds && Number(tdsRate) === p.value;
+                  return (
+                    <button
+                      key={p.value}
+                      type="button"
+                      className={`upload-tds-chip ${active ? "active" : ""}`}
+                      onClick={() => {
+                        setTdsRate(p.value);
+                        setIsCustomTds(false);
+                      }}
+                      title={p.title}
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
+
+                <button
+                  type="button"
+                  className={`upload-tds-chip ${isCustomTds ? "active" : ""}`}
+                  onClick={() => setIsCustomTds(true)}
+                  title="Give a custom TDS percentage value"
+                >
+                  {isCustomTds ? `Custom (${customTdsVal || "0"}%)` : "⚙️ Custom %..."}
+                </button>
+              </div>
+
+              {isCustomTds && (
+                <div className="upload-tds-custom-input-box animate-popin">
+                  <input
+                    type="number"
+                    step="any"
+                    min="0"
+                    max="100"
+                    placeholder="Rate"
+                    value={customTdsVal}
+                    onChange={(e) => {
+                      setCustomTdsVal(e.target.value);
+                      const parsed = parseFloat(e.target.value);
+                      if (!isNaN(parsed) && parsed >= 0 && parsed <= 100) {
+                        setTdsRate(parsed);
+                      }
+                    }}
+                    className="upload-tds-input"
+                    autoFocus
+                  />
+                  <span className="upload-tds-unit">%</span>
+                  <button
+                    type="button"
+                    className="btn-tds-strip-cancel"
+                    onClick={() => {
+                      setIsCustomTds(false);
+                      setTdsRate(2.0);
+                    }}
+                    title="Revert to preset"
+                  >
+                    <i className="bi bi-x" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="upload-tds-hint">
+              <i className="bi bi-info-circle me-1" />
+              Applied TDS Rate: <strong>{getFinalTds()}%</strong> (automatically computes Net Receivable upon extraction)
+            </div>
           </div>
 
           {/* Action Row - Dedicated Upload & Extract button */}

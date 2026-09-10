@@ -115,7 +115,7 @@ export default function CalculationPanel({ calcData, onTdsChange }) {
             <form onSubmit={handleCustomApply} style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
               <input
                 type="number"
-                step="0.1"
+                step="any"
                 min="0"
                 max="100"
                 value={customVal}

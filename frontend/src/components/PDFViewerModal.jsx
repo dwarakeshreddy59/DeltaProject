@@ -15,10 +15,13 @@ export default function PDFViewerModal({
   pdfUrl: propPdfUrl = null,
   pdfFile = null,
   title: customTitle = null,
+  onUpdateTds = null,
 }) {
   const { nomenclature } = useOrganization();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [blobUrl, setBlobUrl] = useState(null);
+  const [showCustomTds, setShowCustomTds] = useState(false);
+  const [customTdsInput, setCustomTdsInput] = useState(String(docData?.tds_rate ?? 2));
 
   // Generate blob URL if local File object is passed
   useEffect(() => {
@@ -259,9 +262,132 @@ export default function PDFViewerModal({
                       <span className="pdf-field-name">GST (18%)</span>
                       <span className="pdf-field-val val-money">{inr(docData?.gst_amount)}</span>
                     </div>
-                    <div className="pdf-info-field">
-                      <span className="pdf-field-name">TDS Rate</span>
-                      <span className="pdf-field-val fw-bold text-danger">{docData?.tds_rate ?? 2}%</span>
+                    <div className="pdf-info-field" style={{ flexDirection: "column", alignItems: "stretch", gap: ".35rem" }}>
+                      <div className="d-flex justify-content-between align-items-center">
+                        <span className="pdf-field-name">TDS Rate</span>
+                        <span className="pdf-field-val fw-bold text-danger">
+                          {docData?.tds_rate ?? 2}%
+                          {Number(docData?.tds_rate) !== 2 && (
+                            <span className="badge bg-purple ms-1" style={{ fontSize: ".65rem" }}>Custom</span>
+                          )}
+                        </span>
+                      </div>
+                      {onUpdateTds && (
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px", flexWrap: "wrap", marginTop: "2px" }}>
+                          <span style={{ fontSize: ".7rem", color: "var(--text-muted)", fontWeight: 600 }}>Options:</span>
+                          {[0, 1, 2, 5, 10].map((r) => (
+                            <button
+                              key={r}
+                              type="button"
+                              onClick={() => {
+                                setShowCustomTds(false);
+                                onUpdateTds(r);
+                              }}
+                              style={{
+                                border: "1px solid",
+                                borderColor: Number(docData?.tds_rate) === r && !showCustomTds ? "#A855F7" : "var(--border-subtle)",
+                                background: Number(docData?.tds_rate) === r && !showCustomTds ? "rgba(168,85,247,0.25)" : "var(--bg-card)",
+                                color: Number(docData?.tds_rate) === r && !showCustomTds ? "#C084FC" : "var(--text-muted)",
+                                borderRadius: 5,
+                                padding: "2px 6px",
+                                fontSize: ".68rem",
+                                fontWeight: 700,
+                                cursor: "pointer",
+                              }}
+                            >
+                              {r}%
+                            </button>
+                          ))}
+                          {!showCustomTds ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowCustomTds(true);
+                                setCustomTdsInput(String(docData?.tds_rate ?? 2));
+                              }}
+                              style={{
+                                border: "1px dashed var(--border-medium)",
+                                background: "var(--bg-card)",
+                                color: "var(--purple-violet)",
+                                borderRadius: 5,
+                                padding: "2px 6px",
+                                fontSize: ".68rem",
+                                fontWeight: 700,
+                                cursor: "pointer",
+                              }}
+                              title="Give a custom TDS percentage value"
+                            >
+                              ⚙️ Custom %
+                            </button>
+                          ) : (
+                            <form
+                              onSubmit={(e) => {
+                                e.preventDefault();
+                                const val = parseFloat(customTdsInput);
+                                if (!isNaN(val) && val >= 0 && val <= 100) {
+                                  onUpdateTds(val);
+                                  setShowCustomTds(false);
+                                }
+                              }}
+                              style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}
+                            >
+                              <input
+                                type="number"
+                                step="any"
+                                min="0"
+                                max="100"
+                                value={customTdsInput}
+                                onChange={(e) => setCustomTdsInput(e.target.value)}
+                                style={{
+                                  width: "55px",
+                                  padding: "2px 4px",
+                                  fontSize: ".7rem",
+                                  fontWeight: 700,
+                                  borderRadius: 4,
+                                  border: "1px solid #A855F7",
+                                  background: "var(--bg-card)",
+                                  color: "var(--text-main)",
+                                  outline: "none",
+                                  textAlign: "right",
+                                }}
+                                autoFocus
+                              />
+                              <span style={{ fontSize: ".7rem", color: "#A855F7", fontWeight: 700 }}>%</span>
+                              <button
+                                type="submit"
+                                style={{
+                                  padding: "2px 5px",
+                                  background: "#10B981",
+                                  color: "#fff",
+                                  border: "none",
+                                  borderRadius: 4,
+                                  fontSize: ".7rem",
+                                  cursor: "pointer",
+                                  fontWeight: 700,
+                                }}
+                                title="Apply"
+                              >
+                                ✓
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setShowCustomTds(false)}
+                                style={{
+                                  padding: "2px 4px",
+                                  background: "transparent",
+                                  color: "var(--text-muted)",
+                                  border: "none",
+                                  fontSize: ".7rem",
+                                  cursor: "pointer",
+                                }}
+                                title="Cancel"
+                              >
+                                ✕
+                              </button>
+                            </form>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="pdf-info-field">
                       <span className="pdf-field-name">TDS Deduction</span>

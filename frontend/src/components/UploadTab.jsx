@@ -172,10 +172,11 @@ export default function UploadTab({
         isOpen={pdfModal.isOpen}
         onClose={() => setPdfModal((prev) => ({ ...prev, isOpen: false }))}
         docType={pdfModal.docType}
-        docData={pdfModal.docData}
+        docData={pdfModal.docType === "invoice" ? { ...pdfModal.docData, ...calcData } : pdfModal.docData}
         pdfUrl={pdfModal.pdfUrl}
         pdfFile={pdfModal.pdfFile}
         title={pdfModal.title}
+        onUpdateTds={pdfModal.docType === "invoice" ? onRecalc : null}
       />
 
       {!results && !loading && (

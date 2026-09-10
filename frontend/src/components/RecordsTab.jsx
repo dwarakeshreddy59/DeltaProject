@@ -60,7 +60,7 @@ export function TableTdsSelector({ rate = 2.0, isUpdating, onSelect }) {
       <form onSubmit={handleCustomSubmit} className="tds-custom-input-wrap">
         <input
           type="number"
-          step="0.1"
+          step="any"
           min="0"
           max="100"
           value={customVal}
@@ -120,6 +120,10 @@ export function CalculationBreakdownModal({ record, onClose, onUpdateTds, isUpda
   const tdsAmount = Number(record.tds_amount || (assessable * (tdsRate / 100)));
   const receivable = Number(record.receivable || (assessable - tdsAmount + gstAmount));
 
+  const [isCustom, setIsCustom] = useState(false);
+  const [customVal, setCustomVal] = useState(String(tdsRate));
+  const isPreset = TDS_SITUATIONS.some((s) => s.value === tdsRate);
+
   return (
     <div className="modal-backdrop-custom animate-fadein" onClick={onClose}>
       <div className="calc-modal-card animate-slideup" onClick={(e) => e.stopPropagation()}>
@@ -160,8 +164,11 @@ export function CalculationBreakdownModal({ record, onClose, onUpdateTds, isUpda
                 <button
                   key={s.value}
                   type="button"
-                  className={`tds-chip ${tdsRate === s.value ? "active" : ""}`}
-                  onClick={() => onUpdateTds(s.value)}
+                  className={`tds-chip ${!isCustom && tdsRate === s.value ? "active" : ""}`}
+                  onClick={() => {
+                    setIsCustom(false);
+                    onUpdateTds(s.value);
+                  }}
                   disabled={isUpdating}
                   title={s.label}
                 >
@@ -169,6 +176,57 @@ export function CalculationBreakdownModal({ record, onClose, onUpdateTds, isUpda
                   <span className="chip-tag">{s.badge}</span>
                 </button>
               ))}
+
+              {!isCustom ? (
+                <button
+                  type="button"
+                  className={`tds-chip ${!isPreset ? "active" : ""}`}
+                  onClick={() => {
+                    setIsCustom(true);
+                    setCustomVal(String(tdsRate));
+                  }}
+                  disabled={isUpdating}
+                  title="Give a custom TDS percentage value"
+                >
+                  <span className="chip-rate">{!isPreset ? `${tdsRate}%` : "⚙️ Custom"}</span>
+                  <span className="chip-tag">{!isPreset ? "Custom Rate" : "Give Value"}</span>
+                </button>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const val = parseFloat(customVal);
+                    if (!isNaN(val) && val >= 0 && val <= 100) {
+                      onUpdateTds(val);
+                      setIsCustom(false);
+                    } else {
+                      toast.error("Enter a valid percentage between 0 and 100");
+                    }
+                  }}
+                  className="tds-modal-custom-form animate-popin"
+                >
+                  <input
+                    type="number"
+                    step="any"
+                    min="0"
+                    max="100"
+                    value={customVal}
+                    onChange={(e) => setCustomVal(e.target.value)}
+                    placeholder="Rate"
+                    className="tds-inline-input"
+                    style={{ width: "75px" }}
+                    autoFocus
+                    disabled={isUpdating}
+                  />
+                  <span className="tds-pct-symbol">%</span>
+                  <button type="submit" className="btn-tds-confirm" disabled={isUpdating} title="Apply custom TDS">
+                    <i className="bi bi-check" />
+                  </button>
+                  <button type="button" className="btn-tds-cancel" onClick={() => setIsCustom(false)} title="Cancel">
+                    <i className="bi bi-x" />
+                  </button>
+                </form>
+              )}
             </div>
           </div>
 
@@ -515,6 +573,27 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
   const totalReceivable = data.invoices.reduce((acc, curr) => acc + Number(curr.receivable || 0), 0);
   const totalPOAmount = data.purchase_orders.reduce((acc, curr) => acc + Number(curr.total_amount || 0), 0);
   const totalRemittanceGross = data.remittances.reduce((acc, curr) => acc + Number(curr.gross_amount || 0), 0);
+
+  const handlePdfModalUpdateTds = async (newRate) => {
+    if (!pdfModal.docData?.invoice_number) return;
+    await handleUpdateTdsRate(pdfModal.docData, newRate);
+    setPdfModal((prev) => {
+      if (!prev.docData) return prev;
+      const base = Number(prev.docData.assessable_value || 0);
+      const gstAmt = Number(prev.docData.gst_amount || (base * 0.18));
+      const tdsAmt = base * (newRate / 100);
+      const recv = base - tdsAmt + gstAmt;
+      return {
+        ...prev,
+        docData: {
+          ...prev.docData,
+          tds_rate: newRate,
+          tds_amount: tdsAmt,
+          receivable: recv,
+        },
+      };
+    });
+  };
 
   return (
     <div className="search-wrapper animate-fadein">
@@ -1168,6 +1247,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
         docData={pdfModal.docData}
         pdfUrl={pdfModal.pdfUrl}
         title={pdfModal.title}
+        onUpdateTds={pdfModal.docType === "invoice" ? handlePdfModalUpdateTds : null}
       />
     </div>
   );

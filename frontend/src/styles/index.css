@@ -8805,3 +8805,166 @@ body {
   background: #F1F5F9;
 }
 
+/* ==========================================================================
+   CUSTOM TDS RATE CONFIGURATION & INPUT STYLES
+   ========================================================================== */
+
+.upload-tds-strip {
+  margin-top: 0.85rem;
+  margin-bottom: 1.25rem;
+  padding: 0.85rem 1.2rem;
+  border-radius: 12px;
+  background: var(--bg-card-subtle);
+  border: 1.5px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: all 0.2s ease;
+}
+
+.upload-tds-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.upload-tds-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.upload-tds-title i {
+  color: var(--purple-neon);
+  font-size: 1rem;
+}
+
+.upload-tds-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.upload-tds-chip {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  color: var(--text-main);
+  border-radius: 8px;
+  padding: 0.32rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.upload-tds-chip:hover {
+  border-color: #A855F7;
+  color: #A855F7;
+  transform: translateY(-1px);
+}
+
+.upload-tds-chip.active {
+  background: linear-gradient(135deg, #7C3AED, #A855F7);
+  border-color: #A855F7;
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.45);
+  transform: translateY(-1px);
+}
+
+.upload-tds-custom-input-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--bg-card);
+  border: 1.5px solid #A855F7;
+  border-radius: 8px;
+  padding: 0.18rem 0.55rem;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.35);
+}
+
+.upload-tds-input {
+  width: 65px;
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  font-size: 0.82rem;
+  font-weight: 800;
+  outline: none;
+  text-align: right;
+}
+
+.upload-tds-unit {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #A855F7;
+}
+
+.btn-tds-strip-cancel {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0 0.2rem;
+  display: flex;
+  align-items: center;
+}
+
+.btn-tds-strip-cancel:hover {
+  color: var(--danger-red);
+}
+
+.upload-tds-hint {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+}
+
+.tds-modal-custom-form {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--bg-card);
+  border: 1.5px solid #A855F7;
+  border-radius: 8px;
+  padding: 0.18rem 0.45rem;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+}
+
+/* Light Theme Overrides for TDS Strip */
+[data-theme="bright"] .upload-tds-strip {
+  background: #F8FAFC;
+  border-color: #E2E8F0;
+}
+
+[data-theme="bright"] .upload-tds-chip {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  color: #1E293B;
+}
+
+[data-theme="bright"] .upload-tds-chip.active {
+  background: linear-gradient(135deg, #7C3AED, #A855F7);
+  color: #FFFFFF;
+}
+
+[data-theme="bright"] .upload-tds-custom-input-box,
+[data-theme="bright"] .tds-modal-custom-form {
+  background: #FFFFFF;
+  border-color: #7C3AED;
+}
+
+[data-theme="bright"] .upload-tds-input {
+  color: #1E293B;
+}
+
+
