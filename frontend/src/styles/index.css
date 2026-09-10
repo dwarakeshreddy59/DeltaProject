@@ -2160,15 +2160,40 @@ body {
   border-color: #7C3AED;
   color: #3B0764;
 }
-[data-theme="bright"] .btn-nav:not(.btn-green) {
+[data-theme="bright"] .btn-nav:not(.btn-green):not(.btn-register-nav) {
   background: #F3E8FF;
   border: 1.5px solid #C084FC;
   color: #5B21B6;
 }
-[data-theme="bright"] .btn-nav:not(.btn-green):hover {
+[data-theme="bright"] .btn-nav:not(.btn-green):not(.btn-register-nav):hover {
   background: #EDE9FE;
   border-color: #7C3AED;
   color: #3B0764;
+}
+
+/* Light mode register company nav button - prominent high contrast */
+[data-theme="bright"] .btn-nav.btn-register-nav,
+[data-theme="bright"] .btn-register-nav {
+  background: linear-gradient(135deg, #7C3AED, #9333EA) !important;
+  border: 1.5px solid #6D28D9 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.35) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+[data-theme="bright"] .btn-nav.btn-register-nav:hover,
+[data-theme="bright"] .btn-register-nav:hover {
+  background: linear-gradient(135deg, #6D28D9, #7C3AED) !important;
+  border-color: #5B21B6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.5) !important;
+  filter: brightness(1.08) !important;
+}
+[data-theme="bright"] .btn-nav.btn-register-nav i,
+[data-theme="bright"] .btn-register-nav i,
+[data-theme="bright"] .btn-nav.btn-register-nav span,
+[data-theme="bright"] .btn-register-nav span {
+  color: #ffffff !important;
 }
 [data-theme="bright"] .nav-divider {
   background: #E9D5FF;
@@ -4299,8 +4324,31 @@ body {
 }
 .btn-register-nav:hover { filter: brightness(1.15); }
 
-.tab-btn-all-companies {
+.tab-btn-register {
   margin-left: auto;
+  background: linear-gradient(135deg, #7C3AED, #9333EA) !important;
+  border: 1.5px solid #C084FC !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-radius: 9px !important;
+  padding: 0.42rem 0.95rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.45rem !important;
+  cursor: pointer !important;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.35);
+  transition: all 0.2s ease !important;
+}
+.tab-btn-register:hover {
+  background: linear-gradient(135deg, #6D28D9, #7C3AED) !important;
+  border-color: #E9D5FF !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.55);
+}
+
+.tab-btn-all-companies {
+  margin-left: 0.5rem;
   background: rgba(124, 58, 237, 0.15) !important;
   border: 1.5px solid rgba(168, 85, 247, 0.3) !important;
   color: #C084FC !important;
@@ -4456,6 +4504,72 @@ body {
   background: #F3E8FF;
   border-color: #C084FC;
   color: #6B21A8;
+}
+
+[data-theme="bright"] .chip-switch-btn {
+  background: #ffffff;
+  color: #6D28D9;
+  border: 1px solid #C084FC;
+}
+[data-theme="bright"] .chip-switch-btn:hover {
+  background: #7C3AED;
+  color: #ffffff;
+}
+
+[data-theme="bright"] .btn-ws-register {
+  background: #ffffff !important;
+  border: 1.5px solid #A855F7 !important;
+  color: #6D28D9 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 6px rgba(124, 58, 237, 0.12) !important;
+}
+[data-theme="bright"] .btn-ws-register:hover {
+  background: #7C3AED !important;
+  border-color: #7C3AED !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.25) !important;
+}
+[data-theme="bright"] .btn-ws-register i {
+  color: #7C3AED !important;
+}
+[data-theme="bright"] .btn-ws-register:hover i {
+  color: #ffffff !important;
+}
+
+[data-theme="bright"] .btn-ws-switch {
+  background: linear-gradient(135deg, #7C3AED, #9333EA) !important;
+  border: 1.5px solid #6D28D9 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.25) !important;
+}
+[data-theme="bright"] .btn-ws-switch:hover {
+  background: linear-gradient(135deg, #6D28D9, #7C3AED) !important;
+  border-color: #5B21B6 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="bright"] .tab-btn-register {
+  background: linear-gradient(135deg, #7C3AED, #9333EA) !important;
+  border: 1.5px solid #6D28D9 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.3) !important;
+}
+[data-theme="bright"] .tab-btn-register:hover {
+  background: linear-gradient(135deg, #6D28D9, #7C3AED) !important;
+  border-color: #5B21B6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.45) !important;
+}
+
+[data-theme="bright"] .tab-btn-all-companies {
+  background: #F3E8FF !important;
+  border: 1.5px solid #C084FC !important;
+  color: #6D28D9 !important;
+}
+[data-theme="bright"] .tab-btn-all-companies:hover {
+  background: #7C3AED !important;
+  border-color: #7C3AED !important;
+  color: #ffffff !important;
 }
 
 /* ── Workspace Top Metrics Row ── */

@@ -17,6 +17,7 @@ function AppContent() {
     isAtHub,
     goToHub,
     nomenclature,
+    openRegisterModal,
     isRegisterModalOpen,
     closeRegisterModal,
     refreshClients,
@@ -182,6 +183,16 @@ function AppContent() {
                   )}
                 </button>
               ))}
+
+              <button
+                type="button"
+                className="tab-btn tab-btn-register"
+                onClick={openRegisterModal}
+                title="Register a new company or client entity"
+              >
+                <i className="bi bi-plus-circle-fill" />
+                <span>Register Company</span>
+              </button>
 
               <button
                 type="button"
