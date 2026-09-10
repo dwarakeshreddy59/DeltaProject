@@ -21,14 +21,16 @@ CREATE TABLE IF NOT EXISTS clients (
 
 -- 1. Purchase Orders
 CREATE TABLE IF NOT EXISTS purchase_orders (
-    id            SERIAL PRIMARY KEY,
-    client_id     INTEGER,
-    po_number     VARCHAR(200) UNIQUE NOT NULL,
-    po_date       VARCHAR(50),
-    description   TEXT,
-    delivery_date VARCHAR(50),
-    total_amount  NUMERIC(18,2) DEFAULT 0,
-    created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    id                SERIAL PRIMARY KEY,
+    client_id         INTEGER,
+    po_number         VARCHAR(200) UNIQUE NOT NULL,
+    po_date           VARCHAR(50),
+    description       TEXT,
+    delivery_date     VARCHAR(50),
+    total_amount      NUMERIC(18,2) DEFAULT 0,
+    pdf_filename      VARCHAR(255),
+    pdf_original_name VARCHAR(255),
+    created_at        TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- 2. Invoices (no FK constraint on po_number — soft reference)
@@ -48,6 +50,8 @@ CREATE TABLE IF NOT EXISTS invoices (
     tds_rate            NUMERIC(5,2)  DEFAULT 2.00,
     tds_amount          NUMERIC(18,2) DEFAULT 0,
     receivable          NUMERIC(18,2) DEFAULT 0,
+    pdf_filename        VARCHAR(255),
+    pdf_original_name   VARCHAR(255),
     created_at          TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -60,13 +64,23 @@ CREATE TABLE IF NOT EXISTS remittances (
     invoice_number     VARCHAR(200),        -- soft ref, no FK
     gross_amount       NUMERIC(18,2) DEFAULT 0,
     total_gross_amount NUMERIC(18,2) DEFAULT 0,
+    pdf_filename       VARCHAR(255),
+    pdf_original_name  VARCHAR(255),
     created_at         TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Add client_id columns to existing tables if table already exists
+-- Add client_id and PDF columns to existing tables if table already exists
 ALTER TABLE purchase_orders ADD COLUMN IF NOT EXISTS client_id INTEGER;
+ALTER TABLE purchase_orders ADD COLUMN IF NOT EXISTS pdf_filename VARCHAR(255);
+ALTER TABLE purchase_orders ADD COLUMN IF NOT EXISTS pdf_original_name VARCHAR(255);
+
 ALTER TABLE invoices ADD COLUMN IF NOT EXISTS client_id INTEGER;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS pdf_filename VARCHAR(255);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS pdf_original_name VARCHAR(255);
+
 ALTER TABLE remittances ADD COLUMN IF NOT EXISTS client_id INTEGER;
+ALTER TABLE remittances ADD COLUMN IF NOT EXISTS pdf_filename VARCHAR(255);
+ALTER TABLE remittances ADD COLUMN IF NOT EXISTS pdf_original_name VARCHAR(255);
 
 CREATE INDEX IF NOT EXISTS idx_clients_org ON clients(organization_name);
 CREATE INDEX IF NOT EXISTS idx_inv_client  ON invoices(client_id);

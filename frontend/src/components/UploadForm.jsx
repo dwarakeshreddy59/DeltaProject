@@ -3,7 +3,7 @@ import DropZone from "./DropZone";
 import WrongFileModal from "./WrongFileModal";
 import { useOrganization } from "../context/OrganizationContext";
 
-export default function UploadForm({ onSubmit, loading, mismatchError, onClearMismatch, resetTrigger }) {
+export default function UploadForm({ onSubmit, loading, mismatchError, onClearMismatch, resetTrigger, onPreviewFile }) {
   const { activeClient, nomenclature, openRegisterModal } = useOrganization();
   const [files, setFiles] = useState({ invoice: null, po: null, remittance: null });
   const [errors, setErrors] = useState({});
@@ -219,6 +219,7 @@ export default function UploadForm({ onSubmit, loading, mismatchError, onClearMi
                     onFile={setFile(key)}
                     hasError={errors[key]}
                     mismatch={slotMismatch}
+                    onPreview={(slotKey, f) => onPreviewFile && onPreviewFile(slotKey, f)}
                   />
                 </div>
               );

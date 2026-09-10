@@ -6,7 +6,7 @@ const SLOT_CONFIG = {
   remittance: { icon: "bi-cash-stack", color: "#22C55E", bg: "linear-gradient(135deg, #16A34A, #22C55E)" },
 };
 
-export default function DropZone({ slot, label, hint, file, onFile, hasError, mismatch }) {
+export default function DropZone({ slot, label, hint, file, onFile, hasError, mismatch, onPreview }) {
   const inputRef = useRef(null);
   const cfg = SLOT_CONFIG[slot] || SLOT_CONFIG.invoice;
 
@@ -76,11 +76,26 @@ export default function DropZone({ slot, label, hint, file, onFile, hasError, mi
       )}
 
       {file ? (
-        /* File info + change/clear buttons */
+        /* File info + change/clear/preview buttons */
         <>
           <div className="drop-filename">{file.name}</div>
           <div className="drop-filesize">{(file.size / 1024).toFixed(1)} KB</div>
           <div style={{ display: "flex", gap: ".45rem", marginTop: ".65rem", justifyContent: "center", flexWrap: "wrap" }}>
+            {onPreview && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onPreview(slot, file); }}
+                style={{
+                  background: "rgba(56, 189, 248, 0.15)", border: "1.5px solid rgba(56, 189, 248, 0.4)", color: "#38bdf8",
+                  borderRadius: 8, padding: ".3rem .75rem", fontSize: ".73rem",
+                  fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: ".3rem",
+                  boxShadow: "0 2px 8px rgba(56, 189, 248, 0.2)"
+                }}
+                title="Preview this PDF document"
+              >
+                <i className="bi bi-eye-fill" /> Preview
+              </button>
+            )}
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}

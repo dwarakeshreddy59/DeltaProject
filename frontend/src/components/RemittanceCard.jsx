@@ -29,7 +29,7 @@ const Row = ({ label, value, type = "text" }) => {
   );
 };
 
-export default function RemittanceCard({ remittance = {} }) {
+export default function RemittanceCard({ remittance = {}, onViewPdf = null }) {
   const { nomenclature } = useOrganization();
   const items = Array.isArray(remittance.items) ? remittance.items : [];
 
@@ -37,7 +37,17 @@ export default function RemittanceCard({ remittance = {} }) {
     <div className="result-card">
       <div className="card-head card-head-remit">
         <div className="card-head-icon"><i className="bi bi-cash-stack" /></div>
-        {nomenclature.remittance_doc_label || "Remittance"}
+        <span>{nomenclature.remittance_doc_label || "Remittance"}</span>
+        {onViewPdf && (
+          <button
+            type="button"
+            className="btn-card-pdf"
+            onClick={() => onViewPdf({ type: "remittance", data: remittance })}
+            title="View Source PDF"
+          >
+            <i className="bi bi-file-earmark-pdf-fill" /> View PDF
+          </button>
+        )}
       </div>
       <div className="card-body-custom">
         <table className="info-table">

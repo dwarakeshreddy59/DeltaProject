@@ -3,7 +3,7 @@ import { fmt } from "../utils/format";
 import { useOrganization } from "../context/OrganizationContext";
 import { TableTdsSelector, CalculationBreakdownModal } from "./RecordsTab";
 
-export default function ExtractedTableView({ po = {}, invoice = {}, remittance = {}, calcData = {}, onTdsChange }) {
+export default function ExtractedTableView({ po = {}, invoice = {}, remittance = {}, calcData = {}, onTdsChange, onViewPdf }) {
   const { nomenclature } = useOrganization();
   const [showCalcModal, setShowCalcModal] = useState(false);
 
@@ -54,7 +54,7 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
 
   return (
     <div className="search-wrapper mb-4" style={{ marginTop: "1.5rem" }}>
-      <div className="search-header" style={{ background: "linear-gradient(135deg, #181033 0%, #24134d 50%, #361775 100%)", borderBottom: "2px solid #7C3AED" }}>
+      <div className="search-header" style={{ background: "linear-gradient(135deg, #181033 0%, #24134d 50%, #361775 100%)", borderBottom: "2px solid #7C3AED", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: ".75rem" }}>
         <div className="search-title">
           <i className="bi bi-grid-3x3-gap-fill" style={{ color: "#A855F7" }} />
           All Extracted Data (Master Table View)
@@ -62,6 +62,38 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
             22 Columns / Fields
           </span>
         </div>
+
+        {onViewPdf && (
+          <div style={{ display: "flex", gap: ".5rem", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontSize: ".72rem", color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>
+              <i className="bi bi-eye-fill me-1" />View Source PDFs:
+            </span>
+            <button
+              type="button"
+              className="btn-card-pdf"
+              onClick={() => onViewPdf({ type: "invoice", data: invoice })}
+              title={`View Source ${nomenclature.invoice_doc_label} PDF`}
+            >
+              <i className="bi bi-receipt me-1" /> {nomenclature.invoice_doc_label}
+            </button>
+            <button
+              type="button"
+              className="btn-card-pdf"
+              onClick={() => onViewPdf({ type: "po", data: po })}
+              title={`View Source ${nomenclature.po_doc_label} PDF`}
+            >
+              <i className="bi bi-file-text me-1" /> {nomenclature.po_doc_label}
+            </button>
+            <button
+              type="button"
+              className="btn-card-pdf"
+              onClick={() => onViewPdf({ type: "remittance", data: remittance })}
+              title={`View Source ${nomenclature.remittance_doc_label} PDF`}
+            >
+              <i className="bi bi-cash-stack me-1" /> {nomenclature.remittance_doc_label}
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="history-body">
@@ -74,6 +106,7 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
             <table className="history-table">
               <thead>
                 <tr>
+                  <th style={{ background: "#4C1D95", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem", textAlign: "center" }}>Source Documents</th>
                   <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>{nomenclature.invoice_num_label}</th>
                   <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice Date</th>
                   <th style={{ background: "#7C3AED", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Invoice Period</th>
@@ -96,6 +129,36 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
               </thead>
               <tbody>
                 <tr>
+                  <td style={{ textAlign: "center", whiteSpace: "nowrap" }}>
+                    {onViewPdf && (
+                      <div style={{ display: "inline-flex", gap: ".35rem" }}>
+                        <button
+                          type="button"
+                          className="btn-pdf-pill"
+                          onClick={() => onViewPdf({ type: "invoice", data: invoice })}
+                          title={`View Source ${nomenclature.invoice_doc_label} PDF`}
+                        >
+                          <i className="bi bi-file-earmark-pdf" /> Inv
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-pdf-pill"
+                          onClick={() => onViewPdf({ type: "po", data: po })}
+                          title={`View Source ${nomenclature.po_doc_label} PDF`}
+                        >
+                          <i className="bi bi-file-earmark-pdf" /> PO
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-pdf-pill"
+                          onClick={() => onViewPdf({ type: "remittance", data: remittance })}
+                          title={`View Source ${nomenclature.remittance_doc_label} PDF`}
+                        >
+                          <i className="bi bi-file-earmark-pdf" /> Rem
+                        </button>
+                      </div>
+                    )}
+                  </td>
                   <td><span className="id-badge">{invoice.invoice_number || "—"}</span></td>
                   <td>{invoice.invoice_date || "—"}</td>
                   <td>{invoice.invoice_period || "—"}</td>

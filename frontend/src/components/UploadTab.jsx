@@ -7,6 +7,7 @@ import InvoiceCard from "./InvoiceCard";
 import RemittanceCard from "./RemittanceCard";
 import ExtractedTableView from "./ExtractedTableView";
 import CalculationPanel from "./CalculationPanel";
+import PDFViewerModal from "./PDFViewerModal";
 
 export default function UploadTab({
   loading,
@@ -21,10 +22,42 @@ export default function UploadTab({
 }) {
   const [viewMode, setViewMode] = useState("cards");
   const [resetTrigger, setResetTrigger] = useState(0);
+  const [pdfModal, setPdfModal] = useState({
+    isOpen: false,
+    docType: "invoice",
+    docData: null,
+    pdfUrl: null,
+    pdfFile: null,
+    title: null,
+  });
 
   const handleOk = () => {
     if (onReset) onReset();
     setResetTrigger((n) => n + 1);
+  };
+
+  const handlePreviewFile = (slot, file) => {
+    setPdfModal({
+      isOpen: true,
+      docType: slot,
+      docData: results ? results[slot] : null,
+      pdfFile: file,
+      pdfUrl: null,
+      title: `Source PDF Preview: ${file.name}`,
+    });
+  };
+
+  const handleViewPdf = ({ type, data }) => {
+    const docData = data || (results ? results[type] : {});
+    const url = docData?.pdf_url || results?.documents?.[type]?.url || null;
+    setPdfModal({
+      isOpen: true,
+      docType: type,
+      docData,
+      pdfUrl: url,
+      pdfFile: null,
+      title: null,
+    });
   };
 
   return (
@@ -36,6 +69,7 @@ export default function UploadTab({
         mismatchError={mismatchError}
         onClearMismatch={onClearMismatch}
         resetTrigger={resetTrigger}
+        onPreviewFile={handlePreviewFile}
       />
 
       {/* Results */}
@@ -80,9 +114,15 @@ export default function UploadTab({
           {/* Cards */}
           {(viewMode === "cards" || viewMode === "both") && (
             <div className="row g-4 mb-4">
-              <div className="col-lg-4"><POCard po={results.po} /></div>
-              <div className="col-lg-4"><InvoiceCard invoice={results.invoice} /></div>
-              <div className="col-lg-4"><RemittanceCard remittance={results.remittance} /></div>
+              <div className="col-lg-4">
+                <POCard po={results.po} onViewPdf={handleViewPdf} />
+              </div>
+              <div className="col-lg-4">
+                <InvoiceCard invoice={results.invoice} onViewPdf={handleViewPdf} />
+              </div>
+              <div className="col-lg-4">
+                <RemittanceCard remittance={results.remittance} onViewPdf={handleViewPdf} />
+              </div>
             </div>
           )}
 
@@ -94,6 +134,7 @@ export default function UploadTab({
               remittance={results.remittance}
               calcData={calcData}
               onTdsChange={onRecalc}
+              onViewPdf={handleViewPdf}
             />
           )}
 
@@ -125,6 +166,17 @@ export default function UploadTab({
           </div>
         </div>
       )}
+
+      {/* Interactive Source PDF Viewer Modal */}
+      <PDFViewerModal
+        isOpen={pdfModal.isOpen}
+        onClose={() => setPdfModal((prev) => ({ ...prev, isOpen: false }))}
+        docType={pdfModal.docType}
+        docData={pdfModal.docData}
+        pdfUrl={pdfModal.pdfUrl}
+        pdfFile={pdfModal.pdfFile}
+        title={pdfModal.title}
+      />
 
       {!results && !loading && (
         <div className="animate-fadein" style={{ textAlign: "center", padding: "3rem 1rem", color: "#A1A1AA" }}>

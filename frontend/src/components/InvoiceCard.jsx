@@ -29,14 +29,24 @@ const Row = ({ label, value, type = "text" }) => {
   );
 };
 
-export default function InvoiceCard({ invoice = {} }) {
+export default function InvoiceCard({ invoice = {}, onViewPdf = null }) {
   const { nomenclature } = useOrganization();
 
   return (
     <div className="result-card">
       <div className="card-head card-head-invoice">
         <div className="card-head-icon"><i className="bi bi-receipt" /></div>
-        {nomenclature.invoice_doc_label || "Invoice"}
+        <span>{nomenclature.invoice_doc_label || "Invoice"}</span>
+        {onViewPdf && (
+          <button
+            type="button"
+            className="btn-card-pdf"
+            onClick={() => onViewPdf({ type: "invoice", data: invoice })}
+            title="View Source PDF"
+          >
+            <i className="bi bi-file-earmark-pdf-fill" /> View PDF
+          </button>
+        )}
       </div>
       <div className="card-body-custom">
         <table className="info-table">

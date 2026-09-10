@@ -29,14 +29,24 @@ const Row = ({ label, value, type = "text" }) => {
   );
 };
 
-export default function POCard({ po = {} }) {
+export default function POCard({ po = {}, onViewPdf = null }) {
   const { nomenclature } = useOrganization();
 
   return (
     <div className="result-card">
       <div className="card-head card-head-po">
         <div className="card-head-icon"><i className="bi bi-file-text" /></div>
-        {nomenclature.po_doc_label || "Purchase Order"}
+        <span>{nomenclature.po_doc_label || "Purchase Order"}</span>
+        {onViewPdf && (
+          <button
+            type="button"
+            className="btn-card-pdf"
+            onClick={() => onViewPdf({ type: "po", data: po })}
+            title="View Source PDF"
+          >
+            <i className="bi bi-file-earmark-pdf-fill" /> View PDF
+          </button>
+        )}
       </div>
       <div className="card-body-custom">
         <table className="info-table">

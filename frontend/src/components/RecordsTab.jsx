@@ -3,6 +3,7 @@ import { fmt } from "../utils/format";
 import { fetchHistory, deleteInvoice, deletePO, deleteRemittance, clearAllRecords, recalculate } from "../services/api";
 import { useOrganization } from "../context/OrganizationContext";
 import toast from "react-hot-toast";
+import PDFViewerModal from "./PDFViewerModal";
 
 const PAGE_SIZE = 10;
 
@@ -268,6 +269,31 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
   const [deletingKey,     setDeletingKey]     = useState(null);
   const [updatingInv,     setUpdatingInv]     = useState(null);
   const [activeCalcModal, setActiveCalcModal] = useState(null);
+  const [pdfModal, setPdfModal] = useState({
+    isOpen: false,
+    docType: "invoice",
+    docData: null,
+    pdfUrl: null,
+    title: null,
+  });
+
+  const handleViewRecordPdf = (type, row) => {
+    let url = null;
+    if (type === "invoice") {
+      url = row.pdf_filename ? `/api/documents/${row.pdf_filename}` : (row.invoice_pdf ? `/api/documents/${row.invoice_pdf}` : null);
+    } else if (type === "po") {
+      url = row.pdf_filename ? `/api/documents/${row.pdf_filename}` : (row.po_pdf ? `/api/documents/${row.po_pdf}` : null);
+    } else if (type === "remittance") {
+      url = row.pdf_filename ? `/api/documents/${row.pdf_filename}` : (row.remittance_pdf ? `/api/documents/${row.remittance_pdf}` : null);
+    }
+    setPdfModal({
+      isOpen: true,
+      docType: type,
+      docData: row,
+      pdfUrl: url,
+      title: null,
+    });
+  };
 
   const handleUpdateTdsRate = async (row, newRate) => {
     if (!row?.invoice_number) return;
@@ -762,7 +788,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
               <table className="history-table">
                 <thead>
                   <tr>
-                    <th style={{ width: 70, textAlign: "center" }}>Action</th>
+                    <th style={{ width: 110, textAlign: "center" }}>Action</th>
                     <th onClick={() => handleSort("invoice_number")}>{nomenclature.invoice_num_label} <Ico col="invoice_number" /></th>
                     <th onClick={() => handleSort("invoice_date")}>Invoice Date <Ico col="invoice_date" /></th>
                     <th onClick={() => handleSort("po_number")}>Linked {nomenclature.po_num_label} <Ico col="po_number" /></th>
@@ -781,14 +807,25 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                 <tbody>
                   {pageData.map((r, i) => (
                     <tr key={i} className="animate-fadein" style={{ animationDelay: `${i * 0.04}s` }}>
-                      <td style={{ textAlign: "center" }}>
-                        <button
-                          onClick={() => handleDeleteInvoice(r.invoice_number)}
-                          disabled={deletingKey === r.invoice_number}
-                          className="btn-del-sm"
-                        >
-                          <i className="bi bi-trash3" /> Delete
-                        </button>
+                      <td style={{ textAlign: "center", whiteSpace: "nowrap" }}>
+                        <div style={{ display: "inline-flex", gap: ".35rem", alignItems: "center" }}>
+                          <button
+                            type="button"
+                            onClick={() => handleViewRecordPdf("invoice", r)}
+                            className="btn-pdf-pill"
+                            title="View Source Invoice PDF"
+                          >
+                            <i className="bi bi-file-earmark-pdf-fill text-danger" /> PDF
+                          </button>
+                          <button
+                            onClick={() => handleDeleteInvoice(r.invoice_number)}
+                            disabled={deletingKey === r.invoice_number}
+                            className="btn-del-sm"
+                            title="Delete record"
+                          >
+                            <i className="bi bi-trash3" />
+                          </button>
+                        </div>
                       </td>
                       <td><span className="id-badge">{r.invoice_number || "—"}</span></td>
                       <td>{r.invoice_date || "—"}</td>
@@ -854,7 +891,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
               <table className="history-table">
                 <thead>
                   <tr>
-                    <th style={{ width: 70, textAlign: "center" }}>Action</th>
+                    <th style={{ width: 110, textAlign: "center" }}>Action</th>
                     <th onClick={() => handleSort("po_number")}>{nomenclature.po_num_label} <Ico col="po_number" /></th>
                     <th onClick={() => handleSort("po_date")}>PO Date <Ico col="po_date" /></th>
                     <th onClick={() => handleSort("description")}>Description <Ico col="description" /></th>
@@ -866,14 +903,25 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                 <tbody>
                   {pageData.map((r, i) => (
                     <tr key={i} className="animate-fadein" style={{ animationDelay: `${i * 0.04}s` }}>
-                      <td style={{ textAlign: "center" }}>
-                        <button
-                          onClick={() => handleDeletePO(r.po_number)}
-                          disabled={deletingKey === r.po_number}
-                          className="btn-del-sm"
-                        >
-                          <i className="bi bi-trash3" /> Delete
-                        </button>
+                      <td style={{ textAlign: "center", whiteSpace: "nowrap" }}>
+                        <div style={{ display: "inline-flex", gap: ".35rem", alignItems: "center" }}>
+                          <button
+                            type="button"
+                            onClick={() => handleViewRecordPdf("po", r)}
+                            className="btn-pdf-pill"
+                            title="View Source PO PDF"
+                          >
+                            <i className="bi bi-file-earmark-pdf-fill text-danger" /> PDF
+                          </button>
+                          <button
+                            onClick={() => handleDeletePO(r.po_number)}
+                            disabled={deletingKey === r.po_number}
+                            className="btn-del-sm"
+                            title="Delete record"
+                          >
+                            <i className="bi bi-trash3" />
+                          </button>
+                        </div>
                       </td>
                       <td><span className="id-badge badge-po">{r.po_number || "—"}</span></td>
                       <td>{r.po_date || "—"}</td>
@@ -899,7 +947,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
               <table className="history-table">
                 <thead>
                   <tr>
-                    <th style={{ width: 70, textAlign: "center" }}>Action</th>
+                    <th style={{ width: 110, textAlign: "center" }}>Action</th>
                     <th onClick={() => handleSort("remittance_number")}>{nomenclature.remittance_num_label} <Ico col="remittance_number" /></th>
                     <th onClick={() => handleSort("remittance_date")}>Remittance Date <Ico col="remittance_date" /></th>
                     <th onClick={() => handleSort("invoice_number")}>Linked {nomenclature.invoice_num_label} <Ico col="invoice_number" /></th>
@@ -912,14 +960,25 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                 <tbody>
                   {pageData.map((r, i) => (
                     <tr key={i} className="animate-fadein" style={{ animationDelay: `${i * 0.04}s` }}>
-                      <td style={{ textAlign: "center" }}>
-                        <button
-                          onClick={() => handleDeleteRemittance(r.remittance_number)}
-                          disabled={deletingKey === r.remittance_number}
-                          className="btn-del-sm"
-                        >
-                          <i className="bi bi-trash3" /> Delete
-                        </button>
+                      <td style={{ textAlign: "center", whiteSpace: "nowrap" }}>
+                        <div style={{ display: "inline-flex", gap: ".35rem", alignItems: "center" }}>
+                          <button
+                            type="button"
+                            onClick={() => handleViewRecordPdf("remittance", r)}
+                            className="btn-pdf-pill"
+                            title="View Source Remittance PDF"
+                          >
+                            <i className="bi bi-file-earmark-pdf-fill text-danger" /> PDF
+                          </button>
+                          <button
+                            onClick={() => handleDeleteRemittance(r.remittance_number)}
+                            disabled={deletingKey === r.remittance_number}
+                            className="btn-del-sm"
+                            title="Delete record"
+                          >
+                            <i className="bi bi-trash3" />
+                          </button>
+                        </div>
                       </td>
                       <td><span className="id-badge badge-remit">{r.remittance_number || "—"}</span></td>
                       <td>{r.remittance_date || "—"}</td>
@@ -946,7 +1005,7 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
               <table className="history-table">
                 <thead>
                   <tr>
-                    <th style={{ width: 70, textAlign: "center" }}>Action</th>
+                    <th style={{ width: 175, textAlign: "center" }}>Action / PDFs</th>
                     <th>Organization</th>
                     <th onClick={() => handleSort("invoice_number")}>{nomenclature.invoice_num_label} <Ico col="invoice_number" /></th>
                     <th onClick={() => handleSort("invoice_date")}>Invoice Date <Ico col="invoice_date" /></th>
@@ -972,14 +1031,41 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                 <tbody>
                   {pageData.map((r, i) => (
                     <tr key={i} className="animate-fadein" style={{ animationDelay: `${i * 0.04}s` }}>
-                      <td style={{ textAlign: "center" }}>
-                        <button
-                          onClick={() => handleDeleteInvoice(r.invoice_number)}
-                          disabled={deletingKey === r.invoice_number}
-                          className="btn-del-sm"
-                        >
-                          <i className="bi bi-trash3" /> Delete
-                        </button>
+                      <td style={{ textAlign: "center", whiteSpace: "nowrap" }}>
+                        <div style={{ display: "inline-flex", gap: ".25rem", alignItems: "center" }}>
+                          <button
+                            type="button"
+                            onClick={() => handleViewRecordPdf("invoice", r)}
+                            className="btn-pdf-pill"
+                            title={`View Source ${nomenclature.invoice_doc_label} PDF`}
+                          >
+                            <i className="bi bi-file-earmark-pdf" /> Inv
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleViewRecordPdf("po", r)}
+                            className="btn-pdf-pill"
+                            title={`View Source ${nomenclature.po_doc_label} PDF`}
+                          >
+                            <i className="bi bi-file-earmark-pdf" /> PO
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleViewRecordPdf("remittance", r)}
+                            className="btn-pdf-pill"
+                            title={`View Source ${nomenclature.remittance_doc_label} PDF`}
+                          >
+                            <i className="bi bi-file-earmark-pdf" /> Rem
+                          </button>
+                          <button
+                            onClick={() => handleDeleteInvoice(r.invoice_number)}
+                            disabled={deletingKey === r.invoice_number}
+                            className="btn-del-sm"
+                            title="Delete"
+                          >
+                            <i className="bi bi-trash3" />
+                          </button>
+                        </div>
                       </td>
                       <td>
                         <span
@@ -1073,6 +1159,16 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
           isUpdating={updatingInv === activeCalcModal.invoice_number}
         />
       )}
+
+      {/* ── Interactive PDF Document Viewer Modal ── */}
+      <PDFViewerModal
+        isOpen={pdfModal.isOpen}
+        onClose={() => setPdfModal((prev) => ({ ...prev, isOpen: false }))}
+        docType={pdfModal.docType}
+        docData={pdfModal.docData}
+        pdfUrl={pdfModal.pdfUrl}
+        title={pdfModal.title}
+      />
     </div>
   );
 }

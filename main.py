@@ -70,6 +70,10 @@ LOGOS_FOLDER = os.path.join(Config.UPLOAD_FOLDER, "logos")
 os.makedirs(LOGOS_FOLDER, exist_ok=True)
 app.mount("/uploads/logos", StaticFiles(directory=LOGOS_FOLDER), name="client_logos")
 
+DOCUMENTS_FOLDER = os.path.join(Config.UPLOAD_FOLDER, "documents")
+os.makedirs(DOCUMENTS_FOLDER, exist_ok=True)
+app.mount("/uploads/documents", StaticFiles(directory=DOCUMENTS_FOLDER), name="documents")
+
 ALLOWED_EXT = {"pdf"}
 
 
@@ -77,14 +81,15 @@ def _allowed(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXT
 
 
-def _save_upload(upload: UploadFile) -> tuple[str, str]:
-    """Save an UploadFile to the temp uploads folder. Returns (path, original_name)."""
+def _save_upload(upload: UploadFile) -> tuple[str, str, str]:
+    """Save an UploadFile to the documents folder. Returns (path, fname, original_name)."""
     original = upload.filename or "upload.pdf"
-    fname    = f"{uuid.uuid4().hex}_{secure_filename(original)}"
-    path     = os.path.join(Config.UPLOAD_FOLDER, fname)
+    safe_orig = secure_filename(original)
+    fname    = f"{uuid.uuid4().hex[:12]}_{safe_orig}"
+    path     = os.path.join(DOCUMENTS_FOLDER, fname)
     with open(path, "wb") as f:
         f.write(upload.file.read())
-    return path, original
+    return path, fname, original
 
 
 # ── Pydantic Models ───────────────────────────────────────────────────────────
@@ -121,10 +126,10 @@ async def upload(
     if tds_rate not in VALID_TDS_RATES:
         tds_rate = 2.0
 
-    # Save uploads
-    inv_path, inv_name = _save_upload(invoice_pdf)
-    po_path,  po_name  = _save_upload(po_pdf)
-    rem_path, _        = _save_upload(remittance_pdf)
+    # Save uploads permanently to documents folder
+    inv_path, inv_fname, inv_name = _save_upload(invoice_pdf)
+    po_path,  po_fname,  po_name  = _save_upload(po_pdf)
+    rem_path, rem_fname, rem_name = _save_upload(remittance_pdf)
 
     warnings = []
 
@@ -163,7 +168,7 @@ async def upload(
             mismatches.append({
                 "slot": "remittance",
                 "slot_label": "Remittance PDF Slot",
-                "filename": remittance_pdf.filename or "remittance.pdf",
+                "filename": rem_name,
                 "detected_type": rem_class["type"],
                 "detected_label": rem_class["label"],
                 "expected_type": "REMITTANCE",
@@ -172,6 +177,13 @@ async def upload(
             })
 
         if mismatches:
+            # Clean up uploaded files since validation failed
+            for p in [inv_path, po_path, rem_path]:
+                try:
+                    os.remove(p)
+                except OSError:
+                    pass
+
             slot_types = {
                 "invoice": inv_class["type"],
                 "po": po_class["type"],
@@ -218,6 +230,19 @@ async def upload(
         invoice_data    = invoice_extractor.extract(inv_path, inv_name)
         remittance_data = remittance_extractor.extract(rem_path, invoice_data.get("invoice_number", ""))
 
+        # Attach source PDF details to extracted data
+        invoice_data["pdf_filename"] = inv_fname
+        invoice_data["pdf_original_name"] = inv_name
+        invoice_data["pdf_url"] = f"/api/documents/{inv_fname}"
+
+        po_data["pdf_filename"] = po_fname
+        po_data["pdf_original_name"] = po_name
+        po_data["pdf_url"] = f"/api/documents/{po_fname}"
+
+        remittance_data["pdf_filename"] = rem_fname
+        remittance_data["pdf_original_name"] = rem_name
+        remittance_data["pdf_url"] = f"/api/documents/{rem_fname}"
+
         print("\n=== DEBUG EXTRACTION ===")
         print("PO DATA:", po_data)
         print("INVOICE DATA:", invoice_data)
@@ -242,13 +267,8 @@ async def upload(
         except Exception as e:
             warnings.append(f"DB save warning: {str(e)}")
 
-    finally:
-        # Cleanup temp files
-        for p in [inv_path, po_path, rem_path]:
-            try:
-                os.remove(p)
-            except OSError:
-                pass
+    except Exception as e:
+        warnings.append(f"Extraction error: {str(e)}")
 
     return JSONResponse({
         "success":    True,
@@ -257,6 +277,11 @@ async def upload(
         "po":         po_data,
         "invoice":    invoice_data,
         "remittance": remittance_data,
+        "documents": {
+            "invoice": {"filename": inv_fname, "original_name": inv_name, "url": f"/api/documents/{inv_fname}"},
+            "po": {"filename": po_fname, "original_name": po_name, "url": f"/api/documents/{po_fname}"},
+            "remittance": {"filename": rem_fname, "original_name": rem_name, "url": f"/api/documents/{rem_fname}"},
+        }
     })
 
 
@@ -579,16 +604,40 @@ async def history(client_id: Optional[int] = None):
     return await records_all(client_id=client_id)
 
 
+@app.get("/api/documents/{filename}")
+async def get_document(filename: str, download: bool = False):
+    """
+    Serve uploaded PDF document for inline browser viewing or attachment download.
+    """
+    safe_name = os.path.basename(filename)
+    path = os.path.join(DOCUMENTS_FOLDER, safe_name)
+    if not os.path.isfile(path):
+        raise HTTPException(status_code=404, detail="Document PDF not found.")
+
+    disposition = "attachment" if download else "inline"
+    return FileResponse(
+        path,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'{disposition}; filename="{safe_name}"',
+            "Cache-Control": "public, max-age=86400",
+        },
+    )
+
+
 _RECORDS_SQL = """
     SELECT
         i.invoice_number, i.invoice_date, i.description AS inv_description,
         i.invoice_period, i.assessable_value, i.total_tax,
         i.total_invoice_value, i.gst_rate, i.gst_amount,
         i.tds_rate, i.tds_amount, i.receivable,
+        i.pdf_filename AS invoice_pdf, i.pdf_original_name AS invoice_pdf_name,
         p.po_number, p.po_date, p.description AS po_description,
         p.delivery_date, p.total_amount,
+        p.pdf_filename AS po_pdf, p.pdf_original_name AS po_pdf_name,
         r.remittance_number, r.remittance_date, r.description AS rem_description,
         r.gross_amount, r.total_gross_amount, r.line_items AS rem_items,
+        r.pdf_filename AS remittance_pdf, r.pdf_original_name AS remittance_pdf_name,
         i.client_id,
         c.organization_name, c.client_name, c.logo_url, c.gst_number AS client_gstin,
         i.created_at
@@ -846,16 +895,20 @@ def _save_to_db(po: dict, inv: dict, rem: dict, client_id: Optional[int] = None)
     if po.get("po_number"):
         db.execute_query(
             """INSERT INTO purchase_orders
-                   (client_id, po_number, po_date, description, delivery_date, total_amount)
-               VALUES (%s,%s,%s,%s,%s,%s)
+                   (client_id, po_number, po_date, description, delivery_date, total_amount,
+                    pdf_filename, pdf_original_name)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
                ON CONFLICT (po_number) DO UPDATE SET
-                   client_id     = COALESCE(EXCLUDED.client_id, purchase_orders.client_id),
-                   po_date       = EXCLUDED.po_date,
-                   description   = EXCLUDED.description,
-                   delivery_date = EXCLUDED.delivery_date,
-                   total_amount  = EXCLUDED.total_amount""",
+                   client_id         = COALESCE(EXCLUDED.client_id, purchase_orders.client_id),
+                   po_date           = EXCLUDED.po_date,
+                   description       = EXCLUDED.description,
+                   delivery_date     = EXCLUDED.delivery_date,
+                   total_amount      = EXCLUDED.total_amount,
+                   pdf_filename      = COALESCE(EXCLUDED.pdf_filename, purchase_orders.pdf_filename),
+                   pdf_original_name = COALESCE(EXCLUDED.pdf_original_name, purchase_orders.pdf_original_name)""",
             (client_id, po["po_number"], po.get("po_date"), po.get("description"),
-             po.get("delivery_date"), po.get("total_amount", 0)),
+             po.get("delivery_date"), po.get("total_amount", 0),
+             po.get("pdf_filename"), po.get("pdf_original_name")),
         )
         saved_po_number = po["po_number"]
         print(f"[DB] PO saved: {saved_po_number} (client_id={client_id})")
@@ -881,8 +934,9 @@ def _save_to_db(po: dict, inv: dict, rem: dict, client_id: Optional[int] = None)
             """INSERT INTO invoices
                    (client_id, invoice_number, invoice_date, po_number, description,
                     invoice_period, assessable_value, total_tax, total_invoice_value,
-                    gst_rate, gst_amount, tds_rate, tds_amount, receivable)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    gst_rate, gst_amount, tds_rate, tds_amount, receivable,
+                    pdf_filename, pdf_original_name)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                ON CONFLICT (invoice_number) DO UPDATE SET
                    client_id           = COALESCE(EXCLUDED.client_id, invoices.client_id),
                    invoice_date        = EXCLUDED.invoice_date,
@@ -896,7 +950,9 @@ def _save_to_db(po: dict, inv: dict, rem: dict, client_id: Optional[int] = None)
                    gst_amount          = EXCLUDED.gst_amount,
                    tds_rate            = EXCLUDED.tds_rate,
                    tds_amount          = EXCLUDED.tds_amount,
-                   receivable          = EXCLUDED.receivable""",
+                   receivable          = EXCLUDED.receivable,
+                   pdf_filename        = COALESCE(EXCLUDED.pdf_filename, invoices.pdf_filename),
+                   pdf_original_name   = COALESCE(EXCLUDED.pdf_original_name, invoices.pdf_original_name)""",
             (client_id, inv["invoice_number"], inv.get("invoice_date"),
              inv_po_ref,            # safe FK or None
              inv.get("description"),
@@ -904,7 +960,8 @@ def _save_to_db(po: dict, inv: dict, rem: dict, client_id: Optional[int] = None)
              inv.get("total_tax", 0), inv.get("total_invoice_value", 0),
              inv.get("gst_rate", 18), inv.get("gst_amount", 0),
              inv.get("tds_rate", 2), inv.get("tds_amount", 0),
-             inv.get("receivable", 0)),
+             inv.get("receivable", 0),
+             inv.get("pdf_filename"), inv.get("pdf_original_name")),
         )
         saved_inv_number = inv["invoice_number"]
         print(f"[DB] Invoice saved: {saved_inv_number} (client_id={client_id})")
@@ -926,8 +983,9 @@ def _save_to_db(po: dict, inv: dict, rem: dict, client_id: Optional[int] = None)
         db.execute_query(
             """INSERT INTO remittances
                    (client_id, remittance_number, remittance_date, invoice_number, description,
-                    gross_amount, total_gross_amount, line_items)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+                    gross_amount, total_gross_amount, line_items,
+                    pdf_filename, pdf_original_name)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                ON CONFLICT (remittance_number) DO UPDATE SET
                    client_id          = COALESCE(EXCLUDED.client_id, remittances.client_id),
                    remittance_date    = EXCLUDED.remittance_date,
@@ -935,11 +993,14 @@ def _save_to_db(po: dict, inv: dict, rem: dict, client_id: Optional[int] = None)
                    description        = EXCLUDED.description,
                    gross_amount       = EXCLUDED.gross_amount,
                    total_gross_amount = EXCLUDED.total_gross_amount,
-                   line_items         = EXCLUDED.line_items""",
+                   line_items         = EXCLUDED.line_items,
+                   pdf_filename       = COALESCE(EXCLUDED.pdf_filename, remittances.pdf_filename),
+                   pdf_original_name  = COALESCE(EXCLUDED.pdf_original_name, remittances.pdf_original_name)""",
             (client_id, rem["remittance_number"], rem.get("remittance_date"),
              rem_inv_num, rem.get("description", ""),
              rem.get("gross_amount", 0), rem.get("total_gross_amount", 0),
-             line_items_json),
+             line_items_json,
+             rem.get("pdf_filename"), rem.get("pdf_original_name")),
         )
         print(f"[DB] Remittance saved: {rem['remittance_number']} (client_id={client_id})")
 
