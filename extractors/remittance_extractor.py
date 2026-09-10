@@ -39,7 +39,10 @@ _REM_DATE_LABELS = [
 _INV_REF_LABELS = [
     r"your\s*document",
     r"your\s*ref(?:erence)?",
+    r"invoice\s*ref(?:erence)?",
     r"invoice\s*(?:no\.?|number|#|ref)",
+    r"document\s*ref(?:erence)?",
+    r"settles\s*invoice",
     r"against\s*invoice",
     r"bill\s*(?:no\.?|number)",
     r"inv\.?\s*(?:no\.?|#)",
@@ -86,7 +89,7 @@ def extract(pdf_path: str, target_invoice_number: str = "") -> dict:
             gross_amount = items[0]["gross_amount"] if len(items) == 1 else total_gross
             desc = combined_all_descs
     else:
-        inv_ref = _extract_single_invoice_ref(text, tables)
+        inv_ref = _extract_single_invoice_ref(text, tables, pdf_path)
         gross_amount = total_gross
 
     if not gross_amount and total_gross > 0:
@@ -256,17 +259,24 @@ def _extract_all_cleared_items(text: str, tables: list) -> list:
     return items
 
 
-def _extract_single_invoice_ref(text: str, tables: list) -> str:
+def _extract_single_invoice_ref(text: str, tables: list, pdf_path: str = None) -> str:
+    # 1. Smart Multi-Layout Extractor
+    smart_id = extract_smart_id(text, _INV_REF_LABELS, tables=tables, pdf_path=pdf_path, min_len=3, require_digit=True)
+    if smart_id:
+        return smart_id
+
     m = re.search(
         r"(?:Your\s*Document|Invoice|Bill|Inv)\s*(?:No\.?|Number|#|Ref)?\s*[:\-]?\s*([A-Za-z0-9\-_/]{3,30})",
         text, re.IGNORECASE,
     )
-    if m and is_valid_id(m.group(1), min_len=3, require_digit=True):
-        return m.group(1).strip()
+    if m:
+        cand = clean_extracted_id(m.group(1))
+        if is_valid_id(cand, min_len=3, require_digit=True):
+            return cand
 
     val = find_value_after_label(text, _INV_REF_LABELS)
     if val:
-        token = val.split()[0]
+        token = clean_extracted_id(val.split()[0])
         if is_valid_id(token, min_len=3, require_digit=True):
             return token
 

@@ -24,8 +24,8 @@ _ID_BLACKLIST = {
 DATE_REGEX = re.compile(
     r"\b(?:\d{1,2}[./-]\d{1,2}[./-]\d{2,4}"
     r"|\d{4}[./-]\d{1,2}[./-]\d{1,2}"
-    r"|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,]+\d{2,4}"
-    r"|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2}[\s,]+\d{2,4})\b",
+    r"|\d{1,2}[\s\-/.](?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s\-/,.]\d{2,4}"
+    r"|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s\-/,.]\d{1,2}[\s\-/,.]\d{2,4})\b",
     re.IGNORECASE,
 )
 
@@ -327,7 +327,7 @@ def extract_smart_id(
         if "invoice" in pat.lower():
             tolerant_patterns.append(pat.replace("invoice", r"inv(?:oice)?\.?"))
         if "purchase" in pat.lower():
-            tolerant_patterns.append(pat.replace("purchase", r"po|purchase"))
+            tolerant_patterns.append(pat.replace("purchase", r"(?:po|purchase)"))
 
     # -------------------------------------------------------------
     # STRATEGY 1: INLINE / BESIDE (Label and ID on the same line)
@@ -335,10 +335,11 @@ def extract_smart_id(
     # -------------------------------------------------------------
     for line in lines:
         for pat in tolerant_patterns:
+            # Must not be preceded by hyphen or alphanumeric (e.g. MVA-PO- should not match label PO)
             regex = (
-                rf"(?:{pat})"
+                rf"(?<![A-Za-z0-9\-_/])(?:{pat})"
                 rf"(?:\s+(?:n+umber|t?number|no\.?|#|nr\.?))*"
-                rf"[\s:;\-=_~|/]*"
+                rf"[\s:;\-=_~|/]+"
                 rf"([A-Za-z0-9/_\-\.]{{{min_len},40}})"
             )
             m = re.search(regex, line, re.IGNORECASE)
@@ -347,8 +348,7 @@ def extract_smart_id(
                 if is_valid_id(cand, min_len=min_len, require_digit=require_digit):
                     return cand
 
-            # Match label at start of string or after boundary, then inspect rest of line
-            m_label = re.search(rf"(?:{pat})(?:\s+(?:n+umber|t?number|no\.?|#|nr\.?))*[\s:;\-=_~|/]*", line, re.IGNORECASE)
+            m_label = re.search(rf"(?<![A-Za-z0-9\-_/])(?:{pat})(?:\s+(?:n+umber|t?number|no\.?|#|nr\.?))*[\s:;\-=_~|/]+", line, re.IGNORECASE)
             if m_label and m_label.end() < len(line):
                 rest = line[m_label.end():].strip()
                 cand = clean_extracted_id(rest)
@@ -360,14 +360,12 @@ def extract_smart_id(
     # -------------------------------------------------------------
     for i, line in enumerate(lines):
         for pat in tolerant_patterns:
-            m_label = re.search(rf"^(?:.*?\b)?(?:{pat})(?:\s+(?:n+umber|t?number|no\.?|#|nr\.?))*[\s:;\-=_~|/]*$", line, re.IGNORECASE)
-            if not m_label:
-                m_sub = re.search(rf"(?:{pat})(?:\s+(?:n+umber|t?number|no\.?|#|nr\.?))*[\s:;\-=_~|/]*", line, re.IGNORECASE)
-                if m_sub:
-                    after = line[m_sub.end():].strip()
-                    cleaned_after = clean_extracted_id(after)
-                    if not is_valid_id(cleaned_after, min_len=min_len, require_digit=require_digit):
-                        m_label = m_sub
+            m_sub = re.search(rf"(?<![A-Za-z0-9\-_/])(?:{pat})(?:\s+(?:n+umber|t?number|no\.?|#|nr\.?))*[\s:;\-=_~|/]*", line, re.IGNORECASE)
+            if m_sub:
+                after = line[m_sub.end():].strip()
+                cleaned_after = clean_extracted_id(after)
+                if not is_valid_id(cleaned_after, min_len=min_len, require_digit=require_digit):
+                    m_label = m_sub
 
             if m_label:
                 for k in range(1, line_lookahead + 1):

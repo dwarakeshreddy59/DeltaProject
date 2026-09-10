@@ -29,8 +29,9 @@ _INVOICE_DATE_LABELS = [
 ]
 
 _PO_NUM_LABELS = [
-    r"p\.?o\.?\s*(?:no\.?|number|#|ref)",
-    r"purchase\s*order\s*(?:no\.?|number|#|ref)?",
+    r"p\.?o\.?\s*(?:no\.?|number|#|ref(?:erence)?|nr\.?)",
+    r"(?:po|purchase)\s*order\s*(?:change\s*)?(?:no\.?|number|#|ref(?:erence)?|nr\.?)",
+    r"po\s*reference",
     r"buyer['\s]*order\s*no",
     r"customer\s*po",
     r"order\s*no\.?",

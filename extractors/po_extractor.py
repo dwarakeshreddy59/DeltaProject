@@ -10,8 +10,8 @@ from utils.pdf_utils import (
 )
 
 _PO_NUM_LABELS = [
-    r"p\.?o\.?\s*(?:no\.?|number|#|ref|nr\.?)",
-    r"purchase\s*order\s*(?:change\s*)?(?:no\.?|number|#|nr\.?)",
+    r"p\.?o\.?\s*(?:no\.?|number|#|ref(?:erence)?|nr\.?)",
+    r"(?:po|purchase)\s*order\s*(?:change\s*)?(?:no\.?|number|#|ref(?:erence)?|nr\.?)",
     r"order\s*(?:no\.?|number|#|nr\.?)",
     r"our\s*order\s*(?:no\.?|number|nr\.?)",
 ]
@@ -26,6 +26,7 @@ _PO_DATE_LABELS = [
     r"\bdate\b",
 ]
 _DELIVERY_DATE_LABELS = [
+    r"requested\s*delivery",
     r"delivery\s*date",
     r"deliver(?:y|ed)\s*(?:by|on)",
     r"required\s*(?:by|date|delivery)",
@@ -57,8 +58,8 @@ _TOTAL_AMOUNT_LABELS = [
 _DATE_RE = re.compile(
     r"\b(?:\d{1,2}[./-]\d{1,2}[./-]\d{2,4}"
     r"|\d{4}[./-]\d{1,2}[./-]\d{1,2}"
-    r"|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[,\s]+\d{2,4}"
-    r"|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2}[,\s]+\d{2,4})\b",
+    r"|\d{1,2}[\s\-/.](?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s\-/,.]\d{2,4}"
+    r"|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s\-/,.]\d{1,2}[\s\-/,.]\d{2,4})\b",
     re.IGNORECASE,
 )
 
@@ -96,20 +97,22 @@ def _find_date(text: str, label_patterns: list) -> str:
         for pat in label_patterns:
             if re.search(pat, line, re.IGNORECASE):
                 # 1. After the label on same line
-                after = re.sub(re.compile(pat, re.IGNORECASE), "", line)
+                after = re.sub(re.compile(rf"(?<![A-Za-z0-9\-_/])(?:{pat})", re.IGNORECASE), "", line)
                 d = _DATE_RE.search(after)
                 if d:
                     return d.group()
-                # 2. Whole line might contain date
+                # 2. Next several lines (checking for multi-date columnar lines)
+                for j in range(1, 6):
+                    if i + j < len(lines):
+                        matches = _DATE_RE.findall(lines[i + j])
+                        if matches:
+                            if any(deliv in pat.lower() for deliv in ["delivery", "validity", "due", "requested"]):
+                                return matches[-1]
+                            return matches[0]
+                # 3. Whole line might contain date
                 d = _DATE_RE.search(line)
                 if d:
                     return d.group()
-                # 3. Next several lines
-                for j in range(1, 6):
-                    if i + j < len(lines):
-                        d = _DATE_RE.search(lines[i + j])
-                        if d:
-                            return d.group()
 
     # Global fallback: find any date in first half of document
     half = text[:len(text)//2]
