@@ -6,6 +6,7 @@ from utils.pdf_utils import (
     get_pdf_text, get_pdf_tables,
     find_value_after_label, find_date_after_label,
     clean_number, clean_description, filename_description, is_valid_id,
+    extract_smart_id, clean_extracted_id, extract_spatial_field,
 )
 
 _PO_NUM_LABELS = [
@@ -68,7 +69,7 @@ def extract(pdf_path: str, filename: str) -> dict:
 
     print(f"\n=== PO RAW TEXT (first 800 chars) ===\n{text[:800]}\n=== END ===\n")
 
-    po_num        = _extract_po_number(text, tables, filename)
+    po_num        = _extract_po_number(text, tables, filename, pdf_path)
     po_date       = _find_date(text, _PO_DATE_LABELS)
     delivery_date = _find_date(text, _DELIVERY_DATE_LABELS)
     description   = filename_description(filename, po_num)
@@ -118,13 +119,18 @@ def _find_date(text: str, label_patterns: list) -> str:
     return ""
 
 
-def _extract_po_number(text: str, tables: list, filename: str) -> str:
+def _extract_po_number(text: str, tables: list, filename: str, pdf_path: str = None) -> str:
+    # 1. Smart Multi-Layout Extractor (beside, down-to-it, malformed separators, 2D table grid, spatial)
+    smart_id = extract_smart_id(text, _PO_NUM_LABELS, tables=tables, pdf_path=pdf_path, min_len=4, require_digit=True)
+    if smart_id:
+        return smart_id
+
     m = re.search(
         r"(?:PO|P\.O\.|Purchase\s*Order|Order)\s*(?:Change\s*)?(?:No\.?|Number|#|Nr\.?)?\s*[:\-]?\s*([A-Za-z0-9\-_/]{4,30})",
         text, re.IGNORECASE,
     )
     if m:
-        val = m.group(1).strip()
+        val = clean_extracted_id(m.group(1))
         if is_valid_id(val, min_len=4, require_digit=True):
             return val
 

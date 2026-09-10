@@ -7,6 +7,7 @@ from utils.pdf_utils import (
     get_pdf_text, get_pdf_tables,
     find_value_after_label, find_date_after_label, find_amount_after_label,
     clean_number, clean_description, filename_description, is_valid_id,
+    extract_smart_id, clean_extracted_id, extract_spatial_field,
 )
 
 _INVOICE_NUM_LABELS = [
@@ -91,9 +92,9 @@ def extract(pdf_path: str, filename: str) -> dict:
 
     print(f"\n=== INVOICE RAW TEXT (first 800 chars) ===\n{text[:800]}\n=== END ===\n")
 
-    inv_num     = _extract_invoice_number(text, tables)
+    inv_num     = _extract_invoice_number(text, tables, pdf_path)
     inv_date    = find_date_after_label(text, _INVOICE_DATE_LABELS)
-    po_num      = _extract_po_number(text, tables)
+    po_num      = _extract_po_number(text, tables, pdf_path)
     inv_period  = _extract_period(text)
     description = filename_description(filename, inv_num)
     assessable  = _extract_assessable(text, tables)
@@ -127,36 +128,48 @@ def extract(pdf_path: str, filename: str) -> dict:
     }
 
 
-def _extract_invoice_number(text: str, tables: list) -> str:
+def _extract_invoice_number(text: str, tables: list, pdf_path: str = None) -> str:
+    # 1. Smart Multi-Layout Extractor (beside, down-to-it, malformed separators, 2D table grid, spatial)
+    smart_id = extract_smart_id(text, _INVOICE_NUM_LABELS, tables=tables, pdf_path=pdf_path, min_len=3, require_digit=False)
+    if smart_id:
+        return smart_id
+
+    # 2. Direct regex search fallback
     m = re.search(
         r"(?:Document|Invoice|Tax\s*Invoice|Bill|Doc)\s*(?:No\.?|Number|#)\s*[:\-]?\s*([A-Za-z0-9\-_/]+)",
         text, re.IGNORECASE
     )
-    if m and is_valid_id(m.group(1)):
-        return m.group(1).strip()
+    if m:
+        cand = clean_extracted_id(m.group(1))
+        if is_valid_id(cand):
+            return cand
 
     val = find_value_after_label(text, _INVOICE_NUM_LABELS)
     if val:
-        token = val.split()[0]
+        token = clean_extracted_id(val.split()[0])
         if is_valid_id(token):
             return token
 
     return _search_tables(tables, ["document no", "invoice no", "bill no", "tax invoice"])
 
 
-def _extract_po_number(text: str, tables: list) -> str:
+def _extract_po_number(text: str, tables: list, pdf_path: str = None) -> str:
+    smart_id = extract_smart_id(text, _PO_NUM_LABELS, tables=tables, pdf_path=pdf_path, min_len=4, require_digit=True)
+    if smart_id and not smart_id.lower().startswith("date"):
+        return smart_id
+
     m = re.search(
         r"(?:PO|P\.O\.|Purchase\s*Order)\s*(?:No\.?|Number|#)?\s*[:\-]?\s*([A-Za-z0-9\-_/]{4,})",
         text, re.IGNORECASE
     )
-    if m and is_valid_id(m.group(1), min_len=4, require_digit=True):
-        val = m.group(1).strip()
-        if not val.lower().startswith("date"):
+    if m:
+        val = clean_extracted_id(m.group(1))
+        if is_valid_id(val, min_len=4, require_digit=True) and not val.lower().startswith("date"):
             return val
 
     val = find_value_after_label(text, _PO_NUM_LABELS)
     if val:
-        token = val.split()[0]
+        token = clean_extracted_id(val.split()[0])
         if is_valid_id(token, min_len=4, require_digit=True):
             return token
 

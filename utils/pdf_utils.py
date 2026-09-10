@@ -190,6 +190,235 @@ def clean_description(desc: str, inv_num: str = "", po_num: str = "") -> str:
     return d
 
 
+def clean_extracted_id(val: str) -> str:
+    """
+    Cleans raw captured document ID tokens from OCR/PDF artifacts and malformed separators.
+    Handles:
+      - Trailing/leading punctuation & separators: ';-224324' -> '224324', ':-23264778' -> '23264778'
+      - Stripping repeated label fragments: 'number ;-224324' -> '224324', 'no. 224324' -> '224324'
+      - Stripping quotes, colons, semicolons, dashes, tildes, slashes
+    """
+    if not val:
+        return ""
+    s = str(val).strip()
+
+    # Strip any leading repeated label words like "number", "no", "doc", "ref"
+    s = re.sub(r"^(?:n+umber|t?number|no\.?|nr\.?|doc\.?|ref\.?|id|#)[\s:;\-=_~|/]+", "", s, flags=re.IGNORECASE)
+
+    # Strip leading/trailing noisy punctuation symbols: ; - : = _ ~ / \ | . ,
+    s = re.sub(r"^[\s:;\-=_~|/.,]+", "", s)
+    s = re.sub(r"[\s:;\-=_~|/.,]+$", "", s)
+
+    # If the token contains whitespace, pick the first token that satisfies is_valid_id
+    parts = s.split()
+    if len(parts) > 1:
+        for p in parts:
+            p_clean = re.sub(r"^[\s:;\-=_~|/.,]+|[\s:;\-=_~|/.,]+$", "", p)
+            if is_valid_id(p_clean, min_len=3, require_digit=True):
+                return p_clean
+        s = parts[0]
+        s = re.sub(r"^[\s:;\-=_~|/.,]+|[\s:;\-=_~|/.,]+$", "", s)
+
+    return s.strip()
+
+
+def extract_spatial_field(
+    pdf_path: str,
+    label_patterns: list,
+    min_len: int = 3,
+    require_digit: bool = True,
+) -> str:
+    """
+    Extracts text using 2D spatial geometry when PDF reading order is disorganized.
+    Finds words matching the label, then extracts words within bounding boxes:
+      1. To the right: [label.x1, label.top - 3, label.x1 + 320, label.bottom + 3]
+      2. Directly underneath: [label.x0 - 20, label.bottom, label.x1 + 180, label.bottom + 45]
+    """
+    if not pdf_path or not os.path.isfile(pdf_path):
+        return ""
+    try:
+        with pdfplumber.open(pdf_path) as pdf:
+            if not pdf.pages:
+                return ""
+            page = pdf.pages[0]
+            words = page.extract_words(x_tolerance=3, y_tolerance=3)
+            if not words:
+                return ""
+
+            for i, w in enumerate(words):
+                for lookahead in [1, 2, 3]:
+                    if i + lookahead <= len(words):
+                        phrase = " ".join(words[k]["text"] for k in range(i, i + lookahead))
+                        matched = False
+                        for pat in label_patterns:
+                            if re.search(pat, phrase, re.IGNORECASE):
+                                matched = True
+                                break
+                        if matched:
+                            lbl_x0 = words[i]["x0"]
+                            lbl_x1 = words[i + lookahead - 1]["x1"]
+                            lbl_top = min(words[k]["top"] for k in range(i, i + lookahead))
+                            lbl_bottom = max(words[k]["bottom"] for k in range(i, i + lookahead))
+
+                            # 1. Look to the right (same horizontal band)
+                            right_words = [
+                                w2 for w2 in words
+                                if w2["x0"] >= lbl_x1 - 2
+                                and w2["x0"] <= lbl_x1 + 320
+                                and abs(w2["top"] - lbl_top) <= 8
+                            ]
+                            if right_words:
+                                right_text = " ".join(w2["text"] for w2 in right_words)
+                                cand = clean_extracted_id(right_text)
+                                if is_valid_id(cand, min_len=min_len, require_digit=require_digit):
+                                    return cand
+
+                            # 2. Look directly below (vertical column underneath)
+                            below_words = [
+                                w2 for w2 in words
+                                if w2["top"] >= lbl_bottom - 2
+                                and w2["top"] <= lbl_bottom + 45
+                                and w2["x0"] >= lbl_x0 - 20
+                                and w2["x1"] <= lbl_x1 + 180
+                            ]
+                            if below_words:
+                                below_text = " ".join(w2["text"] for w2 in below_words)
+                                cand = clean_extracted_id(below_text)
+                                if is_valid_id(cand, min_len=min_len, require_digit=require_digit):
+                                    return cand
+    except Exception as e:
+        print(f"[extract_spatial_field] Error: {e}")
+    return ""
+
+
+def extract_smart_id(
+    text: str,
+    label_patterns: list,
+    tables: list = None,
+    pdf_path: str = None,
+    min_len: int = 3,
+    require_digit: bool = True,
+    line_lookahead: int = 4,
+) -> str:
+    """
+    Universal Automated Multi-Layout Field Extractor.
+    Cascades across 5 intelligent strategies:
+      1. INLINE (Beside): Label and ID on same line, tolerating repeated words (e.g. 'number number')
+         and malformed separators (e.g. ';-224324', ': - 23264778').
+      2. STACKED / DOWN-TO-IT (Below): Label on one line, ID on subsequent line(s), skipping blank/noise lines.
+      3. TABLE MATRIX: Searching table cell to the right or table cell directly beneath.
+      4. 2D SPATIAL PROXIMITY: Using pdfplumber word coordinates to extract text physically
+         adjacent (right or below) regardless of PDF line flow.
+      5. REGEX FALLBACK: Direct regex scans across the entire document text.
+    """
+    if not text:
+        text = ""
+
+    lines = [l.strip() for l in text.split("\n") if l.strip()]
+
+    # Extended label patterns to tolerate OCR typos (e.g. documnet) and repeated words
+    tolerant_patterns = []
+    for pat in label_patterns:
+        tolerant_patterns.append(pat)
+        if "document" in pat.lower():
+            tolerant_patterns.append(pat.replace("document", r"docu?m(?:en|ne)t?"))
+            tolerant_patterns.append(pat.replace("document", r"doc\.?"))
+            tolerant_patterns.append(r"docu?m(?:en|ne)t?\s*(?:t?n+umber|no\.?|nr\.?|#)*")
+        if "invoice" in pat.lower():
+            tolerant_patterns.append(pat.replace("invoice", r"inv(?:oice)?\.?"))
+        if "purchase" in pat.lower():
+            tolerant_patterns.append(pat.replace("purchase", r"po|purchase"))
+
+    # -------------------------------------------------------------
+    # STRATEGY 1: INLINE / BESIDE (Label and ID on the same line)
+    # Tolerates: repeated words ("number number"), malformed separators (";-", ": -")
+    # -------------------------------------------------------------
+    for line in lines:
+        for pat in tolerant_patterns:
+            regex = (
+                rf"(?:{pat})"
+                rf"(?:\s+(?:n+umber|t?number|no\.?|#|nr\.?))*"
+                rf"[\s:;\-=_~|/]*"
+                rf"([A-Za-z0-9/_\-\.]{{{min_len},40}})"
+            )
+            m = re.search(regex, line, re.IGNORECASE)
+            if m:
+                cand = clean_extracted_id(m.group(1))
+                if is_valid_id(cand, min_len=min_len, require_digit=require_digit):
+                    return cand
+
+            # Match label at start of string or after boundary, then inspect rest of line
+            m_label = re.search(rf"(?:{pat})(?:\s+(?:n+umber|t?number|no\.?|#|nr\.?))*[\s:;\-=_~|/]*", line, re.IGNORECASE)
+            if m_label and m_label.end() < len(line):
+                rest = line[m_label.end():].strip()
+                cand = clean_extracted_id(rest)
+                if is_valid_id(cand, min_len=min_len, require_digit=require_digit):
+                    return cand
+
+    # -------------------------------------------------------------
+    # STRATEGY 2: STACKED / DOWN-TO-IT (ID is on subsequent line below label)
+    # -------------------------------------------------------------
+    for i, line in enumerate(lines):
+        for pat in tolerant_patterns:
+            m_label = re.search(rf"^(?:.*?\b)?(?:{pat})(?:\s+(?:n+umber|t?number|no\.?|#|nr\.?))*[\s:;\-=_~|/]*$", line, re.IGNORECASE)
+            if not m_label:
+                m_sub = re.search(rf"(?:{pat})(?:\s+(?:n+umber|t?number|no\.?|#|nr\.?))*[\s:;\-=_~|/]*", line, re.IGNORECASE)
+                if m_sub:
+                    after = line[m_sub.end():].strip()
+                    cleaned_after = clean_extracted_id(after)
+                    if not is_valid_id(cleaned_after, min_len=min_len, require_digit=require_digit):
+                        m_label = m_sub
+
+            if m_label:
+                for k in range(1, line_lookahead + 1):
+                    if i + k < len(lines):
+                        cand_line = lines[i + k].strip()
+                        if not cand_line:
+                            continue
+                        if re.match(r"^(?:date|invoice\s*date|po\s*date|bill\s*to|gstin|page|vendor|buyer)\b", cand_line, re.IGNORECASE):
+                            continue
+                        cand = clean_extracted_id(cand_line)
+                        if is_valid_id(cand, min_len=min_len, require_digit=require_digit):
+                            return cand
+
+    # -------------------------------------------------------------
+    # STRATEGY 3: TABLE GRID (Cell beside or Cell directly below)
+    # -------------------------------------------------------------
+    if tables:
+        for table in tables:
+            if not table:
+                continue
+            for r_idx, row in enumerate(table):
+                if not row:
+                    continue
+                for c_idx, cell in enumerate(row):
+                    if not cell:
+                        continue
+                    cell_str = str(cell).strip()
+                    for pat in tolerant_patterns:
+                        if re.search(pat, cell_str, re.IGNORECASE):
+                            # 3A: Horizontal pair (cell beside)
+                            if c_idx + 1 < len(row) and row[c_idx + 1]:
+                                cand = clean_extracted_id(str(row[c_idx + 1]))
+                                if is_valid_id(cand, min_len=min_len, require_digit=require_digit):
+                                    return cand
+                            # 3B: Vertical pair (cell directly below)
+                            if r_idx + 1 < len(table) and len(table[r_idx + 1]) > c_idx and table[r_idx + 1][c_idx]:
+                                cand = clean_extracted_id(str(table[r_idx + 1][c_idx]))
+                                if is_valid_id(cand, min_len=min_len, require_digit=require_digit):
+                                    return cand
+
+    # -------------------------------------------------------------
+    # STRATEGY 4: 2D SPATIAL PROXIMITY (pdfplumber bounding box)
+    # -------------------------------------------------------------
+    if pdf_path:
+        cand_spatial = extract_spatial_field(pdf_path, tolerant_patterns, min_len=min_len, require_digit=require_digit)
+        if cand_spatial:
+            return cand_spatial
+
+    return ""
+
+
 def find_value_after_label(text: str, label_patterns: list, line_lookahead: int = 3) -> str:
     lines = [l.strip() for l in text.split("\n") if l.strip()]
     for i, line in enumerate(lines):

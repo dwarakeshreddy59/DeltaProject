@@ -8,6 +8,7 @@ from utils.pdf_utils import (
     get_pdf_text, get_pdf_tables,
     find_value_after_label, find_date_after_label,
     clean_number, is_valid_id, DATE_REGEX,
+    extract_smart_id, clean_extracted_id, extract_spatial_field,
 )
 
 _REM_NUM_LABELS = [
@@ -51,7 +52,7 @@ def extract(pdf_path: str, target_invoice_number: str = "") -> dict:
 
     print(f"\n=== REMITTANCE RAW TEXT (first 800 chars) ===\n{text[:800]}\n=== END ===\n")
 
-    doc_num  = _extract_doc_number(text, tables)
+    doc_num  = _extract_doc_number(text, tables, pdf_path)
     rem_date = _extract_remittance_date(text)
     items    = _extract_all_cleared_items(text, tables)
     total_gross = _extract_total_amount(text, tables, items)
@@ -104,8 +105,13 @@ def extract(pdf_path: str, target_invoice_number: str = "") -> dict:
     }
 
 
-def _extract_doc_number(text: str, tables: list) -> str:
+def _extract_doc_number(text: str, tables: list, pdf_path: str = None) -> str:
     """Find doc/voucher/UTR/payment reference number (must contain digits)."""
+    # 1. Smart Multi-Layout Extractor (beside, down-to-it, malformed separators, 2D table grid, spatial)
+    smart_id = extract_smart_id(text, _REM_NUM_LABELS, tables=tables, pdf_path=pdf_path, min_len=4, require_digit=True)
+    if smart_id and smart_id != "0008005972" and not smart_id.startswith("00"):
+        return smart_id
+
     lines = [l.strip() for l in text.split("\n") if l.strip()]
 
     # 1. Label-based search across lines
