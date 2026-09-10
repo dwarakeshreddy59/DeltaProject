@@ -35,5 +35,5 @@ def calculate(assessable_value: float, gst_rate: float = 18.0, tds_rate: float =
     }
 
 
-VALID_TDS_RATES = [0.1, 2.0, 10.0]
+VALID_TDS_RATES = [0.0, 0.1, 1.0, 2.0, 5.0, 10.0]
 GST_RATE        = 18.0   # Fixed at 18% as per requirement

@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { inr, fmt } from "../utils/format";
 
 const TDS_OPTIONS = [
-  { label: "0.1%", value: 0.1 },
-  { label: "2%",   value: 2.0 },
-  { label: "10%",  value: 10.0 },
+  { label: "0% (Nil)",           value: 0.0,  title: "Section 197 (Nil / Non-deduction Certificate)" },
+  { label: "0.1% (Goods)",       value: 0.1,  title: "Section 194Q (Purchase of Goods > ₹50L)" },
+  { label: "1% (Contractor)",    value: 1.0,  title: "Section 194C (Works Contract - Individual / HUF)" },
+  { label: "2% (Standard/Tech)", value: 2.0,  title: "Section 194C (Corporate Contractor) / 194J (Tech)" },
+  { label: "5% (Rent/Comm)",     value: 5.0,  title: "Section 194I (Rent) / 194H (Commission)" },
+  { label: "10% (Prof. Fees)",   value: 10.0, title: "Section 194J (Professional & Legal Fees)" },
 ];
 
 /**
@@ -13,6 +16,9 @@ const TDS_OPTIONS = [
  * Changing TDS ONLY updates this panel — never re-renders data cards.
  */
 export default function CalculationPanel({ calcData, onTdsChange }) {
+  const [showCustom, setShowCustom] = useState(false);
+  const [customVal, setCustomVal] = useState("");
+
   if (!calcData) return null;
 
   const {
@@ -25,12 +31,23 @@ export default function CalculationPanel({ calcData, onTdsChange }) {
     receivable          = 0,
   } = calcData;
 
+  const handleCustomApply = (e) => {
+    e.preventDefault();
+    const val = parseFloat(customVal);
+    if (!isNaN(val) && val >= 0 && val <= 100) {
+      onTdsChange(val);
+      setShowCustom(false);
+    }
+  };
+
+  const isPreset = TDS_OPTIONS.some((o) => o.value === Number(tds_rate));
+
   return (
     <div className="calc-wrapper animate-slideup">
       <div className="calc-header">
         <div className="calc-title">
           <i className="bi bi-calculator-fill" />
-          Financial Calculations
+          Financial Calculations &amp; Tax Deductions
         </div>
         <div className="live-badge">
           <div className="live-dot" />
@@ -50,33 +67,108 @@ export default function CalculationPanel({ calcData, onTdsChange }) {
           </span>
         </div>
 
-        {/* TDS selector — independent of data cards */}
-        <div className="tds-selector-row">
-          <span className="tds-label">Change TDS Rate:</span>
+        {/* TDS selector — situation-based */}
+        <div className="tds-selector-row" style={{ flexWrap: "wrap", gap: ".5rem" }}>
+          <span className="tds-label">TDS Situation / Rate:</span>
           {TDS_OPTIONS.map((o) => (
             <button
               key={o.value}
               type="button"
-              onClick={() => onTdsChange(o.value)}
+              onClick={() => { onTdsChange(o.value); setShowCustom(false); }}
+              title={o.title}
               style={{
-                padding: ".4rem .9rem",
+                padding: ".4rem .85rem",
                 borderRadius: 8,
                 border: "1.5px solid",
                 cursor: "pointer",
                 fontWeight: 700,
                 fontSize: ".82rem",
                 transition: "all .2s",
-                background: tds_rate === o.value ? "linear-gradient(135deg, #7C3AED, #A855F7)" : "var(--bg-card)",
-                borderColor: tds_rate === o.value ? "#A855F7" : "var(--border-subtle)",
-                color: tds_rate === o.value ? "#fff" : "var(--text-main)",
-                boxShadow: tds_rate === o.value ? "0 0 16px rgba(168, 85, 247, 0.55)" : "none",
+                background: Number(tds_rate) === o.value ? "linear-gradient(135deg, #7C3AED, #A855F7)" : "var(--bg-card)",
+                borderColor: Number(tds_rate) === o.value ? "#A855F7" : "var(--border-subtle)",
+                color: Number(tds_rate) === o.value ? "#fff" : "var(--text-main)",
+                boxShadow: Number(tds_rate) === o.value ? "0 0 16px rgba(168, 85, 247, 0.55)" : "none",
               }}
             >
               {o.label}
             </button>
           ))}
-          <span style={{ fontSize: ".75rem", color: "#A1A1AA", marginLeft: ".5rem" }}>
-            (does not affect extracted data above)
+
+          {!showCustom ? (
+            <button
+              type="button"
+              onClick={() => { setShowCustom(true); setCustomVal(String(tds_rate)); }}
+              style={{
+                padding: ".4rem .85rem",
+                borderRadius: 8,
+                border: "1.5px dashed var(--border-medium)",
+                cursor: "pointer",
+                fontWeight: 700,
+                fontSize: ".82rem",
+                background: !isPreset ? "linear-gradient(135deg, #7C3AED, #A855F7)" : "transparent",
+                color: !isPreset ? "#fff" : "var(--text-muted)",
+              }}
+            >
+              {!isPreset ? `Custom (${tds_rate}%)` : "⚙️ Custom %..."}
+            </button>
+          ) : (
+            <form onSubmit={handleCustomApply} style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                max="100"
+                value={customVal}
+                onChange={(e) => setCustomVal(e.target.value)}
+                placeholder="Rate"
+                style={{
+                  width: "70px",
+                  padding: ".35rem .5rem",
+                  borderRadius: 6,
+                  border: "1.5px solid #A855F7",
+                  background: "var(--bg-card)",
+                  color: "var(--text-main)",
+                  fontSize: ".82rem",
+                  fontWeight: 700,
+                }}
+                autoFocus
+              />
+              <span style={{ fontSize: ".82rem", fontWeight: 700, color: "var(--text-muted)" }}>%</span>
+              <button
+                type="submit"
+                style={{
+                  padding: ".35rem .65rem",
+                  borderRadius: 6,
+                  border: "none",
+                  background: "#10B981",
+                  color: "#fff",
+                  fontWeight: 700,
+                  fontSize: ".8rem",
+                  cursor: "pointer",
+                }}
+              >
+                Apply
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowCustom(false)}
+                style={{
+                  padding: ".35rem .5rem",
+                  borderRadius: 6,
+                  border: "1px solid var(--border-subtle)",
+                  background: "transparent",
+                  color: "var(--text-muted)",
+                  fontSize: ".8rem",
+                  cursor: "pointer",
+                }}
+              >
+                ✕
+              </button>
+            </form>
+          )}
+
+          <span style={{ fontSize: ".75rem", color: "#A1A1AA", marginLeft: ".25rem", alignSelf: "center" }}>
+            (Live calculation updates)
           </span>
         </div>
 

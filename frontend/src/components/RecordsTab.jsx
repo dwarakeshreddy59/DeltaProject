@@ -1,10 +1,253 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { fmt } from "../utils/format";
-import { fetchHistory, deleteInvoice, deletePO, deleteRemittance, clearAllRecords } from "../services/api";
+import { fetchHistory, deleteInvoice, deletePO, deleteRemittance, clearAllRecords, recalculate } from "../services/api";
 import { useOrganization } from "../context/OrganizationContext";
 import toast from "react-hot-toast";
 
 const PAGE_SIZE = 10;
+
+export const TDS_SITUATIONS = [
+  { value: 0.0,  label: "0% (Nil / Exempt - Sec 197)", shortLabel: "0% (Nil)", badge: "Nil / Exempt", section: "Section 197 (Nil / Non-deduction Exemption)" },
+  { value: 0.1,  label: "0.1% (Purchase of Goods - Sec 194Q)", shortLabel: "0.1% (Goods)", badge: "194Q Goods", section: "Section 194Q (Purchase of Goods > ₹50L)" },
+  { value: 1.0,  label: "1% (Contractor Ind/HUF - Sec 194C)", shortLabel: "1% (194C Ind)", badge: "194C Ind/HUF", section: "Section 194C (Works Contract - Individual / HUF)" },
+  { value: 2.0,  label: "2% (Company Contractor / Tech - Sec 194C/J)", shortLabel: "2% (Standard)", badge: "194C/J Standard", section: "Section 194C (Corporate Contractor) / 194J (Technical Services)" },
+  { value: 5.0,  label: "5% (Rent / Commission - Sec 194I/H)", shortLabel: "5% (Rent/Comm)", badge: "194I/H Rent", section: "Section 194I (Rent on Land/Building) / 194H (Commission/Brokerage)" },
+  { value: 10.0, label: "10% (Professional Fees - Sec 194J)", shortLabel: "10% (Prof. Fees)", badge: "194J Prof", section: "Section 194J (Professional & Legal Fees / Royalty)" },
+];
+
+export function getSectionDescription(rate) {
+  const num = Number(rate);
+  const match = TDS_SITUATIONS.find((s) => s.value === num);
+  if (match) return match.section;
+  return `Custom Scenario (${rate}%)`;
+}
+
+/**
+ * Inline Interactive TDS Selector for Table Cells
+ */
+export function TableTdsSelector({ rate = 2.0, isUpdating, onSelect }) {
+  const [isCustom, setIsCustom] = useState(false);
+  const [customVal, setCustomVal] = useState(String(rate));
+
+  const numRate = Number(rate);
+  const isKnown = TDS_SITUATIONS.some((s) => s.value === numRate);
+
+  const handleSelect = (e) => {
+    const val = e.target.value;
+    if (val === "custom") {
+      setIsCustom(true);
+      setCustomVal(String(rate));
+    } else {
+      setIsCustom(false);
+      onSelect(parseFloat(val));
+    }
+  };
+
+  const handleCustomSubmit = (e) => {
+    e.preventDefault();
+    const parsed = parseFloat(customVal);
+    if (!isNaN(parsed) && parsed >= 0 && parsed <= 100) {
+      onSelect(parsed);
+      setIsCustom(false);
+    } else {
+      toast.error("Enter a valid percentage between 0% and 100%");
+    }
+  };
+
+  if (isCustom) {
+    return (
+      <form onSubmit={handleCustomSubmit} className="tds-custom-input-wrap">
+        <input
+          type="number"
+          step="0.1"
+          min="0"
+          max="100"
+          value={customVal}
+          onChange={(e) => setCustomVal(e.target.value)}
+          className="tds-inline-input"
+          autoFocus
+          disabled={isUpdating}
+        />
+        <span className="tds-pct-symbol">%</span>
+        <button type="submit" className="btn-tds-confirm" disabled={isUpdating} title="Apply TDS Rate">
+          <i className="bi bi-check" />
+        </button>
+        <button type="button" className="btn-tds-cancel" onClick={() => setIsCustom(false)} title="Cancel">
+          <i className="bi bi-x" />
+        </button>
+      </form>
+    );
+  }
+
+  return (
+    <div className="tds-selector-inline-wrap">
+      <select
+        className={`tds-select-inline ${isUpdating ? "updating" : ""}`}
+        value={isKnown ? numRate : "custom_active"}
+        onChange={handleSelect}
+        disabled={isUpdating}
+        title="Change TDS Rate according to scenario"
+      >
+        {TDS_SITUATIONS.map((s) => (
+          <option key={s.value} value={s.value}>
+            {s.label}
+          </option>
+        ))}
+        {!isKnown && (
+          <option value="custom_active">
+            Custom ({numRate}%)
+          </option>
+        )}
+        <option value="custom">⚙️ Custom %...</option>
+      </select>
+      {isUpdating && <span className="spinner-border spinner-border-sm text-primary ms-1" role="status" />}
+    </div>
+  );
+}
+
+/**
+ * Calculation Breakdown Modal showing step-by-step waterfall math
+ */
+export function CalculationBreakdownModal({ record, onClose, onUpdateTds, isUpdating }) {
+  if (!record) return null;
+
+  const assessable = Number(record.assessable_value || 0);
+  const gstRate = 18.0;
+  const gstAmount = Number(record.gst_amount || (assessable * 0.18));
+  const totalInv = Number(record.total_invoice_value || (assessable + gstAmount));
+  const tdsRate = Number(record.tds_rate ?? 2.0);
+  const tdsAmount = Number(record.tds_amount || (assessable * (tdsRate / 100)));
+  const receivable = Number(record.receivable || (assessable - tdsAmount + gstAmount));
+
+  return (
+    <div className="modal-backdrop-custom animate-fadein" onClick={onClose}>
+      <div className="calc-modal-card animate-slideup" onClick={(e) => e.stopPropagation()}>
+        {/* Modal Header */}
+        <div className="calc-modal-header">
+          <div className="d-flex align-items-center gap-2">
+            <div className="calc-modal-badge-icon">
+              <i className="bi bi-calculator-fill" />
+            </div>
+            <div>
+              <h5 className="calc-modal-title mb-0">Financial Calculation Breakdown</h5>
+              <div className="calc-modal-subtitle">
+                Invoice: <strong>{record.invoice_number}</strong>
+                {record.po_number && <> · Linked PO: <strong>{record.po_number}</strong></>}
+                {record.organization_name && <> · <strong>{record.organization_name}</strong></>}
+              </div>
+            </div>
+          </div>
+          <button type="button" className="btn-close-modal" onClick={onClose}>
+            <i className="bi bi-x-lg" />
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <div className="calc-modal-body">
+          {/* Situation Switcher */}
+          <div className="modal-tds-changer">
+            <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-1">
+              <span className="changer-label">
+                <i className="bi bi-sliders me-1" style={{ color: "#A855F7" }} /> Select TDS Situation / Rate:
+              </span>
+              <span className="current-situation-badge">
+                {getSectionDescription(tdsRate)}
+              </span>
+            </div>
+            <div className="tds-situation-chips">
+              {TDS_SITUATIONS.map((s) => (
+                <button
+                  key={s.value}
+                  type="button"
+                  className={`tds-chip ${tdsRate === s.value ? "active" : ""}`}
+                  onClick={() => onUpdateTds(s.value)}
+                  disabled={isUpdating}
+                  title={s.label}
+                >
+                  <span className="chip-rate">{s.value}%</span>
+                  <span className="chip-tag">{s.badge}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Formula Rule Banner */}
+          <div className="calc-rule-box">
+            <div className="rule-title">
+              <i className="bi bi-info-circle-fill me-1" /> Standard Invoice Deduction Formula
+            </div>
+            <div className="rule-formula">
+              <strong>Net Receivable</strong> = Assessable Value − TDS Deduction + GST (18%)
+            </div>
+          </div>
+
+          {/* Step-by-Step Waterfall Calculation */}
+          <div className="calc-waterfall">
+            <div className="waterfall-row plus">
+              <div className="wf-left">
+                <span className="wf-step">Step 1</span>
+                <span className="wf-title">Assessable / Taxable Value</span>
+              </div>
+              <span className="wf-amount money">+ {fmt(assessable)}</span>
+            </div>
+
+            <div className="waterfall-row plus">
+              <div className="wf-left">
+                <span className="wf-step">Step 2</span>
+                <span className="wf-title">Goods & Services Tax (GST @ 18%)</span>
+              </div>
+              <span className="wf-amount money text-teal">+ {fmt(gstAmount)}</span>
+            </div>
+
+            <div className="waterfall-subtotal">
+              <span>Total Invoice Value (Assessable + GST)</span>
+              <span className="subtotal-val">{fmt(totalInv)}</span>
+            </div>
+
+            <div className="waterfall-row minus active-glow">
+              <div className="wf-left">
+                <span className="wf-step">Step 3</span>
+                <div>
+                  <span className="wf-title" style={{ color: "var(--danger-red)" }}>TDS Deduction ({tdsRate}%)</span>
+                  <div className="wf-desc">
+                    {fmt(assessable)} × {tdsRate}% &bull; {getSectionDescription(tdsRate)}
+                  </div>
+                </div>
+              </div>
+              <span className="wf-amount" style={{ color: "var(--danger-red)", fontWeight: 800, fontSize: "1.05rem" }}>
+                − {fmt(tdsAmount)}
+              </span>
+            </div>
+
+            {/* Net Receivable Grand Total */}
+            <div className="waterfall-result">
+              <div>
+                <div className="result-label">Net Amount Receivable</div>
+                <div className="result-equation">
+                  {fmt(assessable)} − {fmt(tdsAmount)} + {fmt(gstAmount)}
+                </div>
+              </div>
+              <div className="result-val">
+                ₹ {fmt(receivable)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Footer */}
+        <div className="calc-modal-footer">
+          <div className="status-note">
+            <i className="bi bi-shield-check text-success me-1" />
+            PostgreSQL DB automatically synced with selected TDS rate
+          </div>
+          <button type="button" className="btn-modal-done" onClick={onClose}>
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function RecordsTab({ refreshTrigger = 0 }) {
   const { clients, activeClient, nomenclature, refreshClients } = useOrganization();
@@ -21,8 +264,65 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
   const [sortCol,     setSortCol]     = useState("created_at");
   const [sortDir,     setSortDir]     = useState("desc");
   const [page,        setPage]        = useState(1);
-  const [filter,      setFilter]      = useState("");
-  const [deletingKey, setDeletingKey] = useState(null);
+  const [filter,          setFilter]          = useState("");
+  const [deletingKey,     setDeletingKey]     = useState(null);
+  const [updatingInv,     setUpdatingInv]     = useState(null);
+  const [activeCalcModal, setActiveCalcModal] = useState(null);
+
+  const handleUpdateTdsRate = async (row, newRate) => {
+    if (!row?.invoice_number) return;
+    const invNum = row.invoice_number;
+    setUpdatingInv(invNum);
+    try {
+      const res = await recalculate(row.assessable_value, newRate, invNum);
+      if (res.data?.success) {
+        const updated = res.data;
+        setData((prev) => {
+          const updateItem = (item) => {
+            if (item.invoice_number === invNum) {
+              return {
+                ...item,
+                tds_rate: updated.tds_rate,
+                tds_amount: updated.tds_amount,
+                receivable: updated.receivable,
+                gst_amount: updated.gst_amount,
+                total_invoice_value: updated.total_invoice_value,
+              };
+            }
+            return item;
+          };
+          return {
+            ...prev,
+            invoices: prev.invoices.map(updateItem),
+            combined: prev.combined.map(updateItem),
+          };
+        });
+
+        setActiveCalcModal((prev) => {
+          if (prev && prev.invoice_number === invNum) {
+            return {
+              ...prev,
+              tds_rate: updated.tds_rate,
+              tds_amount: updated.tds_amount,
+              receivable: updated.receivable,
+              gst_amount: updated.gst_amount,
+              total_invoice_value: updated.total_invoice_value,
+            };
+          }
+          return prev;
+        });
+
+        toast.success(
+          `Applied ${updated.tds_rate}% TDS to ${invNum}! Net: ₹${fmt(updated.receivable)}`
+        );
+        if (refreshClients) refreshClients();
+      }
+    } catch (err) {
+      toast.error("Failed to update TDS: " + (err?.response?.data?.detail || err.message));
+    } finally {
+      setUpdatingInv(null);
+    }
+  };
 
   // Sync selected filter with activeClient changes
   useEffect(() => {
@@ -472,9 +772,9 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                     <th onClick={() => handleSort("total_tax")}>Tax Amount <Ico col="total_tax" /></th>
                     <th onClick={() => handleSort("total_invoice_value")}>Total Value <Ico col="total_invoice_value" /></th>
                     <th onClick={() => handleSort("gst_amount")}>GST (18%) <Ico col="gst_amount" /></th>
-                    <th onClick={() => handleSort("tds_rate")}>TDS% <Ico col="tds_rate" /></th>
-                    <th onClick={() => handleSort("tds_amount")}>TDS Amount <Ico col="tds_amount" /></th>
-                    <th onClick={() => handleSort("receivable")}>Net Receivable <Ico col="receivable" /></th>
+                    <th onClick={() => handleSort("tds_rate")} style={{ minWidth: 155 }}>TDS Rate / Situation <Ico col="tds_rate" /></th>
+                    <th onClick={() => handleSort("tds_amount")} style={{ minWidth: 120 }}>TDS Deduction <Ico col="tds_amount" /></th>
+                    <th onClick={() => handleSort("receivable")} style={{ minWidth: 165 }}>Net Receivable <Ico col="receivable" /></th>
                     <th onClick={() => handleSort("created_at")}>Saved At <Ico col="created_at" /></th>
                   </tr>
                 </thead>
@@ -499,9 +799,42 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                       <td className="money">{fmt(r.total_tax)}</td>
                       <td className="money" style={{ fontWeight: 800 }}>{fmt(r.total_invoice_value)}</td>
                       <td className="money">{fmt(r.gst_amount)}</td>
-                      <td style={{ textAlign: "center", fontWeight: 700 }}>{r.tds_rate}%</td>
-                      <td className="tds-cell">{fmt(r.tds_amount)}</td>
-                      <td className="receivable-cell">{fmt(r.receivable)}</td>
+                      <td>
+                        <TableTdsSelector
+                          rate={r.tds_rate}
+                          isUpdating={updatingInv === r.invoice_number}
+                          onSelect={(newRate) => handleUpdateTdsRate(r, newRate)}
+                        />
+                      </td>
+                      <td className="tds-cell">
+                        <div style={{ fontWeight: 700, color: "var(--danger-red)", whiteSpace: "nowrap" }}>
+                          − {fmt(r.tds_amount)}
+                        </div>
+                        <div className="calc-subtext">
+                          {r.tds_rate}% of {fmt(r.assessable_value)}
+                        </div>
+                      </td>
+                      <td className="receivable-cell">
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: ".5rem" }}>
+                          <div>
+                            <div style={{ fontWeight: 800, color: "var(--success-green)", fontSize: ".92rem", whiteSpace: "nowrap" }}>
+                              {fmt(r.receivable)}
+                            </div>
+                            <div className="calc-subtext" title="Assessable - TDS + GST">
+                              = Base − TDS + GST
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            className="btn-calc-pill"
+                            onClick={() => setActiveCalcModal(r)}
+                            title="View Step-by-Step Calculation Breakdown"
+                          >
+                            <i className="bi bi-calculator-fill me-1" />
+                            Calc
+                          </button>
+                        </div>
+                      </td>
                       <td style={{ color: "var(--text-muted)", fontSize: ".72rem", whiteSpace: "nowrap" }}>
                         {r.created_at ? new Date(r.created_at).toLocaleString("en-IN") : "—"}
                       </td>
@@ -622,9 +955,9 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                     <th onClick={() => handleSort("assessable_value")}>Assessable <Ico col="assessable_value" /></th>
                     <th onClick={() => handleSort("gst_amount")}>GST 18% <Ico col="gst_amount" /></th>
                     <th onClick={() => handleSort("total_invoice_value")}>Total Inv. <Ico col="total_invoice_value" /></th>
-                    <th onClick={() => handleSort("tds_rate")}>TDS% <Ico col="tds_rate" /></th>
-                    <th onClick={() => handleSort("tds_amount")}>TDS Amt <Ico col="tds_amount" /></th>
-                    <th onClick={() => handleSort("receivable")}>Receivable <Ico col="receivable" /></th>
+                    <th onClick={() => handleSort("tds_rate")} style={{ minWidth: 155 }}>TDS Rate / Situation <Ico col="tds_rate" /></th>
+                    <th onClick={() => handleSort("tds_amount")} style={{ minWidth: 120 }}>TDS Deduction <Ico col="tds_amount" /></th>
+                    <th onClick={() => handleSort("receivable")} style={{ minWidth: 165 }}>Net Receivable <Ico col="receivable" /></th>
                     <th onClick={() => handleSort("po_number")}>{nomenclature.po_num_label} <Ico col="po_number" /></th>
                     <th onClick={() => handleSort("po_date")}>PO Date <Ico col="po_date" /></th>
                     <th onClick={() => handleSort("delivery_date")}>PO Validity <Ico col="delivery_date" /></th>
@@ -674,9 +1007,42 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
                       <td className="money">{fmt(r.assessable_value)}</td>
                       <td className="money">{fmt(r.gst_amount)}</td>
                       <td className="money">{fmt(r.total_invoice_value)}</td>
-                      <td style={{ textAlign: "center", fontWeight: 700 }}>{r.tds_rate}%</td>
-                      <td className="tds-cell">{fmt(r.tds_amount)}</td>
-                      <td className="receivable-cell" style={{ fontWeight: 800 }}>{fmt(r.receivable)}</td>
+                      <td>
+                        <TableTdsSelector
+                          rate={r.tds_rate}
+                          isUpdating={updatingInv === r.invoice_number}
+                          onSelect={(newRate) => handleUpdateTdsRate(r, newRate)}
+                        />
+                      </td>
+                      <td className="tds-cell">
+                        <div style={{ fontWeight: 700, color: "var(--danger-red)", whiteSpace: "nowrap" }}>
+                          − {fmt(r.tds_amount)}
+                        </div>
+                        <div className="calc-subtext">
+                          {r.tds_rate}% of {fmt(r.assessable_value)}
+                        </div>
+                      </td>
+                      <td className="receivable-cell" style={{ fontWeight: 800 }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: ".5rem" }}>
+                          <div>
+                            <div style={{ color: "var(--success-green)", fontSize: ".92rem", whiteSpace: "nowrap" }}>
+                              {fmt(r.receivable)}
+                            </div>
+                            <div className="calc-subtext" title="Assessable - TDS + GST">
+                              = Base − TDS + GST
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            className="btn-calc-pill"
+                            onClick={() => setActiveCalcModal(r)}
+                            title="View Step-by-Step Calculation Breakdown"
+                          >
+                            <i className="bi bi-calculator-fill me-1" />
+                            Calc
+                          </button>
+                        </div>
+                      </td>
                       <td><span className="id-badge badge-po">{r.po_number || "—"}</span></td>
                       <td>{r.po_date || "—"}</td>
                       <td>{r.delivery_date || "—"}</td>
@@ -697,6 +1063,16 @@ export default function RecordsTab({ refreshTrigger = 0 }) {
           </div>
         )}
       </div>
+
+      {/* ── Calculation Breakdown Modal ── */}
+      {activeCalcModal && (
+        <CalculationBreakdownModal
+          record={activeCalcModal}
+          onClose={() => setActiveCalcModal(null)}
+          onUpdateTds={(newRate) => handleUpdateTdsRate(activeCalcModal, newRate)}
+          isUpdating={updatingInv === activeCalcModal.invoice_number}
+        />
+      )}
     </div>
   );
 }

@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { fmt } from "../utils/format";
 import { useOrganization } from "../context/OrganizationContext";
+import { TableTdsSelector, CalculationBreakdownModal } from "./RecordsTab";
 
-export default function ExtractedTableView({ po = {}, invoice = {}, remittance = {}, calcData = {} }) {
+export default function ExtractedTableView({ po = {}, invoice = {}, remittance = {}, calcData = {}, onTdsChange }) {
   const { nomenclature } = useOrganization();
+  const [showCalcModal, setShowCalcModal] = useState(false);
 
   const fields = [
     // Invoice Fields
@@ -35,9 +37,20 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
     { section: "Calculations", label: "GST Rate (Fixed)", value: `${calcData.gst_rate ?? 18}%`, type: "text" },
     { section: "Calculations", label: "GST Amount (Assessable × 18%)", value: fmt(calcData.gst_amount), type: "money" },
     { section: "Calculations", label: "TDS Rate Selected", value: `${calcData.tds_rate ?? 2}%`, type: "text" },
-    { section: "Calculations", label: "TDS Amount (Assessable × TDS%)", value: fmt(calcData.tds_amount), type: "tds" },
+    { section: "Calculations", label: "TDS Deduction (Assessable × TDS%)", value: fmt(calcData.tds_amount), type: "tds" },
     { section: "Calculations", label: "Net Receivable (Assessable − TDS + GST)", value: fmt(calcData.receivable), type: "receivable" },
   ];
+
+  const modalRecord = {
+    ...invoice,
+    assessable_value: invoice.assessable_value ?? calcData.assessable_value,
+    gst_amount: calcData.gst_amount,
+    total_invoice_value: invoice.total_invoice_value ?? calcData.total_invoice_value,
+    tds_rate: calcData.tds_rate ?? 2,
+    tds_amount: calcData.tds_amount,
+    receivable: calcData.receivable,
+    po_number: po.po_number,
+  };
 
   return (
     <div className="search-wrapper mb-4" style={{ marginTop: "1.5rem" }}>
@@ -76,8 +89,9 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
                   <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Gross Amount</th>
                   <th style={{ background: "#16A34A", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Total Gross Amount</th>
                   <th style={{ background: "#6D28D9", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>GST (18%)</th>
-                  <th style={{ background: "#6D28D9", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>TDS ({calcData.tds_rate}%)</th>
-                  <th style={{ background: "#6D28D9", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem" }}>Receivable</th>
+                  <th style={{ background: "#6D28D9", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem", minWidth: 155 }}>TDS Rate / Situation</th>
+                  <th style={{ background: "#6D28D9", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem", minWidth: 120 }}>TDS Deduction</th>
+                  <th style={{ background: "#6D28D9", color: "#ffffff", fontWeight: 800, padding: ".75rem 1rem", minWidth: 165 }}>Net Receivable</th>
                 </tr>
               </thead>
               <tbody>
@@ -97,13 +111,62 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
                   <td className="money">{fmt(remittance.gross_amount)}</td>
                   <td className="money">{fmt(remittance.total_gross_amount)}</td>
                   <td className="money">{fmt(calcData.gst_amount)}</td>
-                  <td className="tds-cell">{fmt(calcData.tds_amount)}</td>
-                  <td className="receivable-cell" style={{ fontSize: ".9rem", fontWeight: 800 }}>{fmt(calcData.receivable)}</td>
+                  <td>
+                    {onTdsChange ? (
+                      <TableTdsSelector
+                        rate={calcData.tds_rate ?? 2}
+                        onSelect={onTdsChange}
+                      />
+                    ) : (
+                      <span style={{ fontWeight: 700 }}>{calcData.tds_rate ?? 2}%</span>
+                    )}
+                  </td>
+                  <td className="tds-cell">
+                    <div style={{ fontWeight: 700, color: "var(--danger-red)", whiteSpace: "nowrap" }}>
+                      − {fmt(calcData.tds_amount)}
+                    </div>
+                    <div className="calc-subtext">
+                      {calcData.tds_rate ?? 2}% of {fmt(invoice.assessable_value)}
+                    </div>
+                  </td>
+                  <td className="receivable-cell">
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: ".5rem" }}>
+                      <div>
+                        <div style={{ fontSize: ".92rem", fontWeight: 800, color: "var(--success-green)", whiteSpace: "nowrap" }}>
+                          {fmt(calcData.receivable)}
+                        </div>
+                        <div className="calc-subtext" title="Assessable - TDS + GST">
+                          = Base − TDS + GST
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn-calc-pill"
+                        onClick={() => setShowCalcModal(true)}
+                        title="View Step-by-Step Calculation Breakdown"
+                      >
+                        <i className="bi bi-calculator-fill me-1" />
+                        Calc
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
+
+        {/* Modal if opened from ExtractedTableView */}
+        {showCalcModal && (
+          <CalculationBreakdownModal
+            record={modalRecord}
+            onClose={() => setShowCalcModal(false)}
+            onUpdateTds={(rate) => {
+              if (onTdsChange) onTdsChange(rate);
+            }}
+            isUpdating={false}
+          />
+        )}
 
         {/* Structured Field-by-Field Matrix Table */}
         <h6 style={{ fontSize: ".85rem", fontWeight: 800, color: "var(--text-main)", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: ".75rem" }}>

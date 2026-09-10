@@ -266,7 +266,11 @@ async def recalculate(body: RecalculateRequest):
     Re-run financial calculations with a new TDS rate.
     Also updates the DB row if invoice_number is provided.
     """
-    tds_rate = body.tds_rate if body.tds_rate in VALID_TDS_RATES else 2.0
+    try:
+        rate = float(body.tds_rate)
+        tds_rate = rate if 0.0 <= rate <= 100.0 else 2.0
+    except (ValueError, TypeError):
+        tds_rate = 2.0
 
     calc = calculate(body.assessable_value, GST_RATE, tds_rate)
 

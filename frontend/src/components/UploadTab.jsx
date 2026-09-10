@@ -88,8 +88,13 @@ export default function UploadTab({
 
           {/* Table */}
           {(viewMode === "table" || viewMode === "both") && (
-            <ExtractedTableView po={results.po} invoice={results.invoice}
-              remittance={results.remittance} calcData={calcData} />
+            <ExtractedTableView
+              po={results.po}
+              invoice={results.invoice}
+              remittance={results.remittance}
+              calcData={calcData}
+              onTdsChange={onRecalc}
+            />
           )}
 
           {/* Calculations */}
