@@ -1,12 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DropZone from "./DropZone";
 import WrongFileModal from "./WrongFileModal";
 import { useOrganization } from "../context/OrganizationContext";
 
-export default function UploadForm({ onSubmit, loading, mismatchError, onClearMismatch }) {
+export default function UploadForm({ onSubmit, loading, mismatchError, onClearMismatch, resetTrigger }) {
   const { activeClient, nomenclature, openRegisterModal } = useOrganization();
   const [files, setFiles] = useState({ invoice: null, po: null, remittance: null });
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (resetTrigger) {
+      setFiles({ invoice: null, po: null, remittance: null });
+      setErrors({});
+      if (onClearMismatch) onClearMismatch();
+    }
+  }, [resetTrigger]);
 
   const slots = [
     {

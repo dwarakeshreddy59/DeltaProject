@@ -68,5 +68,12 @@ export function useExtraction() {
     }
   }, [results, calcData]);
 
-  return { loading, results, calcData, mismatchError, extract, recalc, clearMismatchError };
+  const resetExtraction = useCallback(() => {
+    setResults(null);
+    setCalcData(null);
+    setMismatchError(null);
+    toast.success("View refreshed. Ready for next upload!");
+  }, []);
+
+  return { loading, results, calcData, mismatchError, extract, recalc, clearMismatchError, resetExtraction };
 }

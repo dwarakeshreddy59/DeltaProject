@@ -17,8 +17,15 @@ export default function UploadTab({
   onRecalc,
   onViewRecords,
   onClearMismatch,
+  onReset,
 }) {
   const [viewMode, setViewMode] = useState("cards");
+  const [resetTrigger, setResetTrigger] = useState(0);
+
+  const handleOk = () => {
+    if (onReset) onReset();
+    setResetTrigger((n) => n + 1);
+  };
 
   return (
     <>
@@ -28,6 +35,7 @@ export default function UploadTab({
         loading={loading}
         mismatchError={mismatchError}
         onClearMismatch={onClearMismatch}
+        resetTrigger={resetTrigger}
       />
 
       {/* Results */}
@@ -37,7 +45,7 @@ export default function UploadTab({
 
           <CrossLinkBadge po={results.po} invoice={results.invoice} remittance={results.remittance} />
 
-          {/* View Toggle */}
+          {/* View Toggle Bar with OK Button */}
           <div className="view-toggle-bar">
             <span className="view-toggle-label">
               <i className="bi bi-layout-text-window" />Extracted Data
@@ -56,6 +64,15 @@ export default function UploadTab({
               </div>
               <button className="btn-nav btn-green" style={{ fontFamily: "inherit", fontSize: ".8rem" }} onClick={onViewRecords}>
                 <i className="bi bi-database-fill" />View All Records in DB
+              </button>
+              <button
+                type="button"
+                className="btn-ok-refresh"
+                onClick={handleOk}
+                title="Finish review & refresh for next upload"
+              >
+                <i className="bi bi-check-circle-fill" />
+                <span>OK</span>
               </button>
             </div>
           </div>
@@ -77,6 +94,30 @@ export default function UploadTab({
 
           {/* Calculations */}
           <CalculationPanel calcData={calcData} onTdsChange={onRecalc} />
+
+          {/* Bottom OK Completion Banner */}
+          <div className="extraction-done-footer animate-fadein">
+            <div className="done-footer-info">
+              <div className="done-footer-icon">
+                <i className="bi bi-check2-all" />
+              </div>
+              <div>
+                <div className="done-footer-title">Extraction &amp; Reconciliation Complete</div>
+                <div className="done-footer-subtitle">
+                  Information successfully captured and saved to records. Click OK to refresh view for next upload.
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="btn-ok-done"
+              onClick={handleOk}
+              title="Refresh view for next upload"
+            >
+              <i className="bi bi-check-circle-fill me-2" />
+              OK
+            </button>
+          </div>
         </div>
       )}
 

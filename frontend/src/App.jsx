@@ -33,6 +33,7 @@ function AppContent() {
     extract,
     recalc,
     clearMismatchError,
+    resetExtraction,
   } = useExtraction();
 
   const [activeTab, setActiveTab] = useState("upload");
@@ -68,6 +69,12 @@ function AppContent() {
       setUploadCount((n) => n + 1);
       if (refreshClients) refreshClients();
     }
+  };
+
+  const handleResetExtraction = () => {
+    resetExtraction();
+    if (refreshClients) refreshClients();
+    setRefreshTrigger((n) => n + 1);
   };
 
   const workspaceTabs = [
@@ -201,6 +208,7 @@ function AppContent() {
                   onRecalc={recalc}
                   onViewRecords={() => setActiveTab("records")}
                   onClearMismatch={clearMismatchError}
+                  onReset={handleResetExtraction}
                 />
               )}
               {activeTab === "records" && (
