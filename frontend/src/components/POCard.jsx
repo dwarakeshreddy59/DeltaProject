@@ -52,10 +52,10 @@ export default function POCard({ po = {}, onViewPdf = null }) {
         <table className="info-table">
           <tbody>
             <Row label={nomenclature.po_num_label || "PO Number"} value={po.po_number} type="badge" />
-            <Row label="PO Date (Document Date)"  value={po.po_date}       type="highlight" />
-            <Row label="Original Description"     value={po.description} />
-            <Row label="PO Validity"              value={po.delivery_date} />
-            <Row label="Total Amount"             value={po.total_amount}  type="money" />
+            <Row label={nomenclature.po_date_label || "PO Date"} value={po.po_date} type="highlight" />
+            <Row label={nomenclature.po_desc_label || "Original Description"} value={po.description} />
+            <Row label={nomenclature.po_validity_label || "PO Validity"} value={po.delivery_date} />
+            <Row label={nomenclature.po_total_label || "Total Amount"} value={po.total_amount} type="money" />
           </tbody>
         </table>
       </div>

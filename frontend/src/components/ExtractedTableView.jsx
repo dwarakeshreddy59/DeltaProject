@@ -9,29 +9,29 @@ export default function ExtractedTableView({ po = {}, invoice = {}, remittance =
 
   const fields = [
     // Invoice Fields
-    { section: nomenclature.invoice_doc_label, label: `${nomenclature.invoice_num_label} (Document No.)`, value: invoice.invoice_number || "—", type: "badge", badgeColor: "#A855F7" },
-    { section: nomenclature.invoice_doc_label, label: `${nomenclature.invoice_doc_label} Date`, value: invoice.invoice_date || "—", type: "text" },
+    { section: nomenclature.invoice_doc_label, label: nomenclature.invoice_num_label, value: invoice.invoice_number || "—", type: "badge", badgeColor: "#A855F7" },
+    { section: nomenclature.invoice_doc_label, label: nomenclature.invoice_date_label, value: invoice.invoice_date || "—", type: "text" },
     { section: nomenclature.invoice_doc_label, label: `${nomenclature.po_num_label} (Ref in ${nomenclature.invoice_doc_label})`, value: invoice.po_number || "—", type: "badge", badgeColor: "#C084FC" },
-    { section: nomenclature.invoice_doc_label, label: "Description (Filename without numbers)", value: invoice.description || "—", type: "text" },
-    { section: nomenclature.invoice_doc_label, label: "Billing Period", value: invoice.invoice_period || "—", type: "text" },
-    { section: nomenclature.invoice_doc_label, label: "Assessable Value (Taxable Amount)", value: fmt(invoice.assessable_value), type: "money" },
-    { section: nomenclature.invoice_doc_label, label: "Total Tax", value: fmt(invoice.total_tax), type: "money" },
-    { section: nomenclature.invoice_doc_label, label: "Total Invoice Value", value: fmt(invoice.total_invoice_value), type: "money" },
+    { section: nomenclature.invoice_doc_label, label: nomenclature.invoice_desc_label, value: invoice.description || "—", type: "text" },
+    { section: nomenclature.invoice_doc_label, label: nomenclature.invoice_period_label, value: invoice.invoice_period || "—", type: "text" },
+    { section: nomenclature.invoice_doc_label, label: nomenclature.invoice_assessable_label, value: fmt(invoice.assessable_value), type: "money" },
+    { section: nomenclature.invoice_doc_label, label: nomenclature.invoice_tax_label, value: fmt(invoice.total_tax), type: "money" },
+    { section: nomenclature.invoice_doc_label, label: nomenclature.invoice_total_label, value: fmt(invoice.total_invoice_value), type: "money" },
 
     // Purchase Order Fields
-    { section: nomenclature.po_doc_label, label: `${nomenclature.po_num_label}`, value: po.po_number || "—", type: "badge", badgeColor: "#C084FC" },
-    { section: nomenclature.po_doc_label, label: "PO Date", value: po.po_date || "—", type: "text" },
-    { section: nomenclature.po_doc_label, label: "Original Description", value: po.description || "—", type: "text" },
-    { section: nomenclature.po_doc_label, label: "PO Validity", value: po.delivery_date || "—", type: "text" },
-    { section: nomenclature.po_doc_label, label: `Total ${nomenclature.po_doc_label} Amount`, value: fmt(po.total_amount), type: "money" },
+    { section: nomenclature.po_doc_label, label: nomenclature.po_num_label, value: po.po_number || "—", type: "badge", badgeColor: "#C084FC" },
+    { section: nomenclature.po_doc_label, label: nomenclature.po_date_label, value: po.po_date || "—", type: "text" },
+    { section: nomenclature.po_doc_label, label: nomenclature.po_desc_label, value: po.description || "—", type: "text" },
+    { section: nomenclature.po_doc_label, label: nomenclature.po_validity_label, value: po.delivery_date || "—", type: "text" },
+    { section: nomenclature.po_doc_label, label: nomenclature.po_total_label, value: fmt(po.total_amount), type: "money" },
 
     // Remittance Fields
-    { section: nomenclature.remittance_doc_label, label: `${nomenclature.remittance_num_label} (Document No.)`, value: remittance.remittance_number || "—", type: "badge", badgeColor: "#22C55E" },
-    { section: nomenclature.remittance_doc_label, label: `${nomenclature.remittance_doc_label} Date`, value: remittance.remittance_date || "—", type: "text" },
-    { section: nomenclature.remittance_doc_label, label: `${nomenclature.invoice_num_label} (Ref in Remittance)`, value: remittance.invoice_number || "—", type: "badge", badgeColor: "#A855F7" },
+    { section: nomenclature.remittance_doc_label, label: nomenclature.remittance_num_label, value: remittance.remittance_number || "—", type: "badge", badgeColor: "#22C55E" },
+    { section: nomenclature.remittance_doc_label, label: nomenclature.remittance_date_label, value: remittance.remittance_date || "—", type: "text" },
+    { section: nomenclature.remittance_doc_label, label: `${nomenclature.invoice_num_label} (Ref in ${nomenclature.remittance_doc_label})`, value: remittance.invoice_number || "—", type: "badge", badgeColor: "#A855F7" },
     { section: nomenclature.remittance_doc_label, label: "Description / Notes", value: remittance.description || "—", type: "text" },
-    { section: nomenclature.remittance_doc_label, label: "Gross Amount", value: fmt(remittance.gross_amount), type: "money" },
-    { section: nomenclature.remittance_doc_label, label: "Total Gross Amount", value: fmt(remittance.total_gross_amount), type: "money" },
+    { section: nomenclature.remittance_doc_label, label: nomenclature.remittance_gross_label, value: fmt(remittance.gross_amount), type: "money" },
+    { section: nomenclature.remittance_doc_label, label: nomenclature.remittance_total_label, value: fmt(remittance.total_gross_amount), type: "money" },
 
     // Financial Calculation Fields
     { section: "Calculations", label: "GST Rate (Fixed)", value: `${calcData.gst_rate ?? 18}%`, type: "text" },

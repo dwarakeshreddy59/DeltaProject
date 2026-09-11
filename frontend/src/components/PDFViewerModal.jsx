@@ -91,6 +91,7 @@ export default function PDFViewerModal({
     invoice: {
       label: nomenclature.invoice_doc_label || "Tax Invoice",
       numLabel: nomenclature.invoice_num_label || "Invoice Number",
+      dateLabel: nomenclature.invoice_date_label || "Invoice Date",
       icon: "bi-receipt",
       color: "#A855F7",
       bgGradient: "linear-gradient(135deg, #7C3AED, #A855F7)",
@@ -100,6 +101,7 @@ export default function PDFViewerModal({
     po: {
       label: nomenclature.po_doc_label || "Purchase Order",
       numLabel: nomenclature.po_num_label || "PO Number",
+      dateLabel: nomenclature.po_date_label || "PO Date",
       icon: "bi-file-text",
       color: "#C084FC",
       bgGradient: "linear-gradient(135deg, #9333EA, #C084FC)",
@@ -109,6 +111,7 @@ export default function PDFViewerModal({
     remittance: {
       label: nomenclature.remittance_doc_label || "Remittance Advice",
       numLabel: nomenclature.remittance_num_label || "Remittance Number",
+      dateLabel: nomenclature.remittance_date_label || "Remittance Date",
       icon: "bi-cash-stack",
       color: "#22C55E",
       bgGradient: "linear-gradient(135deg, #16A34A, #22C55E)",
@@ -218,7 +221,7 @@ export default function PDFViewerModal({
                   <span className="pdf-field-val badge-val font-monospace">{typeConfig.docNumber}</span>
                 </div>
                 <div className="pdf-info-field">
-                  <span className="pdf-field-name">Document Date</span>
+                  <span className="pdf-field-name">{typeConfig.dateLabel || "Document Date"}</span>
                   <span className="pdf-field-val fw-bold">{typeConfig.docDate}</span>
                 </div>
               </div>
@@ -233,13 +236,13 @@ export default function PDFViewerModal({
                       <span className="pdf-field-val badge-val badge-po">{docData?.po_number || "—"}</span>
                     </div>
                     <div className="pdf-info-field">
-                      <span className="pdf-field-name">Description</span>
+                      <span className="pdf-field-name">{nomenclature.invoice_desc_label || "Description"}</span>
                       <span className="pdf-field-val text-wrap text-break" style={{ maxWidth: 210 }}>
                         {docData?.description || docData?.inv_description || "—"}
                       </span>
                     </div>
                     <div className="pdf-info-field">
-                      <span className="pdf-field-name">Billing Period</span>
+                      <span className="pdf-field-name">{nomenclature.invoice_period_label || "Billing Period"}</span>
                       <span className="pdf-field-val">{docData?.invoice_period || "—"}</span>
                     </div>
                   </div>
@@ -247,15 +250,15 @@ export default function PDFViewerModal({
                   <div className="pdf-info-group">
                     <div className="pdf-info-group-title">Financials &amp; Tax</div>
                     <div className="pdf-info-field">
-                      <span className="pdf-field-name">Assessable Value</span>
+                      <span className="pdf-field-name">{nomenclature.invoice_assessable_label || "Assessable Value"}</span>
                       <span className="pdf-field-val val-money">{inr(docData?.assessable_value)}</span>
                     </div>
                     <div className="pdf-info-field">
-                      <span className="pdf-field-name">Total Tax</span>
+                      <span className="pdf-field-name">{nomenclature.invoice_tax_label || "Total Tax"}</span>
                       <span className="pdf-field-val val-money">{inr(docData?.total_tax)}</span>
                     </div>
                     <div className="pdf-info-field">
-                      <span className="pdf-field-name">Total Invoice Value</span>
+                      <span className="pdf-field-name">{nomenclature.invoice_total_label || "Total Invoice Value"}</span>
                       <span className="pdf-field-val val-money fw-bold">{inr(docData?.total_invoice_value)}</span>
                     </div>
                     <div className="pdf-info-field">
@@ -406,19 +409,19 @@ export default function PDFViewerModal({
               {/* Purchase Order Specific Fields */}
               {normalizedType === "po" && (
                 <div className="pdf-info-group">
-                  <div className="pdf-info-group-title">Purchase Order Details</div>
+                  <div className="pdf-info-group-title">{typeConfig.label} Details</div>
                   <div className="pdf-info-field">
-                    <span className="pdf-field-name">Original Description</span>
+                    <span className="pdf-field-name">{nomenclature.po_desc_label || "Original Description"}</span>
                     <span className="pdf-field-val text-wrap text-break" style={{ maxWidth: 210 }}>
                       {docData?.description || docData?.po_description || "—"}
                     </span>
                   </div>
                   <div className="pdf-info-field">
-                    <span className="pdf-field-name">PO Validity / Delivery</span>
+                    <span className="pdf-field-name">{nomenclature.po_validity_label || "PO Validity / Delivery"}</span>
                     <span className="pdf-field-val">{docData?.delivery_date || "—"}</span>
                   </div>
                   <div className="pdf-info-field highlight-field">
-                    <span className="pdf-field-name">Total PO Amount</span>
+                    <span className="pdf-field-name">{nomenclature.po_total_label || "Total PO Amount"}</span>
                     <span className="pdf-field-val val-money fw-bolder" style={{ fontSize: "1.05rem" }}>
                       {inr(docData?.total_amount)}
                     </span>
@@ -429,7 +432,7 @@ export default function PDFViewerModal({
               {/* Remittance Specific Fields */}
               {normalizedType === "remittance" && (
                 <div className="pdf-info-group">
-                  <div className="pdf-info-group-title">Remittance Details</div>
+                  <div className="pdf-info-group-title">{typeConfig.label} Details</div>
                   <div className="pdf-info-field">
                     <span className="pdf-field-name">Linked {nomenclature.invoice_num_label || "Invoice"}</span>
                     <span className="pdf-field-val badge-val">{docData?.invoice_number || "—"}</span>
@@ -441,11 +444,11 @@ export default function PDFViewerModal({
                     </span>
                   </div>
                   <div className="pdf-info-field">
-                    <span className="pdf-field-name">Gross Amount</span>
+                    <span className="pdf-field-name">{nomenclature.remittance_gross_label || "Gross Amount"}</span>
                     <span className="pdf-field-val val-money">{inr(docData?.gross_amount)}</span>
                   </div>
                   <div className="pdf-info-field highlight-field">
-                    <span className="pdf-field-name">Total Gross Cleared</span>
+                    <span className="pdf-field-name">{nomenclature.remittance_total_label || "Total Gross Cleared"}</span>
                     <span className="pdf-field-val val-money fw-bolder" style={{ fontSize: "1.05rem" }}>
                       {inr(docData?.total_gross_amount)}
                     </span>

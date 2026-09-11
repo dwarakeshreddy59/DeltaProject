@@ -53,13 +53,13 @@ export default function RemittanceCard({ remittance = {}, onViewPdf = null }) {
         <table className="info-table">
           <tbody>
             <Row label={nomenclature.remittance_num_label || "Remittance Number"} value={remittance.remittance_number} type="badge" />
-            <Row label="Remittance Date (Document Date)" value={remittance.remittance_date}   type="highlight" />
+            <Row label={nomenclature.remittance_date_label || "Remittance Date"} value={remittance.remittance_date} type="highlight" />
             <Row label={`Linked ${nomenclature.invoice_num_label || "Invoice"} (Ref)`} value={remittance.invoice_number} type="badge" />
             {remittance.description && (
               <Row label="Description / Notes" value={remittance.description} type="text" />
             )}
-            <Row label="Gross Amount"        value={remittance.gross_amount}      type="money" />
-            <Row label="Total Gross Amount"  value={remittance.total_gross_amount} type="money" />
+            <Row label={nomenclature.remittance_gross_label || "Gross Amount"} value={remittance.gross_amount} type="money" />
+            <Row label={nomenclature.remittance_total_label || "Total Gross Amount"} value={remittance.total_gross_amount} type="money" />
           </tbody>
         </table>
 

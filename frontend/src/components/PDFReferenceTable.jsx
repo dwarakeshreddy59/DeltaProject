@@ -33,78 +33,46 @@ export default function PDFReferenceTable() {
     return [agcoClient, ...list];
   }, [clients]);
 
-  // Helper to get PDF field name for any company
+  // Helper to get PDF field name for any company dynamically
   const getPdfField = (client, fieldKey) => {
-    const org = (client.organization_name || "").toUpperCase();
-    const isAgco = org === "AGCO";
-
     switch (fieldKey) {
       // ── Tax Invoice Fields ──
       case "invoice_number":
-        if (isAgco) return "Document No";
-        return client.invoice_num_label || "Document No / Invoice No";
-
+        return client.invoice_num_label || "Invoice Number";
       case "invoice_date":
-        if (isAgco) return "Document Date";
-        return "Document Date";
-
+        return client.invoice_date_label || "Invoice Date";
       case "description":
-        if (isAgco) return "Filename without the number";
-        return "Description";
-
+        return client.invoice_desc_label || "Description";
       case "invoice_period":
-        if (isAgco) return "Invoice Period";
-        return "Invoice Period";
-
+        return client.invoice_period_label || "Invoice Period";
       case "assessable_value":
-        if (isAgco) return "Assessable Value";
-        return "Assessable Value";
-
+        return client.invoice_assessable_label || "Assessable Value";
       case "total_tax":
-        if (isAgco) return "Total Tax";
-        return "Total Tax";
-
+        return client.invoice_tax_label || "Total Tax";
       case "total_invoice_value":
-        if (isAgco) return "Total Invoice Value";
-        return "Total Invoice Value";
+        return client.invoice_total_label || "Total Invoice Value";
 
       // ── Purchase Order Fields ──
       case "po_number":
-        if (isAgco) return "PO Nr";
-        return client.po_num_label || "PO Nr / PO Number";
-
+        return client.po_num_label || "PO Number";
       case "po_date":
-        if (isAgco) return "Date";
-        return "Date";
-
+        return client.po_date_label || "PO Date";
       case "po_description":
-        if (isAgco) return "Description";
-        return "Description";
-
+        return client.po_desc_label || "Original Description";
       case "po_validity":
-        if (isAgco) return "Delivery date";
-        return "Delivery date";
-
+        return client.po_validity_label || "PO Validity";
       case "total_amount":
-        if (isAgco) return "Total amount";
-        return "Total amount";
+        return client.po_total_label || "Total Amount";
 
       // ── Remittance Advice Fields ──
       case "remittance_number":
-        if (isAgco) return "Document Number";
-        return client.remittance_num_label || "Document Number";
-
+        return client.remittance_num_label || "Remittance Number";
       case "remittance_date":
-        if (isAgco) return "Document Date";
-        return "Document Date";
-
+        return client.remittance_date_label || "Remittance Date";
       case "gross_amount":
-        if (isAgco) return "Gross Amount";
-        return "Gross Amount";
-
+        return client.remittance_gross_label || "Gross Amount";
       case "total_gross_amount":
-        if (isAgco) return "Total";
-        return "Total";
+        return client.remittance_total_label || "Total Gross Amount";
 
       default:
         return "—";

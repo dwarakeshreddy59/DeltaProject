@@ -6,30 +6,91 @@ import toast from "react-hot-toast";
 const PRESETS = [
   {
     label: "Standard Corporate",
-    invoice_doc: "Tax Invoice",
-    invoice_num: "Invoice Number",
-    po_doc: "Purchase Order",
-    po_num: "PO Number",
-    rem_doc: "Remittance Advice",
-    rem_num: "Remittance Number",
+    invoice_doc_label: "Tax Invoice",
+    invoice_num_label: "Invoice Number",
+    invoice_date_label: "Invoice Date",
+    invoice_desc_label: "Description",
+    invoice_period_label: "Invoice Period",
+    invoice_assessable_label: "Assessable Value",
+    invoice_tax_label: "Total Tax",
+    invoice_total_label: "Total Invoice Value",
+    po_doc_label: "Purchase Order",
+    po_num_label: "PO Number",
+    po_date_label: "PO Date",
+    po_desc_label: "Original Description",
+    po_validity_label: "PO Validity",
+    po_total_label: "Total Amount",
+    remittance_doc_label: "Remittance Advice",
+    remittance_num_label: "Remittance Number",
+    remittance_date_label: "Remittance Date",
+    remittance_gross_label: "Gross Amount",
+    remittance_total_label: "Total Gross Amount",
+  },
+  {
+    label: "AGCO Reference Spec",
+    invoice_doc_label: "Tax Invoice",
+    invoice_num_label: "Document No",
+    invoice_date_label: "Document Date",
+    invoice_desc_label: "Filename without the number",
+    invoice_period_label: "Invoice Period",
+    invoice_assessable_label: "Assessable Value",
+    invoice_tax_label: "Total Tax",
+    invoice_total_label: "Total Invoice Value",
+    po_doc_label: "Purchase Order",
+    po_num_label: "PO Nr",
+    po_date_label: "PO Date",
+    po_desc_label: "Original Description",
+    po_validity_label: "PO Validity",
+    po_total_label: "Total Amount",
+    remittance_doc_label: "Remittance Advice",
+    remittance_num_label: "Document Number",
+    remittance_date_label: "Remittance Date",
+    remittance_gross_label: "Gross Amount",
+    remittance_total_label: "Total Gross Amount",
   },
   {
     label: "Logistics & Supply (DO / WO)",
-    invoice_doc: "Delivery Order (DO)",
-    invoice_num: "DO Number",
-    po_doc: "Work Order",
-    po_num: "Work Order No",
-    rem_doc: "Payment Voucher",
-    rem_num: "Payment Voucher No",
+    invoice_doc_label: "Delivery Order (DO)",
+    invoice_num_label: "DO Number",
+    invoice_date_label: "Delivery Date",
+    invoice_desc_label: "Cargo Particulars",
+    invoice_period_label: "Billing Cycle",
+    invoice_assessable_label: "Base Freight Value",
+    invoice_tax_label: "GST Amount",
+    invoice_total_label: "Total DO Value",
+    po_doc_label: "Work Order",
+    po_num_label: "Work Order No",
+    po_date_label: "WO Date",
+    po_desc_label: "Scope of Work",
+    po_validity_label: "Completion Target",
+    po_total_label: "Total WO Value",
+    remittance_doc_label: "Payment Voucher",
+    remittance_num_label: "Voucher No",
+    remittance_date_label: "Voucher Date",
+    remittance_gross_label: "Disbursed Amount",
+    remittance_total_label: "Total Disbursed",
   },
   {
     label: "Contractor & Services",
-    invoice_doc: "Commercial Bill",
-    invoice_num: "Bill Number",
-    po_doc: "Service Order",
-    po_num: "Service Order No",
-    rem_doc: "Settlement Advice",
-    rem_num: "Settlement Ref No",
+    invoice_doc_label: "Commercial Bill",
+    invoice_num_label: "Bill Number",
+    invoice_date_label: "Bill Date",
+    invoice_desc_label: "Service Particulars",
+    invoice_period_label: "Service Month",
+    invoice_assessable_label: "Taxable Base Amount",
+    invoice_tax_label: "GST (18%)",
+    invoice_total_label: "Grand Total",
+    po_doc_label: "Service Order",
+    po_num_label: "Service Order No",
+    po_date_label: "Order Date",
+    po_desc_label: "Job Description",
+    po_validity_label: "Service Validity",
+    po_total_label: "Contract Sum",
+    remittance_doc_label: "Settlement Advice",
+    remittance_num_label: "Settlement Ref No",
+    remittance_date_label: "Settlement Date",
+    remittance_gross_label: "Net Cleared",
+    remittance_total_label: "Gross Total",
   },
 ];
 
@@ -44,13 +105,34 @@ export default function ClientRegistrationModal({ isOpen, onClose }) {
     pan_number: "",
     address: "",
     point_of_contact: "",
+
+    // Invoice
     invoice_doc_label: "Tax Invoice",
     invoice_num_label: "Invoice Number",
+    invoice_date_label: "Invoice Date",
+    invoice_desc_label: "Description",
+    invoice_period_label: "Invoice Period",
+    invoice_assessable_label: "Assessable Value",
+    invoice_tax_label: "Total Tax",
+    invoice_total_label: "Total Invoice Value",
+
+    // PO
     po_doc_label: "Purchase Order",
     po_num_label: "PO Number",
+    po_date_label: "PO Date",
+    po_desc_label: "Original Description",
+    po_validity_label: "PO Validity",
+    po_total_label: "Total Amount",
+
+    // Remittance
     remittance_doc_label: "Remittance Advice",
     remittance_num_label: "Remittance Number",
+    remittance_date_label: "Remittance Date",
+    remittance_gross_label: "Gross Amount",
+    remittance_total_label: "Total Gross Amount",
   });
+
+  const [showDetailedFields, setShowDetailedFields] = useState(true);
 
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
@@ -64,14 +146,10 @@ export default function ClientRegistrationModal({ isOpen, onClose }) {
   };
 
   const handleApplyPreset = (preset) => {
+    const { label, ...fields } = preset;
     setForm((prev) => ({
       ...prev,
-      invoice_doc_label: preset.invoice_doc,
-      invoice_num_label: preset.invoice_num,
-      po_doc_label: preset.po_doc,
-      po_num_label: preset.po_num,
-      remittance_doc_label: preset.rem_doc,
-      remittance_num_label: preset.rem_num,
+      ...fields,
     }));
   };
 
@@ -347,7 +425,7 @@ export default function ClientRegistrationModal({ isOpen, onClose }) {
               <div className="client-section-title" style={{ marginBottom: 0 }}>
                 <i className="bi bi-tags" /> 3. Document Nomenclature (Custom Terminology)
               </div>
-              <div style={{ display: "flex", gap: ".4rem", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: ".4rem", flexWrap: "wrap", alignItems: "center" }}>
                 {PRESETS.map((p, idx) => (
                   <button
                     key={idx}
@@ -362,16 +440,40 @@ export default function ClientRegistrationModal({ isOpen, onClose }) {
                       fontSize: ".7rem",
                       fontWeight: 700,
                       cursor: "pointer",
+                      transition: "all .15s",
                     }}
                   >
                     {p.label}
                   </button>
                 ))}
+
+                <button
+                  type="button"
+                  onClick={() => setShowDetailedFields(!showDetailedFields)}
+                  style={{
+                    background: showDetailedFields ? "linear-gradient(135deg, #7C3AED, #9333EA)" : "var(--bg-card-subtle)",
+                    border: "1px solid var(--purple-violet)",
+                    color: showDetailedFields ? "#ffffff" : "var(--purple-violet)",
+                    borderRadius: 6,
+                    padding: ".25rem .6rem",
+                    fontSize: ".7rem",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    marginLeft: "auto",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: ".35rem",
+                  }}
+                  title="Toggle visibility of detailed field mapping inputs"
+                >
+                  <i className={`bi ${showDetailedFields ? "bi-check2-circle" : "bi-sliders"}`} />
+                  {showDetailedFields ? "Showing All Extracted Fields" : "⚙️ Customize All Extracted Fields"}
+                </button>
               </div>
             </div>
 
             <p style={{ fontSize: ".78rem", color: "var(--text-muted)", marginBottom: "1rem" }}>
-              Customize how documents and ID numbers are named for this company (e.g. <strong>DO Number</strong> instead of Invoice No, <strong>Work Order</strong> instead of PO).
+              Customize how documents and extracted fields are named for this company (e.g. <strong>DO Number</strong> instead of Invoice No, <strong>Delivery Date</strong> instead of PO Validity, <strong>Total Gross Amount</strong>).
             </p>
 
             <div className="row g-3">
@@ -381,24 +483,94 @@ export default function ClientRegistrationModal({ isOpen, onClose }) {
                   <div className="nomenclature-box-title" style={{ color: "#A855F7" }}>
                     <i className="bi bi-receipt me-1" /> Invoice Slot
                   </div>
+
                   <label className="client-form-label">Document Name</label>
                   <input
                     type="text"
                     name="invoice_doc_label"
                     value={form.invoice_doc_label}
                     onChange={handleChange}
-                    placeholder="e.g. Delivery Order (DO)"
+                    placeholder="e.g. Tax Invoice / Delivery Order"
                     className="client-form-input client-form-input-sm"
                   />
+
                   <label className="client-form-label mt-2">Document # Label</label>
                   <input
                     type="text"
                     name="invoice_num_label"
                     value={form.invoice_num_label}
                     onChange={handleChange}
-                    placeholder="e.g. DO Number"
+                    placeholder="e.g. Invoice Number / Document No"
                     className="client-form-input client-form-input-sm"
                   />
+
+                  {showDetailedFields && (
+                    <div style={{ marginTop: ".75rem", paddingTop: ".6rem", borderTop: "1px dashed rgba(168, 85, 247, 0.3)" }}>
+                      <div style={{ fontSize: ".68rem", fontWeight: 800, color: "#A855F7", textTransform: "uppercase", marginBottom: ".4rem" }}>
+                        Extracted Fields Terminology:
+                      </div>
+
+                      <label className="client-form-label">Date Label</label>
+                      <input
+                        type="text"
+                        name="invoice_date_label"
+                        value={form.invoice_date_label}
+                        onChange={handleChange}
+                        placeholder="e.g. Invoice Date / Document Date"
+                        className="client-form-input client-form-input-sm mb-2"
+                      />
+
+                      <label className="client-form-label">Description Label</label>
+                      <input
+                        type="text"
+                        name="invoice_desc_label"
+                        value={form.invoice_desc_label}
+                        onChange={handleChange}
+                        placeholder="e.g. Description / Filename"
+                        className="client-form-input client-form-input-sm mb-2"
+                      />
+
+                      <label className="client-form-label">Billing Period</label>
+                      <input
+                        type="text"
+                        name="invoice_period_label"
+                        value={form.invoice_period_label}
+                        onChange={handleChange}
+                        placeholder="e.g. Invoice Period / Billing Month"
+                        className="client-form-input client-form-input-sm mb-2"
+                      />
+
+                      <label className="client-form-label">Assessable Value</label>
+                      <input
+                        type="text"
+                        name="invoice_assessable_label"
+                        value={form.invoice_assessable_label}
+                        onChange={handleChange}
+                        placeholder="e.g. Assessable Value / Taxable Value"
+                        className="client-form-input client-form-input-sm mb-2"
+                      />
+
+                      <label className="client-form-label">Total Tax Label</label>
+                      <input
+                        type="text"
+                        name="invoice_tax_label"
+                        value={form.invoice_tax_label}
+                        onChange={handleChange}
+                        placeholder="e.g. Total Tax / GST Amount"
+                        className="client-form-input client-form-input-sm mb-2"
+                      />
+
+                      <label className="client-form-label">Total Invoice Value</label>
+                      <input
+                        type="text"
+                        name="invoice_total_label"
+                        value={form.invoice_total_label}
+                        onChange={handleChange}
+                        placeholder="e.g. Total Invoice Value / Grand Total"
+                        className="client-form-input client-form-input-sm"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -408,24 +580,74 @@ export default function ClientRegistrationModal({ isOpen, onClose }) {
                   <div className="nomenclature-box-title" style={{ color: "#C084FC" }}>
                     <i className="bi bi-file-text me-1" /> PO Slot
                   </div>
+
                   <label className="client-form-label">Document Name</label>
                   <input
                     type="text"
                     name="po_doc_label"
                     value={form.po_doc_label}
                     onChange={handleChange}
-                    placeholder="e.g. Work Order"
+                    placeholder="e.g. Purchase Order / Work Order"
                     className="client-form-input client-form-input-sm"
                   />
+
                   <label className="client-form-label mt-2">Document # Label</label>
                   <input
                     type="text"
                     name="po_num_label"
                     value={form.po_num_label}
                     onChange={handleChange}
-                    placeholder="e.g. Work Order No"
+                    placeholder="e.g. PO Number / PO Nr / Work Order No"
                     className="client-form-input client-form-input-sm"
                   />
+
+                  {showDetailedFields && (
+                    <div style={{ marginTop: ".75rem", paddingTop: ".6rem", borderTop: "1px dashed rgba(192, 132, 252, 0.3)" }}>
+                      <div style={{ fontSize: ".68rem", fontWeight: 800, color: "#C084FC", textTransform: "uppercase", marginBottom: ".4rem" }}>
+                        Extracted Fields Terminology:
+                      </div>
+
+                      <label className="client-form-label">PO Date Label</label>
+                      <input
+                        type="text"
+                        name="po_date_label"
+                        value={form.po_date_label}
+                        onChange={handleChange}
+                        placeholder="e.g. PO Date / Date / Order Date"
+                        className="client-form-input client-form-input-sm mb-2"
+                      />
+
+                      <label className="client-form-label">Description Label</label>
+                      <input
+                        type="text"
+                        name="po_desc_label"
+                        value={form.po_desc_label}
+                        onChange={handleChange}
+                        placeholder="e.g. Original Description / Scope"
+                        className="client-form-input client-form-input-sm mb-2"
+                      />
+
+                      <label className="client-form-label">Delivery Date / Validity</label>
+                      <input
+                        type="text"
+                        name="po_validity_label"
+                        value={form.po_validity_label}
+                        onChange={handleChange}
+                        placeholder="e.g. PO Validity / Delivery date"
+                        className="client-form-input client-form-input-sm mb-2"
+                      />
+
+                      <label className="client-form-label">Total Amount Label</label>
+                      <input
+                        type="text"
+                        name="po_total_label"
+                        value={form.po_total_label}
+                        onChange={handleChange}
+                        placeholder="e.g. Total amount / PO Total"
+                        className="client-form-input client-form-input-sm"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -435,24 +657,64 @@ export default function ClientRegistrationModal({ isOpen, onClose }) {
                   <div className="nomenclature-box-title" style={{ color: "#22C55E" }}>
                     <i className="bi bi-cash-stack me-1" /> Remittance Slot
                   </div>
+
                   <label className="client-form-label">Document Name</label>
                   <input
                     type="text"
                     name="remittance_doc_label"
                     value={form.remittance_doc_label}
                     onChange={handleChange}
-                    placeholder="e.g. Payment Voucher"
+                    placeholder="e.g. Remittance Advice / Payment Voucher"
                     className="client-form-input client-form-input-sm"
                   />
+
                   <label className="client-form-label mt-2">Document # Label</label>
                   <input
                     type="text"
                     name="remittance_num_label"
                     value={form.remittance_num_label}
                     onChange={handleChange}
-                    placeholder="e.g. Voucher Ref No"
+                    placeholder="e.g. Remittance Number / Document Number"
                     className="client-form-input client-form-input-sm"
                   />
+
+                  {showDetailedFields && (
+                    <div style={{ marginTop: ".75rem", paddingTop: ".6rem", borderTop: "1px dashed rgba(34, 197, 94, 0.3)" }}>
+                      <div style={{ fontSize: ".68rem", fontWeight: 800, color: "#22C55E", textTransform: "uppercase", marginBottom: ".4rem" }}>
+                        Extracted Fields Terminology:
+                      </div>
+
+                      <label className="client-form-label">Date Label</label>
+                      <input
+                        type="text"
+                        name="remittance_date_label"
+                        value={form.remittance_date_label}
+                        onChange={handleChange}
+                        placeholder="e.g. Remittance Date / Document Date"
+                        className="client-form-input client-form-input-sm mb-2"
+                      />
+
+                      <label className="client-form-label">Gross Amount Label</label>
+                      <input
+                        type="text"
+                        name="remittance_gross_label"
+                        value={form.remittance_gross_label}
+                        onChange={handleChange}
+                        placeholder="e.g. Gross Amount / Disbursed Amount"
+                        className="client-form-input client-form-input-sm mb-2"
+                      />
+
+                      <label className="client-form-label">Total Gross Amount Label</label>
+                      <input
+                        type="text"
+                        name="remittance_total_label"
+                        value={form.remittance_total_label}
+                        onChange={handleChange}
+                        placeholder="e.g. Total Gross Amount / Total"
+                        className="client-form-input client-form-input-sm"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -460,7 +722,7 @@ export default function ClientRegistrationModal({ isOpen, onClose }) {
             {/* Live Nomenclature Preview */}
             <div className="nomenclature-preview-bar">
               <div style={{ fontSize: ".73rem", fontWeight: 700, color: "var(--text-muted)" }}>
-                <i className="bi bi-eye-fill me-1" />Live Preview of UI Badges:
+                <i className="bi bi-eye-fill me-1" />Live Preview of UI Badges &amp; Extracted Field Labels:
               </div>
               <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap", marginTop: ".35rem" }}>
                 <span className="id-badge">
@@ -471,6 +733,15 @@ export default function ClientRegistrationModal({ isOpen, onClose }) {
                 </span>
                 <span className="id-badge badge-remit">
                   {form.remittance_num_label || "Remittance Number"}: #2000013497
+                </span>
+                <span className="id-badge" style={{ background: "rgba(168, 85, 247, 0.15)", borderColor: "#A855F7", color: "#D8B4FE" }}>
+                  📅 {form.invoice_date_label || "Invoice Date"}: 09-Sep-2026
+                </span>
+                <span className="id-badge" style={{ background: "rgba(192, 132, 252, 0.15)", borderColor: "#C084FC", color: "#E9D5FF" }}>
+                  ⏱️ {form.po_validity_label || "PO Validity"}: 30-Sep-2026
+                </span>
+                <span className="id-badge" style={{ background: "rgba(34, 197, 94, 0.15)", borderColor: "#22C55E", color: "#86EFAC" }}>
+                  💰 {form.invoice_assessable_label || "Assessable Value"}: ₹1,74,200.00
                 </span>
               </div>
             </div>

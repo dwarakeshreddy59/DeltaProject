@@ -1,13 +1,31 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 import { fetchClients } from "../services/api";
 
-const DEFAULT_NOMENCLATURE = {
+export const DEFAULT_NOMENCLATURE = {
+  // Invoice Slot
   invoice_doc_label: "Tax Invoice",
   invoice_num_label: "Invoice Number",
+  invoice_date_label: "Invoice Date",
+  invoice_desc_label: "Description",
+  invoice_period_label: "Invoice Period",
+  invoice_assessable_label: "Assessable Value",
+  invoice_tax_label: "Total Tax",
+  invoice_total_label: "Total Invoice Value",
+
+  // PO Slot
   po_doc_label: "Purchase Order",
   po_num_label: "PO Number",
+  po_date_label: "PO Date",
+  po_desc_label: "Original Description",
+  po_validity_label: "PO Validity",
+  po_total_label: "Total Amount",
+
+  // Remittance Slot
   remittance_doc_label: "Remittance Advice",
   remittance_num_label: "Remittance Number",
+  remittance_date_label: "Remittance Date",
+  remittance_gross_label: "Gross Amount",
+  remittance_total_label: "Total Gross Amount",
 };
 
 const DEFAULT_CLIENT = {
@@ -82,14 +100,11 @@ export function OrganizationProvider({ children }) {
 
   const nomenclature = useMemo(() => {
     if (!activeCompany) return DEFAULT_NOMENCLATURE;
-    return {
-      invoice_doc_label: activeCompany?.invoice_doc_label || DEFAULT_NOMENCLATURE.invoice_doc_label,
-      invoice_num_label: activeCompany?.invoice_num_label || DEFAULT_NOMENCLATURE.invoice_num_label,
-      po_doc_label: activeCompany?.po_doc_label || DEFAULT_NOMENCLATURE.po_doc_label,
-      po_num_label: activeCompany?.po_num_label || DEFAULT_NOMENCLATURE.po_num_label,
-      remittance_doc_label: activeCompany?.remittance_doc_label || DEFAULT_NOMENCLATURE.remittance_doc_label,
-      remittance_num_label: activeCompany?.remittance_num_label || DEFAULT_NOMENCLATURE.remittance_num_label,
-    };
+    const res = {};
+    for (const key of Object.keys(DEFAULT_NOMENCLATURE)) {
+      res[key] = activeCompany?.[key] || DEFAULT_NOMENCLATURE[key];
+    }
+    return res;
   }, [activeCompany]);
 
   const openRegisterModal = () => setIsRegisterModalOpen(true);

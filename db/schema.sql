@@ -12,10 +12,23 @@ CREATE TABLE IF NOT EXISTS clients (
     point_of_contact     VARCHAR(255),
     invoice_doc_label    VARCHAR(100) DEFAULT 'Tax Invoice',
     invoice_num_label    VARCHAR(100) DEFAULT 'Invoice Number',
+    invoice_date_label   VARCHAR(100) DEFAULT 'Invoice Date',
+    invoice_desc_label   VARCHAR(100) DEFAULT 'Description',
+    invoice_period_label VARCHAR(100) DEFAULT 'Invoice Period',
+    invoice_assessable_label VARCHAR(100) DEFAULT 'Assessable Value',
+    invoice_tax_label    VARCHAR(100) DEFAULT 'Total Tax',
+    invoice_total_label  VARCHAR(100) DEFAULT 'Total Invoice Value',
     po_doc_label         VARCHAR(100) DEFAULT 'Purchase Order',
     po_num_label         VARCHAR(100) DEFAULT 'PO Number',
+    po_date_label        VARCHAR(100) DEFAULT 'PO Date',
+    po_desc_label        VARCHAR(100) DEFAULT 'Original Description',
+    po_validity_label    VARCHAR(100) DEFAULT 'PO Validity',
+    po_total_label       VARCHAR(100) DEFAULT 'Total Amount',
     remittance_doc_label VARCHAR(100) DEFAULT 'Remittance Advice',
     remittance_num_label VARCHAR(100) DEFAULT 'Remittance Number',
+    remittance_date_label VARCHAR(100) DEFAULT 'Remittance Date',
+    remittance_gross_label VARCHAR(100) DEFAULT 'Gross Amount',
+    remittance_total_label VARCHAR(100) DEFAULT 'Total Gross Amount',
     created_at           TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

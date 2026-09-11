@@ -52,13 +52,13 @@ export default function InvoiceCard({ invoice = {}, onViewPdf = null }) {
         <table className="info-table">
           <tbody>
             <Row label={nomenclature.invoice_num_label || "Invoice Number"} value={invoice.invoice_number} type="badge" />
-            <Row label="Invoice Date (Document Date)" value={invoice.invoice_date}        type="highlight" />
+            <Row label={nomenclature.invoice_date_label || "Invoice Date"} value={invoice.invoice_date} type="highlight" />
             <Row label={`${nomenclature.po_num_label || "PO Number"} (Ref)`} value={invoice.po_number} type="badge" />
-            <Row label="Description"            value={invoice.description} />
-            <Row label="Invoice Period"         value={invoice.invoice_period} />
-            <Row label="Assessable Value"       value={invoice.assessable_value}    type="money" />
-            <Row label="Total Tax"              value={invoice.total_tax}           type="money" />
-            <Row label="Total Invoice Value"    value={invoice.total_invoice_value} type="money" />
+            <Row label={nomenclature.invoice_desc_label || "Description"} value={invoice.description} />
+            <Row label={nomenclature.invoice_period_label || "Invoice Period"} value={invoice.invoice_period} />
+            <Row label={nomenclature.invoice_assessable_label || "Assessable Value"} value={invoice.assessable_value} type="money" />
+            <Row label={nomenclature.invoice_tax_label || "Total Tax"} value={invoice.total_tax} type="money" />
+            <Row label={nomenclature.invoice_total_label || "Total Invoice Value"} value={invoice.total_invoice_value} type="money" />
           </tbody>
         </table>
       </div>

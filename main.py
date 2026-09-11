@@ -322,12 +322,7 @@ async def get_clients():
     """List all registered clients/companies with record counts and financial sums."""
     sql = """
         SELECT
-            c.id, c.client_name, c.organization_name, c.logo_url,
-            c.gst_number, c.pan_number, c.address, c.point_of_contact,
-            c.invoice_doc_label, c.invoice_num_label,
-            c.po_doc_label, c.po_num_label,
-            c.remittance_doc_label, c.remittance_num_label,
-            c.created_at,
+            c.*,
             COALESCE(inv_stats.invoices_count, 0) as invoices_count,
             COALESCE(inv_stats.total_receivable, 0) as total_receivable,
             COALESCE(inv_stats.total_assessable, 0) as total_assessable,
@@ -375,12 +370,7 @@ async def get_client(client_id: int):
     """Retrieve a single registered client with stats."""
     sql = """
         SELECT
-            c.id, c.client_name, c.organization_name, c.logo_url,
-            c.gst_number, c.pan_number, c.address, c.point_of_contact,
-            c.invoice_doc_label, c.invoice_num_label,
-            c.po_doc_label, c.po_num_label,
-            c.remittance_doc_label, c.remittance_num_label,
-            c.created_at,
+            c.*,
             COALESCE(inv_stats.invoices_count, 0) as invoices_count,
             COALESCE(inv_stats.total_receivable, 0) as total_receivable,
             COALESCE(inv_stats.total_assessable, 0) as total_assessable,
@@ -431,10 +421,23 @@ async def register_client(
     point_of_contact: Optional[str] = Form(""),
     invoice_doc_label: Optional[str] = Form("Tax Invoice"),
     invoice_num_label: Optional[str] = Form("Invoice Number"),
+    invoice_date_label: Optional[str] = Form("Invoice Date"),
+    invoice_desc_label: Optional[str] = Form("Description"),
+    invoice_period_label: Optional[str] = Form("Invoice Period"),
+    invoice_assessable_label: Optional[str] = Form("Assessable Value"),
+    invoice_tax_label: Optional[str] = Form("Total Tax"),
+    invoice_total_label: Optional[str] = Form("Total Invoice Value"),
     po_doc_label: Optional[str] = Form("Purchase Order"),
     po_num_label: Optional[str] = Form("PO Number"),
+    po_date_label: Optional[str] = Form("PO Date"),
+    po_desc_label: Optional[str] = Form("Original Description"),
+    po_validity_label: Optional[str] = Form("PO Validity"),
+    po_total_label: Optional[str] = Form("Total Amount"),
     remittance_doc_label: Optional[str] = Form("Remittance Advice"),
     remittance_num_label: Optional[str] = Form("Remittance Number"),
+    remittance_date_label: Optional[str] = Form("Remittance Date"),
+    remittance_gross_label: Optional[str] = Form("Gross Amount"),
+    remittance_total_label: Optional[str] = Form("Total Gross Amount"),
     logo_file: Optional[UploadFile] = File(None),
     logo_url: Optional[str] = Form(""),
 ):
@@ -448,12 +451,29 @@ async def register_client(
     pan = _unwrap(pan_number, "").strip().upper()
     addr = _unwrap(address, "").strip()
     poc = _unwrap(point_of_contact, "").strip()
+
     inv_doc = _unwrap(invoice_doc_label, "Tax Invoice").strip() or "Tax Invoice"
     inv_num = _unwrap(invoice_num_label, "Invoice Number").strip() or "Invoice Number"
+    inv_date = _unwrap(invoice_date_label, "Invoice Date").strip() or "Invoice Date"
+    inv_desc = _unwrap(invoice_desc_label, "Description").strip() or "Description"
+    inv_period = _unwrap(invoice_period_label, "Invoice Period").strip() or "Invoice Period"
+    inv_assessable = _unwrap(invoice_assessable_label, "Assessable Value").strip() or "Assessable Value"
+    inv_tax = _unwrap(invoice_tax_label, "Total Tax").strip() or "Total Tax"
+    inv_total = _unwrap(invoice_total_label, "Total Invoice Value").strip() or "Total Invoice Value"
+
     po_doc = _unwrap(po_doc_label, "Purchase Order").strip() or "Purchase Order"
     po_num = _unwrap(po_num_label, "PO Number").strip() or "PO Number"
+    po_date = _unwrap(po_date_label, "PO Date").strip() or "PO Date"
+    po_desc = _unwrap(po_desc_label, "Original Description").strip() or "Original Description"
+    po_validity = _unwrap(po_validity_label, "PO Validity").strip() or "PO Validity"
+    po_total = _unwrap(po_total_label, "Total Amount").strip() or "Total Amount"
+
     rem_doc = _unwrap(remittance_doc_label, "Remittance Advice").strip() or "Remittance Advice"
     rem_num = _unwrap(remittance_num_label, "Remittance Number").strip() or "Remittance Number"
+    rem_date = _unwrap(remittance_date_label, "Remittance Date").strip() or "Remittance Date"
+    rem_gross = _unwrap(remittance_gross_label, "Gross Amount").strip() or "Gross Amount"
+    rem_total = _unwrap(remittance_total_label, "Total Gross Amount").strip() or "Total Gross Amount"
+
     l_url = _unwrap(logo_url, "")
 
     try:
@@ -471,18 +491,26 @@ async def register_client(
             INSERT INTO clients (
                 client_name, organization_name, logo_url, gst_number, pan_number,
                 address, point_of_contact,
-                invoice_doc_label, invoice_num_label,
-                po_doc_label, po_num_label,
-                remittance_doc_label, remittance_num_label
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                invoice_doc_label, invoice_num_label, invoice_date_label, invoice_desc_label,
+                invoice_period_label, invoice_assessable_label, invoice_tax_label, invoice_total_label,
+                po_doc_label, po_num_label, po_date_label, po_desc_label, po_validity_label, po_total_label,
+                remittance_doc_label, remittance_num_label, remittance_date_label,
+                remittance_gross_label, remittance_total_label
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s
+            )
             RETURNING *;
             """,
             (
                 c_name, org_name, final_logo_url,
                 gst, pan, addr, poc,
-                inv_doc, inv_num,
-                po_doc, po_num,
-                rem_doc, rem_num,
+                inv_doc, inv_num, inv_date, inv_desc,
+                inv_period, inv_assessable, inv_tax, inv_total,
+                po_doc, po_num, po_date, po_desc, po_validity, po_total,
+                rem_doc, rem_num, rem_date, rem_gross, rem_total,
             ),
             fetch="one",
         )
@@ -502,10 +530,23 @@ async def update_client(
     point_of_contact: Optional[str] = Form(None),
     invoice_doc_label: Optional[str] = Form(None),
     invoice_num_label: Optional[str] = Form(None),
+    invoice_date_label: Optional[str] = Form(None),
+    invoice_desc_label: Optional[str] = Form(None),
+    invoice_period_label: Optional[str] = Form(None),
+    invoice_assessable_label: Optional[str] = Form(None),
+    invoice_tax_label: Optional[str] = Form(None),
+    invoice_total_label: Optional[str] = Form(None),
     po_doc_label: Optional[str] = Form(None),
     po_num_label: Optional[str] = Form(None),
+    po_date_label: Optional[str] = Form(None),
+    po_desc_label: Optional[str] = Form(None),
+    po_validity_label: Optional[str] = Form(None),
+    po_total_label: Optional[str] = Form(None),
     remittance_doc_label: Optional[str] = Form(None),
     remittance_num_label: Optional[str] = Form(None),
+    remittance_date_label: Optional[str] = Form(None),
+    remittance_gross_label: Optional[str] = Form(None),
+    remittance_total_label: Optional[str] = Form(None),
     logo_file: Optional[UploadFile] = File(None),
     logo_url: Optional[str] = Form(None),
 ):
@@ -521,12 +562,29 @@ async def update_client(
     if pan: pan = pan.upper()
     addr = _unwrap(address, None)
     poc = _unwrap(point_of_contact, None)
+
     inv_doc = _unwrap(invoice_doc_label, None)
     inv_num = _unwrap(invoice_num_label, None)
+    inv_date = _unwrap(invoice_date_label, None)
+    inv_desc = _unwrap(invoice_desc_label, None)
+    inv_period = _unwrap(invoice_period_label, None)
+    inv_assessable = _unwrap(invoice_assessable_label, None)
+    inv_tax = _unwrap(invoice_tax_label, None)
+    inv_total = _unwrap(invoice_total_label, None)
+
     po_doc = _unwrap(po_doc_label, None)
     po_num = _unwrap(po_num_label, None)
+    po_date = _unwrap(po_date_label, None)
+    po_desc = _unwrap(po_desc_label, None)
+    po_validity = _unwrap(po_validity_label, None)
+    po_total = _unwrap(po_total_label, None)
+
     rem_doc = _unwrap(remittance_doc_label, None)
     rem_num = _unwrap(remittance_num_label, None)
+    rem_date = _unwrap(remittance_date_label, None)
+    rem_gross = _unwrap(remittance_gross_label, None)
+    rem_total = _unwrap(remittance_total_label, None)
+
     l_url = _unwrap(logo_url, None)
 
     try:
@@ -557,19 +615,33 @@ async def update_client(
                 point_of_contact     = COALESCE(%s, point_of_contact),
                 invoice_doc_label    = COALESCE(%s, invoice_doc_label),
                 invoice_num_label    = COALESCE(%s, invoice_num_label),
+                invoice_date_label   = COALESCE(%s, invoice_date_label),
+                invoice_desc_label   = COALESCE(%s, invoice_desc_label),
+                invoice_period_label = COALESCE(%s, invoice_period_label),
+                invoice_assessable_label = COALESCE(%s, invoice_assessable_label),
+                invoice_tax_label    = COALESCE(%s, invoice_tax_label),
+                invoice_total_label  = COALESCE(%s, invoice_total_label),
                 po_doc_label         = COALESCE(%s, po_doc_label),
                 po_num_label         = COALESCE(%s, po_num_label),
+                po_date_label        = COALESCE(%s, po_date_label),
+                po_desc_label        = COALESCE(%s, po_desc_label),
+                po_validity_label    = COALESCE(%s, po_validity_label),
+                po_total_label       = COALESCE(%s, po_total_label),
                 remittance_doc_label = COALESCE(%s, remittance_doc_label),
-                remittance_num_label = COALESCE(%s, remittance_num_label)
+                remittance_num_label = COALESCE(%s, remittance_num_label),
+                remittance_date_label = COALESCE(%s, remittance_date_label),
+                remittance_gross_label = COALESCE(%s, remittance_gross_label),
+                remittance_total_label = COALESCE(%s, remittance_total_label)
             WHERE id = %s
             RETURNING *;
             """,
             (
                 c_name, org_name, final_logo_url,
                 gst, pan, addr, poc,
-                inv_doc, inv_num,
-                po_doc, po_num,
-                rem_doc, rem_num,
+                inv_doc, inv_num, inv_date, inv_desc,
+                inv_period, inv_assessable, inv_tax, inv_total,
+                po_doc, po_num, po_date, po_desc, po_validity, po_total,
+                rem_doc, rem_num, rem_date, rem_gross, rem_total,
                 client_id,
             ),
             fetch="one",
